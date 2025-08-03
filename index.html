@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>單字拼寫 v2</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Noto+Sans+TC:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>單字拼寫練習</h1>
+        </header>
+        
+        <div class="word-area">
+            <div id="current-word-display" class="word-display"></div>
+            <div id="translation-display" class="translation-display"></div>
+        </div>
+
+        <div id="spelling-input-area" class="spelling-input-area">
+            <!-- JS will generate letter boxes here -->
+        </div>
+
+        <div id="feedback-message" class="feedback-message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
