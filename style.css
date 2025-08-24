@@ -32,64 +32,88 @@ body {
 }
 
 header h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--header-color);
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .word-display {
-    font-size: 4.5rem;
+    font-size: 3rem;
     font-weight: 700;
     color: var(--text-color);
     letter-spacing: 0.1em;
     margin-bottom: 0.5rem;
-    min-height: 6rem;
+}
+
+.phonetics-display {
+    font-size: 2rem;
+    color: var(--header-color);
+    min-height: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .translation-display {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: var(--header-color);
     min-height: 1.5rem;
+    margin-bottom: 0.5rem; /* Adjusted margin */
+}
+
+.example-display {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    font-style: italic;
+    min-height: 1.3rem;
     margin-bottom: 2rem;
+    padding: 0 1rem;
 }
 
 .spelling-input-area {
     display: flex;
     justify-content: center;
-    gap: 0.75rem;
     flex-wrap: wrap;
     min-height: 4rem;
     margin-bottom: 1.5rem;
 }
 
 .letter-box {
-    width: 4rem;
+    font-family: 'Consolas', 'Courier New', monospace; 
+    width: 1.5rem;
     height: 4rem;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 2.5rem;
     font-weight: 700;
-    background-color: var(--box-bg-color);
-    border-radius: 0.75rem;
     color: var(--text-color);
-    text-transform: uppercase;
-    border: 3px solid transparent;
+    background-color: transparent;
+    border-radius: 0;
+    border-bottom: 4px solid var(--border-color);
     transition: all 0.3s ease;
+    margin: 0 0.1rem;
+}
+
+.letter-box.current-input {
+    border-bottom-color: #f6ad55; /* Orange cursor color */
+    animation: blink-caret 1.2s infinite;
 }
 
 .letter-box.correct {
-    background-color: var(--correct-color);
-    border-color: #8fecb5;
-    color: #1a202c;
-    transform: scale(1.05);
+    color: var(--correct-color);
+    border-bottom-color: var(--correct-color);
 }
 
 .letter-box.incorrect {
-    border-color: var(--incorrect-color);
+    border-bottom-color: var(--incorrect-color);
     animation: shake 0.4s;
+}
+
+@keyframes blink-caret {
+    50% {
+        border-bottom-color: transparent;
+    }
 }
 
 @keyframes shake {
