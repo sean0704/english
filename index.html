@@ -19,14 +19,19 @@
 
         <div class="word-area">
             <div id="current-word-display" class="word-display"></div>
-            <div id="phonetics-display" class="phonetics-display"></div>
+            <div class="pronunciation-area">
+                <div id="phonetics-display" class="phonetics-display"></div>
+                <button id="play-audio-btn" class="play-audio-btn" title="播放發音">🔊</button>
+            </div>
             <div id="translation-display" class="translation-display"></div>
             <div id="example-display" class="example-display"></div>
         </div>
 
-        <div id="spelling-input-area" class="spelling-input-area">
-            <!-- JS will generate letter boxes here -->
-        </div>
+                <audio id="word-audio" style="display: none;"></audio>
+
+        <form id="spelling-form" class="spelling-input-area">
+            <input type="text" id="spelling-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="請在此拼寫單字並按 Enter">
+        </form>
 
         <div id="feedback-message" class="feedback-message"></div>
     </div>
