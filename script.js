@@ -1,8 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM 元素 ---
-    const startGameBtn = document.getElementById('start-game-btn');
     const startContainer = document.getElementById('start-container');
     const gameContainer = document.getElementById('game-container');
+    const completionContainer = document.getElementById('completion-container');
+
+    const startGameBtn = document.getElementById('start-game-btn');
+    const wordListSelectEl = document.getElementById('word-list-select');
+    
     const wordDisplayEl = document.getElementById('current-word-display');
     const translationEl = document.getElementById('translation-display');
     const phoneticsEl = document.getElementById('phonetics-display');
@@ -13,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const playAudioBtnEl = document.getElementById('play-audio-btn');
     const progressBarEl = document.getElementById('progress-bar');
     const roundDisplayEl = document.getElementById('round-display');
-    const wordListSelectEl = document.getElementById('word-list-select');
+
+    const restartBtn = document.getElementById('restart-btn');
+    const backToMenuBtn = document.getElementById('back-to-menu-btn');
 
     // --- 字庫設定 ---
     const wordLists = [
@@ -66,8 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('載入單字時發生錯誤:', error);
             alert(`載入單字失敗，請檢查 ${filePath} 檔案是否存在且格式正確。`);
-            startContainer.style.display = 'flex';
-            gameContainer.style.display = 'none';
+            showStartScreen();
         }
     }
 
@@ -82,28 +87,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!synth) {
             playAudioBtnEl.style.display = 'none';
         }
-        spellingFormEl.addEventListener('submit', handleSubmission);
-        playAudioBtnEl.addEventListener('click', playWordAudio);
         setupNextWord();
     }
 
     function setupNextWord() {
         if (wordsToPractice.length === 0) {
-            if (gameMode === 'practice' && wordsToReview.length > 0) {
+            // --- A pass (practice or review) is finished, decide what's next ---
+            if (wordsToReview.length > 0) {
+                // --- Start a review session ---
                 gameMode = 'review';
                 wordsToPractice = [...wordsToReview].sort(() => Math.random() - 0.5);
                 stageTotal = wordsToPractice.length;
-                wordsToReview = [];
+                wordsToReview = []; // Clear review list for the new session
                 feedbackEl.textContent = `第 ${roundCount} 回合結束！現在開始訂正錯題...`;
                 feedbackEl.className = 'feedback-message notice';
             } else {
-                gameMode = 'practice';
-                if (stageTotal > 0) {
-                    roundCount++;
+                // --- No words to review, pass is fully complete ---
+                if (gameMode === 'practice' && roundCount >= 3) {
+                    endGame(); // GAME END TRIGGER
+                    return; // Exit the function to prevent setting up a new word
                 }
+                
+                // --- Start a new round ---
+                gameMode = 'practice';
+                roundCount++;
                 wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
                 stageTotal = wordsToPractice.length;
-                wordsToReview = [];
+                // wordsToReview is already empty
                 feedbackEl.textContent = `太棒了！第 ${roundCount} 回合開始！`;
                 feedbackEl.className = 'feedback-message notice';
             }
@@ -125,18 +135,43 @@ document.addEventListener('DOMContentLoaded', () => {
         playAudioBtnEl.style.display = synth ? 'block' : 'none';
 
         phoneticsEl.textContent = currentWord.phonetics;
-        if (roundCount === 1 && gameMode === 'practice') {
+
+        if (gameMode === 'practice' && roundCount === 1) {
+            // --- Round 1: Easiest (First Letter Hint) ---
             translationEl.textContent = currentWord.chinese;
             const placeholder = '_______';
             const regex = new RegExp(currentWord.english, 'gi');
             const modifiedExample = currentWord.example.replace(regex, placeholder);
             exampleEl.textContent = modifiedExample;
+
+            const firstLetterHint = currentWord.english.split(' ').map(word => {
+                if (word.length > 0) {
+                    // Handle single-character non-alphanumeric words like punctuation
+                    if (word.length === 1 && !word.match(/[a-zA-Z]/)) {
+                        return word;
+                    }
+                    return word[0] + '_'.repeat(word.length - 1);
+                }
+                return '';
+            }).join(' ');
+            wordDisplayEl.textContent = firstLetterHint;
+
+        } else if (gameMode === 'practice' && roundCount === 2) {
+            // --- Round 2: Medium (Full Context Hint) ---
+            translationEl.textContent = currentWord.chinese;
+            const placeholder = '_______';
+            const regex = new RegExp(currentWord.english, 'gi');
+            const modifiedExample = currentWord.example.replace(regex, placeholder);
+            exampleEl.textContent = modifiedExample;
+            wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
+
         } else {
+            // --- Round 3+ & Review Mode: Hard (No Text Hints) ---
             translationEl.textContent = '';
             exampleEl.textContent = '';
+            wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
         }
         
-        wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
         spellingInputEl.value = '';
         spellingInputEl.disabled = false;
         spellingInputEl.focus();
@@ -147,7 +182,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isPlaying || !currentWord || !synth) return;
         synth.cancel();
         const wordToSpeak = currentWord.english.split('(')[0].trim();
-        const exampleToSpeak = (gameMode === 'practice' && roundCount === 1) ? currentWord.example : '';
+        // In round 2, we also provide the example sentence audio
+        const exampleToSpeak = (gameMode === 'practice' && roundCount <= 2) ? currentWord.example : '';
         const fullTextToSpeak = `${wordToSpeak}. ${exampleToSpeak}`;
         const utterance = new SpeechSynthesisUtterance(fullTextToSpeak);
         utterance.lang = 'en-US';
@@ -218,6 +254,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function endGame() {
+        gameContainer.style.display = 'none';
+        completionContainer.style.display = 'flex';
+    }
+
+    function showStartScreen() {
+        gameContainer.style.display = 'none';
+        completionContainer.style.display = 'none';
+        startContainer.style.display = 'flex';
+    }
+
     // --- 程式進入點 ---
     function populateWordListSelector() {
         wordLists.forEach(list => {
@@ -230,13 +277,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function main() {
         populateWordListSelector();
+
+        // Event Listeners
+        spellingFormEl.addEventListener('submit', handleSubmission);
+        playAudioBtnEl.addEventListener('click', playWordAudio);
+
         startGameBtn.addEventListener('click', async () => {
             const selectedListPath = wordListSelectEl.value;
+            showStartScreen(); // Hide all screens first
             startContainer.style.display = 'none';
             gameContainer.style.display = 'block';
             await loadWords(selectedListPath);
             initializeGame();
         });
+
+        restartBtn.addEventListener('click', () => {
+            completionContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
+            initializeGame(); // Re-initialize the game with the same word list
+        });
+
+        backToMenuBtn.addEventListener('click', showStartScreen);
     }
 
     main();
