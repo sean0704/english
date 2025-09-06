@@ -40,10 +40,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 成就系統定義 ---
     const GLOBAL_ACHIEVEMENTS = {
-        WORDS_1000: { 
-            name: '單字大師', 
-            description: '累積正確拼寫 1000 個單字',
-            progress: (stats) => ({ current: stats.globalStats.totalWordsCorrect, target: 1000 })
+        ACHIEVEMENT_HUNTER: { 
+            name: '成就獵人', 
+            description: '累積獲得 9 個單元成就',
+            progress: (stats) => {
+                const totalUnitAchievements = Object.values(stats.unitData)
+                    .reduce((count, unit) => count + Object.keys(unit.achievements).length, 0);
+                return { current: totalUnitAchievements, target: 9 };
+            }
         },
         PLATINUM: {
             name: '白金獎盃 🏆',
@@ -117,7 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stats.unlockedGlobalAchievements[id]) continue;
 
             let unlocked = false;
-            if (id === 'WORDS_1000' && stats.globalStats.totalWordsCorrect >= 1000) unlocked = true;
+            if (id === 'ACHIEVEMENT_HUNTER') {
+                const totalUnitAchievements = Object.values(stats.unitData)
+                    .reduce((count, unit) => count + Object.keys(unit.achievements).length, 0);
+                if (totalUnitAchievements >= 9) {
+                    unlocked = true;
+                }
+            }
             if (id === 'PLATINUM') {
                 const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.PERFECT_CLEAR).length;
                 if (goldMedalCount >= 3) {
@@ -302,11 +312,25 @@ document.addEventListener('DOMContentLoaded', () => {
     function playWordAudio() {
         if (isPlaying || !currentWord || !synth) return;
         synth.cancel();
-        const utterance = new SpeechSynthesisUtterance(currentWord.english.split('(')[0].trim());
+        const wordToSpeak = currentWord.english.split('(')[0].trim();
+
+        // 只有在練習模式的第一和第二回合，才將例句加入待讀列表
+        const exampleToSpeak = (gameMode === 'practice' && roundCount <= 2) ? currentWord.example : '';
+
+        // 將單字和例句（如果有的話）組合起來
+        const fullTextToSpeak = `${wordToSpeak}. ${exampleToSpeak}`;
+
+        // 將完整的內容傳給語音引擎
+        const utterance = new SpeechSynthesisUtterance(fullTextToSpeak);
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
         utterance.onstart = () => { isPlaying = true; playAudioBtnEl.disabled = true; };
         utterance.onend = () => { isPlaying = false; playAudioBtnEl.disabled = false; };
+        utterance.onerror = (event) => {
+            console.error('語音合成發生錯誤:', event);
+            isPlaying = false;
+            playAudioBtnEl.disabled = false;
+        };
         synth.speak(utterance);
     }
 
