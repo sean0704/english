@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const wordLists = [
         { name: '國一上 Unit 0', path: 'unit0.csv' },
         { name: '國一上 Unit 1', path: 'unit1.csv' },
+        { name: '國一上 Unit 2', path: 'unit2.csv' },
+        { name: '國一上 Unit 3', path: 'unit3.csv' },
+        { name: '國一上 Unit 4', path: 'unit4.csv' },
+        { name: '國一上 Unit 5', path: 'unit5.csv' },
+        { name: '國一上 Unit 6', path: 'unit6.csv' },
     ];
 
     // --- 成就系統定義 ---
