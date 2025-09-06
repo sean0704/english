@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startContainer = document.getElementById('start-container');
     const gameContainer = document.getElementById('game-container');
     const completionContainer = document.getElementById('completion-container');
+    const achievementContainer = document.getElementById('achievement-container');
 
     const startGameBtn = document.getElementById('start-game-btn');
     const wordListSelectEl = document.getElementById('word-list-select');
@@ -21,19 +22,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const restartBtn = document.getElementById('restart-btn');
     const backToMenuBtn = document.getElementById('back-to-menu-btn');
 
+    const showAchievementsBtn = document.getElementById('show-achievements-btn');
+    const closeAchievementsBtn = document.getElementById('close-achievements-btn');
+    const achievementListEl = document.getElementById('achievement-list');
+    const achievementToastEl = document.getElementById('achievement-toast');
+
     // --- 字庫設定 ---
     const wordLists = [
         { name: '國一上 Unit 0', path: 'unit0.csv' },
         { name: '國一上 Unit 1', path: 'unit1.csv' },
-        // { name: 'Unit 2 單字', path: 'unit2.csv' }, // 未來可以像這樣新增
     ];
 
-    // --- 遊戲狀態 & 資料 ---
+    // --- 成就系統定義 ---
+    const GLOBAL_ACHIEVEMENTS = {
+        WORDS_1000: { 
+            name: '單字大師', 
+            description: '累積正確拼寫 1000 個單字',
+            progress: (stats) => ({ current: stats.globalStats.totalWordsCorrect, target: 1000 })
+        },
+        PLATINUM: {
+            name: '白金獎盃 🏆',
+            description: '在 3 個不同單元中獲得金牌評價',
+            progress: (stats) => {
+                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.PERFECT_CLEAR).length;
+                return { current: goldMedalCount, target: 3 };
+            }
+        },
+    };
+    const UNIT_ACHIEVEMENTS = {
+        SMOOTH_CLEAR: { name: '銅牌 🥉', description: '以 3 個或以下的錯誤數完成本單元練習' },
+        ELITE_PERFORMANCE: { name: '銀牌 🥈', description: '以 1 個或以下的錯誤數完成本單元練習' },
+        PERFECT_CLEAR: { name: '金牌 🥇', description: '以零錯誤的完美表現完成本單元練習' },
+    };
+
+    // --- 遊戲 & 玩家狀態 ---
+    let playerStats;
     let wordList = [];
-    let totalWords = 0;
+    let currentWordListPath = '';
+    let currentWordListName = '';
     let roundCount = 1;
     let wordsToPractice = [];
     let wordsToReview = [];
+    let wordsWrongInSession = new Set();
+    let currentStreak = 0;
     let gameMode = 'practice';
     let stageTotal = 0;
     let currentWord = null;
@@ -43,8 +74,126 @@ document.addEventListener('DOMContentLoaded', () => {
     const synth = window.speechSynthesis;
     let isPlaying = false;
 
-    // --- 遊戲主要功能 ---
+    // --- 存儲 & 數據管理 ---
+    function saveProgress() {
+        localStorage.setItem('playerStats_v2', JSON.stringify(playerStats));
+    }
 
+    function loadProgress() {
+        const savedStats = localStorage.getItem('playerStats_v2');
+        if (savedStats) {
+            playerStats = JSON.parse(savedStats);
+        } else {
+            playerStats = {
+                unitData: {},
+                globalStats: {
+                    totalWordsCorrect: 0,
+                    longestStreak: 0,
+                },
+                unlockedGlobalAchievements: {},
+            };
+        }
+    }
+
+    // --- 成就系統 UI & 邏輯 ---
+    function showToast(text) {
+        achievementToastEl.querySelector('.toast-description').textContent = text;
+        achievementToastEl.style.display = 'flex';
+        setTimeout(() => { achievementToastEl.classList.add('show'); }, 10);
+        setTimeout(() => {
+            achievementToastEl.classList.remove('show');
+            setTimeout(() => { achievementToastEl.style.display = 'none'; }, 500);
+        }, 4000);
+    }
+
+    function checkGlobalAchievements() {
+        const stats = playerStats;
+        for (const id in GLOBAL_ACHIEVEMENTS) {
+            if (stats.unlockedGlobalAchievements[id]) continue;
+
+            let unlocked = false;
+            if (id === 'WORDS_1000' && stats.globalStats.totalWordsCorrect >= 1000) unlocked = true;
+            if (id === 'PLATINUM') {
+                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.PERFECT_CLEAR).length;
+                if (goldMedalCount >= 3) {
+                    unlocked = true;
+                }
+            }
+
+            if (unlocked) {
+                stats.unlockedGlobalAchievements[id] = true;
+                showToast(GLOBAL_ACHIEVEMENTS[id].name);
+            }
+        }
+    }
+
+    function updateAchievementDisplay() {
+        achievementListEl.innerHTML = '';
+
+        // Render Global Achievements
+        const globalHeader = document.createElement('h3');
+        globalHeader.className = 'ach-section-header';
+        globalHeader.textContent = '全域成就';
+        achievementListEl.appendChild(globalHeader);
+
+        for (const id in GLOBAL_ACHIEVEMENTS) {
+            const ach = GLOBAL_ACHIEVEMENTS[id];
+            const isUnlocked = playerStats.unlockedGlobalAchievements[id];
+            const li = document.createElement('li');
+            li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+
+            let progressHTML = '';
+            if (!isUnlocked && ach.progress) {
+                const p = ach.progress(playerStats);
+                const percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
+                progressHTML = `
+                    <div class="ach-progress-text">(${p.current} / ${p.target})</div>
+                    <div class="ach-progress-bar-container">
+                        <div class="ach-progress-bar" style="width: ${percent}%;"></div>
+                    </div>
+                `;
+            }
+
+            li.innerHTML = `
+                <div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div>
+                <div class="ach-text">
+                    <h3>${ach.name}</h3>
+                    <p>${ach.description}</p>
+                    ${progressHTML}
+                </div>
+            `;
+            achievementListEl.appendChild(li);
+        }
+
+        // Render Unit-Specific Achievements
+        const playedUnits = Object.keys(playerStats.unitData);
+        playedUnits.forEach(unitPath => {
+            const unitName = wordLists.find(w => w.path === unitPath)?.name || unitPath;
+            const unitHeader = document.createElement('h3');
+            unitHeader.className = 'ach-section-header';
+            unitHeader.textContent = unitName;
+            achievementListEl.appendChild(unitHeader);
+
+            const unitData = playerStats.unitData[unitPath];
+
+            for (const id in UNIT_ACHIEVEMENTS) {
+                const ach = UNIT_ACHIEVEMENTS[id];
+                const isUnlocked = unitData.achievements[id];
+                const li = document.createElement('li');
+                li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+                li.innerHTML = `
+                    <div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div>
+                    <div class="ach-text">
+                        <h3>${ach.name}</h3>
+                        <p>${ach.description}</p>
+                    </div>
+                `;
+                achievementListEl.appendChild(li);
+            }
+        });
+    }
+
+    // --- 遊戲主要功能 ---
     function parseCsvLine(line) {
         const regex = /"([^"]*)"|[^,]+/g;
         const fields = [];
@@ -70,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }).filter(word => word !== null);
             if (wordList.length === 0) throw new Error("單字列表為空或格式錯誤。");
         } catch (error) {
-            console.error('載入單字時發生錯誤:', error);
             alert(`載入單字失敗，請檢查 ${filePath} 檔案是否存在且格式正確。`);
             showStartScreen();
         }
@@ -78,42 +226,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function initializeGame() {
         if (wordList.length === 0) return;
-        totalWords = wordList.length;
-        stageTotal = wordList.length;
         roundCount = 1;
         gameMode = 'practice';
         wordsToReview = [];
+        wordsWrongInSession.clear();
+        currentStreak = 0;
         wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
-        if (!synth) {
-            playAudioBtnEl.style.display = 'none';
-        }
+        stageTotal = wordsToPractice.length;
+        if (!synth) playAudioBtnEl.style.display = 'none';
         setupNextWord();
     }
 
     function setupNextWord() {
         if (wordsToPractice.length === 0) {
-            // --- A pass (practice or review) is finished, decide what's next ---
             if (wordsToReview.length > 0) {
-                // --- Start a review session ---
                 gameMode = 'review';
                 wordsToPractice = [...wordsToReview].sort(() => Math.random() - 0.5);
                 stageTotal = wordsToPractice.length;
-                wordsToReview = []; // Clear review list for the new session
+                wordsToReview = [];
                 feedbackEl.textContent = `第 ${roundCount} 回合結束！現在開始訂正錯題...`;
                 feedbackEl.className = 'feedback-message notice';
             } else {
-                // --- No words to review, pass is fully complete ---
                 if (gameMode === 'practice' && roundCount >= 3) {
-                    endGame(); // GAME END TRIGGER
-                    return; // Exit the function to prevent setting up a new word
+                    endGame();
+                    return;
                 }
-                
-                // --- Start a new round ---
                 gameMode = 'practice';
                 roundCount++;
                 wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
                 stageTotal = wordsToPractice.length;
-                // wordsToReview is already empty
                 feedbackEl.textContent = `太棒了！第 ${roundCount} 回合開始！`;
                 feedbackEl.className = 'feedback-message notice';
             }
@@ -123,13 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const progressPercent = stageTotal > 0 ? (practicedInStage / stageTotal) * 100 : 0;
         progressBarEl.style.width = `${progressPercent}%`;
         
-        if (gameMode === 'review') {
-            roundDisplayEl.textContent = `訂正時間`;
-            progressBarEl.style.backgroundImage = 'linear-gradient(45deg, var(--incorrect-color), #f56565)';
-        } else {
-            roundDisplayEl.textContent = `第 ${roundCount} 回合`;
-            progressBarEl.style.backgroundImage = 'linear-gradient(45deg, var(--correct-color), #68d391)';
-        }
+        roundDisplayEl.textContent = gameMode === 'review' ? `訂正時間` : `第 ${roundCount} 回合`;
+        progressBarEl.style.backgroundImage = gameMode === 'review' 
+            ? 'linear-gradient(45deg, var(--incorrect-color), #f56565)'
+            : 'linear-gradient(45deg, var(--correct-color), #68d391)';
 
         currentWord = wordsToPractice.shift();
         playAudioBtnEl.style.display = synth ? 'block' : 'none';
@@ -137,36 +275,14 @@ document.addEventListener('DOMContentLoaded', () => {
         phoneticsEl.textContent = currentWord.phonetics;
 
         if (gameMode === 'practice' && roundCount === 1) {
-            // --- Round 1: Easiest (First Letter Hint) ---
             translationEl.textContent = currentWord.chinese;
-            const placeholder = '_______';
-            const regex = new RegExp(currentWord.english, 'gi');
-            const modifiedExample = currentWord.example.replace(regex, placeholder);
-            exampleEl.textContent = modifiedExample;
-
-            const firstLetterHint = currentWord.english.split(' ').map(word => {
-                if (word.length > 0) {
-                    // Handle single-character non-alphanumeric words like punctuation
-                    if (word.length === 1 && !word.match(/[a-zA-Z]/)) {
-                        return word;
-                    }
-                    return word[0] + '_'.repeat(word.length - 1);
-                }
-                return '';
-            }).join(' ');
-            wordDisplayEl.textContent = firstLetterHint;
-
+            exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
+            wordDisplayEl.textContent = currentWord.english.split(' ').map(w => w.length > 0 ? w[0] + '_'.repeat(w.length - 1) : '').join(' ');
         } else if (gameMode === 'practice' && roundCount === 2) {
-            // --- Round 2: Medium (Full Context Hint) ---
             translationEl.textContent = currentWord.chinese;
-            const placeholder = '_______';
-            const regex = new RegExp(currentWord.english, 'gi');
-            const modifiedExample = currentWord.example.replace(regex, placeholder);
-            exampleEl.textContent = modifiedExample;
+            exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
             wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
-
         } else {
-            // --- Round 3+ & Review Mode: Hard (No Text Hints) ---
             translationEl.textContent = '';
             exampleEl.textContent = '';
             wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
@@ -181,29 +297,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function playWordAudio() {
         if (isPlaying || !currentWord || !synth) return;
         synth.cancel();
-        const wordToSpeak = currentWord.english.split('(')[0].trim();
-        // In round 2, we also provide the example sentence audio
-        const exampleToSpeak = (gameMode === 'practice' && roundCount <= 2) ? currentWord.example : '';
-        const fullTextToSpeak = `${wordToSpeak}. ${exampleToSpeak}`;
-        const utterance = new SpeechSynthesisUtterance(fullTextToSpeak);
+        const utterance = new SpeechSynthesisUtterance(currentWord.english.split('(')[0].trim());
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
         utterance.onstart = () => { isPlaying = true; playAudioBtnEl.disabled = true; };
         utterance.onend = () => { isPlaying = false; playAudioBtnEl.disabled = false; };
-        utterance.onerror = (event) => {
-            console.error('語音合成發生錯誤:', event);
-            isPlaying = false;
-            playAudioBtnEl.disabled = false;
-        };
         synth.speak(utterance);
     }
 
     function handleSubmission(e) {
         e.preventDefault();
         const userAnswer = spellingInputEl.value.trim();
-        if (userAnswer) {
-            checkAnswer(userAnswer);
-        }
+        if (userAnswer) checkAnswer(userAnswer);
     }
 
     function checkAnswer(answer) {
@@ -218,36 +323,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(setupNextWord, 1000);
                 } else {
                     feedbackEl.textContent = `做得好！請再輸入一次 (${correctionCount}/${REQUIRED_CORRECTIONS})`;
-                    feedbackEl.className = 'feedback-message notice';
                     spellingInputEl.value = '';
-                    spellingInputEl.focus();
                 }
             } else {
                 feedbackEl.textContent = `拼寫仍然不對喔，請再試一次: ${currentWord.english}`;
-                feedbackEl.className = 'feedback-message incorrect';
                 spellingInputEl.value = '';
-                spellingInputEl.focus();
             }
             return;
         }
 
         spellingInputEl.disabled = true;
-        playAudioBtnEl.style.display = 'none';
 
         if (answer.toLowerCase() === currentWord.english.toLowerCase()) {
             feedbackEl.textContent = '正確！';
             feedbackEl.className = 'feedback-message correct';
             wordDisplayEl.textContent = currentWord.english;
+            
+            currentStreak++;
+            playerStats.globalStats.totalWordsCorrect++;
+            if (currentStreak > playerStats.globalStats.longestStreak) {
+                playerStats.globalStats.longestStreak = currentStreak;
+            }
+            checkGlobalAchievements();
+            saveProgress();
+
             setTimeout(setupNextWord, 500);
         } else {
-            if (gameMode === 'practice' && !wordsToReview.some(w => w.english === currentWord.english)) {
+            feedbackEl.textContent = `錯誤！正確答案是: ${currentWord.english} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
+            feedbackEl.className = 'feedback-message incorrect';
+            wordDisplayEl.textContent = currentWord.english;
+            currentStreak = 0;
+            wordsWrongInSession.add(currentWord.english);
+            if (!wordsToReview.some(w => w.english === currentWord.english)) {
                 wordsToReview.push(currentWord);
             }
             isCorrecting = true;
             correctionCount = 0;
-            feedbackEl.textContent = `錯誤！正確答案是: ${currentWord.english} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
-            feedbackEl.className = 'feedback-message incorrect';
-            wordDisplayEl.textContent = currentWord.english;
             spellingInputEl.value = '';
             spellingInputEl.disabled = false;
             spellingInputEl.focus();
@@ -255,6 +366,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function endGame() {
+        const errorCount = wordsWrongInSession.size;
+        const unitPath = currentWordListPath;
+        const unitName = currentWordListName;
+
+        // Initialize unit data if it doesn't exist
+        if (!playerStats.unitData[unitPath]) {
+            playerStats.unitData[unitPath] = { achievements: {} };
+        }
+
+        const unlockedInSession = [];
+        if (errorCount === 0) {
+            if (!playerStats.unitData[unitPath].achievements.PERFECT_CLEAR) unlockedInSession.push(UNIT_ACHIEVEMENTS.PERFECT_CLEAR.name);
+            playerStats.unitData[unitPath].achievements.PERFECT_CLEAR = true;
+        }
+        if (errorCount <= 1) {
+            if (!playerStats.unitData[unitPath].achievements.ELITE_PERFORMANCE) unlockedInSession.push(UNIT_ACHIEVEMENTS.ELITE_PERFORMANCE.name);
+            playerStats.unitData[unitPath].achievements.ELITE_PERFORMANCE = true;
+        }
+        if (errorCount <= 3) {
+            if (!playerStats.unitData[unitPath].achievements.SMOOTH_CLEAR) unlockedInSession.push(UNIT_ACHIEVEMENTS.SMOOTH_CLEAR.name);
+            playerStats.unitData[unitPath].achievements.SMOOTH_CLEAR = true;
+        }
+
+        if(unlockedInSession.length > 0){
+            showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+        }
+
+        checkGlobalAchievements();
+        saveProgress();
+
         gameContainer.style.display = 'none';
         completionContainer.style.display = 'flex';
     }
@@ -262,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showStartScreen() {
         gameContainer.style.display = 'none';
         completionContainer.style.display = 'none';
+        achievementContainer.style.display = 'none';
         startContainer.style.display = 'flex';
     }
 
@@ -276,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function main() {
+        loadProgress();
         populateWordListSelector();
 
         // Event Listeners
@@ -283,21 +426,39 @@ document.addEventListener('DOMContentLoaded', () => {
         playAudioBtnEl.addEventListener('click', playWordAudio);
 
         startGameBtn.addEventListener('click', async () => {
-            const selectedListPath = wordListSelectEl.value;
-            showStartScreen(); // Hide all screens first
+            const selectedOption = wordListSelectEl.options[wordListSelectEl.selectedIndex];
+            currentWordListPath = selectedOption.value;
+            currentWordListName = selectedOption.text;
+
+            // Initialize unit data on start, if it doesn't exist
+            if (!playerStats.unitData[currentWordListPath]) {
+                playerStats.unitData[currentWordListPath] = { achievements: {} };
+                saveProgress();
+            }
+
+            showStartScreen();
             startContainer.style.display = 'none';
             gameContainer.style.display = 'block';
-            await loadWords(selectedListPath);
+            await loadWords(currentWordListPath);
             initializeGame();
         });
 
         restartBtn.addEventListener('click', () => {
             completionContainer.style.display = 'none';
             gameContainer.style.display = 'block';
-            initializeGame(); // Re-initialize the game with the same word list
+            initializeGame();
         });
 
         backToMenuBtn.addEventListener('click', showStartScreen);
+
+        showAchievementsBtn.addEventListener('click', () => {
+            updateAchievementDisplay();
+            achievementContainer.style.display = 'flex';
+        });
+
+        closeAchievementsBtn.addEventListener('click', () => {
+            achievementContainer.style.display = 'none';
+        });
     }
 
     main();

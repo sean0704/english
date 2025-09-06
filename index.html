@@ -14,6 +14,7 @@
         <h1 class="start-title">選擇練習字庫</h1>
         <select id="word-list-select" class="word-list-select"></select>
         <button id="start-game-btn" class="start-button">開始練習</button>
+        <button id="show-achievements-btn" class="start-button secondary" style="background-color: #718096; margin-top: 10px;">我的成就</button>
     </div>
 
     <div id="game-container" class="game-container" style="display: none;">
@@ -57,5 +58,23 @@
     </div>
 
     <script src="script.js"></script>
+
+    <!-- Achievement Modal -->
+    <div id="achievement-container" style="display: none;">
+        <div id="achievement-modal">
+            <h2>我的成就</h2>
+            <ul id="achievement-list"></ul>
+            <button id="close-achievements-btn">關閉</button>
+        </div>
+    </div>
+
+    <!-- Achievement Toast -->
+    <div id="achievement-toast" style="display: none;">
+        <div class="toast-icon">🏆</div>
+        <div class="toast-text">
+            <div class="toast-title">成就解鎖！</div>
+            <div class="toast-description"></div>
+        </div>
+    </div>
 </body>
 </html>
