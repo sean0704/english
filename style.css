@@ -369,3 +369,28 @@ body {
 .ach-section-header:first-of-type {
     margin-top: 0;
 }
+
+/* Added for top-right close button on achievement modal */
+#achievement-modal {
+    position: relative;
+}
+
+#close-achievements-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    margin: 0; /* Override existing margin */
+    padding: 0.5rem; /* Add some padding for easier clicking */
+    width: auto; /* Override existing width */
+    background: none; /* Override existing background */
+    color: var(--header-color);
+    border: none;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+#close-achievements-btn:hover {
+    color: var(--text-color);
+}

@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedbackEl.textContent = `第 ${roundCount} 回合結束！現在開始訂正錯題...`;
                 feedbackEl.className = 'feedback-message notice';
             } else {
-                if (gameMode === 'practice' && roundCount >= 3) {
+                if (roundCount >= 3) {
                     endGame();
                     return;
                 }
