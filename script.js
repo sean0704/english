@@ -298,9 +298,10 @@ document.addEventListener('DOMContentLoaded', () => {
             exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
             wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
         } else {
+            // 第三回合及以後：只提供例句作為提示，不提供底線
             translationEl.textContent = '';
-            exampleEl.textContent = '';
-            wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
+            exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
+            wordDisplayEl.textContent = ''; // 移除底線字數提示
         }
         
         spellingInputEl.value = '';
@@ -312,16 +313,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function playWordAudio() {
         if (isPlaying || !currentWord || !synth) return;
         synth.cancel();
-        const wordToSpeak = currentWord.english.split('(')[0].trim();
 
-        // 只有在練習模式的第一和第二回合，才將例句加入待讀列表
-        const exampleToSpeak = (gameMode === 'practice' && roundCount <= 2) ? currentWord.example : '';
+        let textToSpeak = '';
+        const word = currentWord.english.split('(')[0].trim();
+        const example = currentWord.example;
 
-        // 將單字和例句（如果有的話）組合起來
-        const fullTextToSpeak = `${wordToSpeak}. ${exampleToSpeak}`;
+        if (gameMode === 'practice') {
+            if (roundCount === 1) {
+                // 第一回合：單字 + 例句
+                textToSpeak = `${word}. ${example}`;
+            } else if (roundCount === 2) {
+                // 第二回合：只有單字
+                textToSpeak = word;
+            } else {
+                // 第三回合及以後：只有例句
+                textToSpeak = example;
+            }
+        } else {
+            // 訂正模式：只念單字
+            textToSpeak = word;
+        }
+        
+        if (!textToSpeak) return; // 如果沒有要朗讀的內容，則直接返回
 
-        // 將完整的內容傳給語音引擎
-        const utterance = new SpeechSynthesisUtterance(fullTextToSpeak);
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
         utterance.onstart = () => { isPlaying = true; playAudioBtnEl.disabled = true; };
