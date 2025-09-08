@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 成就系統定義 ---
     const GLOBAL_ACHIEVEMENTS = {
         ACHIEVEMENT_HUNTER: { 
-            name: '成就獵人', 
+            name: '成就獵人 ($100)', 
             description: '累積獲得 9 個單元成就',
             progress: (stats) => {
                 const totalUnitAchievements = Object.values(stats.unitData)
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         PLATINUM: {
-            name: '白金獎盃 🏆',
+            name: '白金獎盃 🏆 ($100)',
             description: '在 3 個不同單元中獲得金牌評價',
             progress: (stats) => {
                 const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.PERFECT_CLEAR).length;
@@ -59,9 +59,12 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
     const UNIT_ACHIEVEMENTS = {
-        SMOOTH_CLEAR: { name: '銅牌 🥉', description: '以 3 個或以下的錯誤數完成本單元練習' },
-        ELITE_PERFORMANCE: { name: '銀牌 🥈', description: '以 1 個或以下的錯誤數完成本單元練習' },
-        PERFECT_CLEAR: { name: '金牌 🥇', description: '以零錯誤的完美表現完成本單元練習' },
+        SMOOTH_CLEAR: { name: '銅牌 🥉 ($25)', description: '以 3 個或以下的錯誤數完成本單元練習' },
+        ELITE_PERFORMANCE: { name: '銀牌 🥈 ($50)', description: '以 1 個或以下的錯誤數完成本單元練習' },
+        PERFECT_CLEAR: { name: '金牌 🥇 ($100)', description: '以零錯誤的完美表現完成本單元練習' },
+        THREE_DAY_STREAK: { name: '堅持不懈 🏃', description: '連續 3 天完成本單元練習' },
+        THREE_WEEK_STREAK: { name: '週而復始 📅', description: '連續 3 週完成本單元練習' },
+        THREE_MONTH_STREAK: { name: '滴水穿石 🗓️', description: '連續 3 個月完成本單元練習' },
     };
 
     // --- 遊戲 & 玩家狀態 ---
@@ -409,18 +412,112 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- 成就系統輔助函式 ---
+    // 根據 ISO 8601 標準獲取年份和週數
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        return [d.getUTCFullYear(), weekNo];
+    }
+
+    function checkStreakAchievements(unitPath, unlockedInSession) {
+        const unitData = playerStats.unitData[unitPath];
+        if (!unitData) return;
+
+        const history = unitData.completionHistory || [];
+        if (history.length < 3) return; // 通關次數少於3次，不可能達成任何連續成就
+
+        // --- 每日連續檢查 (Daily Streak) ---
+        if (!unitData.achievements.THREE_DAY_STREAK) {
+            const uniqueDays = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10)));
+            const sortedDays = Array.from(uniqueDays).sort();
+            if (sortedDays.length >= 3) {
+                for (let i = sortedDays.length - 1; i >= 2; i--) {
+                    const day3 = new Date(sortedDays[i]);
+                    const day2 = new Date(sortedDays[i - 1]);
+                    const isConsecutive = (day3.getTime() - day2.getTime()) === 86400000;
+                    if (isConsecutive) {
+                        const day1 = new Date(sortedDays[i - 2]);
+                        if ((day2.getTime() - day1.getTime()) === 86400000) {
+                            unitData.achievements.THREE_DAY_STREAK = true;
+                            unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.name);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 每月連續檢查 (Monthly Streak) ---
+        if (!unitData.achievements.THREE_MONTH_STREAK) {
+            const uniqueMonths = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7)));
+            const sortedMonths = Array.from(uniqueMonths).sort();
+            if (sortedMonths.length >= 3) {
+                for (let i = sortedMonths.length - 1; i >= 2; i--) {
+                    const month3 = new Date(sortedMonths[i] + '-01T12:00:00Z');
+                    const month2 = new Date(sortedMonths[i - 1] + '-01T12:00:00Z');
+                    month3.setUTCMonth(month3.getUTCMonth() - 1);
+                    if (month3.toISOString().slice(0, 7) === sortedMonths[i - 1]) {
+                        const month1 = new Date(sortedMonths[i - 2] + '-01T12:00:00Z');
+                        month3.setUTCMonth(month3.getUTCMonth() - 1);
+                        if (month3.toISOString().slice(0, 7) === sortedMonths[i - 2]) {
+                            unitData.achievements.THREE_MONTH_STREAK = true;
+                            unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.name);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 每週連續檢查 (Weekly Streak) ---
+        if (!unitData.achievements.THREE_WEEK_STREAK) {
+            const uniqueWeeks = new Set(history.map(ts => {
+                const [year, week] = getWeekNumber(new Date(ts));
+                return `${year}-${String(week).padStart(2, '0')}`;
+            }));
+            const sortedWeeks = Array.from(uniqueWeeks).sort();
+            if (sortedWeeks.length >= 3) {
+                for (let i = sortedWeeks.length - 1; i >= 2; i--) {
+                    const [year3, week3] = sortedWeeks[i].split('-').map(Number);
+                    const date3 = new Date(Date.UTC(year3, 0, 1 + (week3 - 1) * 7));
+                    
+                    const prevWeekDate = new Date(date3.getTime() - 7 * 86400000);
+                    const [prevYear, prevWeek] = getWeekNumber(prevWeekDate);
+
+                    if (`${prevYear}-${String(prevWeek).padStart(2, '0')}` === sortedWeeks[i - 1]) {
+                        const prevPrevWeekDate = new Date(prevWeekDate.getTime() - 7 * 86400000);
+                        const [prevPrevYear, prevPrevWeek] = getWeekNumber(prevPrevWeekDate);
+                        if (`${prevPrevYear}-${String(prevPrevWeek).padStart(2, '0')}` === sortedWeeks[i - 2]) {
+                            unitData.achievements.THREE_WEEK_STREAK = true;
+                            unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.name);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     function endGame() {
         const errorCount = wordsWrongInSession.size;
         const unitPath = currentWordListPath;
         const unitName = currentWordListName;
 
-        // Initialize unit data if it doesn't exist
+        // Initialize unit data if it doesn't exist, and ensure completionHistory is present for legacy saves
         if (!playerStats.unitData[unitPath]) {
-            playerStats.unitData[unitPath] = { achievements: {} };
+            playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
+        } else if (!playerStats.unitData[unitPath].completionHistory) {
+            playerStats.unitData[unitPath].completionHistory = [];
         }
 
+        // Record the timestamp for this completion
+        playerStats.unitData[unitPath].completionHistory.push(Date.now());
+
         const unlockedInSession = [];
-        if (errorCount === 0) {
+        if (errorCount == 0) {
             if (!playerStats.unitData[unitPath].achievements.PERFECT_CLEAR) unlockedInSession.push(UNIT_ACHIEVEMENTS.PERFECT_CLEAR.name);
             playerStats.unitData[unitPath].achievements.PERFECT_CLEAR = true;
         }
@@ -436,6 +533,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if(unlockedInSession.length > 0){
             showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
         }
+
+        // 在此處新增對連續成就的檢查
+        checkStreakAchievements(unitPath, unlockedInSession);
 
         checkGlobalAchievements();
         saveProgress();
@@ -476,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Initialize unit data on start, if it doesn't exist
             if (!playerStats.unitData[currentWordListPath]) {
-                playerStats.unitData[currentWordListPath] = { achievements: {} };
+                playerStats.unitData[currentWordListPath] = { achievements: {}, completionHistory: [] };
                 saveProgress();
             }
 
