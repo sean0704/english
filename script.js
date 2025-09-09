@@ -64,9 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
         BRONZE: { name: '銅牌 🥉 ($25)', description: '以 3 個或以下的錯誤數完成本單元練習', points: 25 },
         SILVER: { name: '銀牌 🥈 ($50)', description: '以 2 個或以下的錯誤數完成本單元練習', points: 50 },
         GOLD: { name: '金牌 🥇 ($75)', description: '以 1 個或以下的錯誤數完成本單元練習', points: 75 },
-        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '連續 3 天完成本單元練習', points: 25 },
-        THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '連續 3 週完成本單元練習', points: 50 },
-        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '連續 3 個月完成本單元練習', points: 75 },
+        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25 },
+        THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '累計 3 週完成本單元練習', points: 50 },
+        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75 },
     };
 
     // --- 遊戲 & 玩家狀態 ---
@@ -208,11 +208,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isUnlocked = unitData.achievements[id];
                 const li = document.createElement('li');
                 li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+                
+                let progressHTML = ''; // Default to no progress bar
+
+                // If it's a cumulative achievement and not unlocked, calculate and generate the progress bar
+                if (!isUnlocked && (id === 'THREE_DAY_STREAK' || id === 'THREE_WEEK_STREAK' || id === 'THREE_MONTH_STREAK')) {
+                    let currentProgress = 0;
+                    const history = playerStats.unitData[unitPath]?.completionHistory || [];
+                    
+                    if (id === 'THREE_DAY_STREAK') {
+                        currentProgress = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10))).size;
+                    } else if (id === 'THREE_WEEK_STREAK') {
+                        currentProgress = new Set(history.map(ts => {
+                            const [year, week] = getWeekNumber(new Date(ts));
+                            return `${year}-${String(week).padStart(2, '0')}`;
+                        })).size;
+                    } else if (id === 'THREE_MONTH_STREAK') {
+                        currentProgress = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7))).size;
+                    }
+
+                    const targetProgress = 3;
+                    const percent = targetProgress > 0 ? Math.min((currentProgress / targetProgress) * 100, 100) : 0;
+                    
+                    progressHTML = `
+                        <div class="ach-progress-text">(${currentProgress} / ${targetProgress})</div>
+                        <div class="ach-progress-bar-container">
+                            <div class="ach-progress-bar" style="width: ${percent}%;"></div>
+                        </div>
+                    `;
+                }
+
                 li.innerHTML = `
                     <div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div>
                     <div class="ach-text">
                         <h3>${ach.name}</h3>
                         <p>${ach.description}</p>
+                        ${progressHTML}
                     </div>
                 `;
                 achievementListEl.appendChild(li);
@@ -438,77 +469,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const history = unitData.completionHistory || [];
         if (history.length < 3) return; // 通關次數少於3次，不可能達成任何連續成就
 
-        // --- 每日連續檢查 (Daily Streak) ---
+        // --- 累計每日檢查 (Cumulative Daily Check) ---
         if (!unitData.achievements.THREE_DAY_STREAK) {
             const uniqueDays = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10)));
-            const sortedDays = Array.from(uniqueDays).sort();
-            if (sortedDays.length >= 3) {
-                for (let i = sortedDays.length - 1; i >= 2; i--) {
-                    const day3 = new Date(sortedDays[i]);
-                    const day2 = new Date(sortedDays[i - 1]);
-                    const isConsecutive = (day3.getTime() - day2.getTime()) === 86400000;
-                    if (isConsecutive) {
-                        const day1 = new Date(sortedDays[i - 2]);
-                        if ((day2.getTime() - day1.getTime()) === 86400000) {
-                            playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.points;
-                            unitData.achievements.THREE_DAY_STREAK = true;
-                            unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.name);
-                            break;
-                        }
-                    }
-                }
+            if (uniqueDays.size >= 3) {
+                playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.points;
+                unitData.achievements.THREE_DAY_STREAK = true;
+                unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.name);
             }
         }
 
-        // --- 每月連續檢查 (Monthly Streak) ---
+        // --- 累計每月檢查 (Cumulative Monthly Check) ---
         if (!unitData.achievements.THREE_MONTH_STREAK) {
             const uniqueMonths = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7)));
-            const sortedMonths = Array.from(uniqueMonths).sort();
-            if (sortedMonths.length >= 3) {
-                for (let i = sortedMonths.length - 1; i >= 2; i--) {
-                    const month3 = new Date(sortedMonths[i] + '-01T12:00:00Z');
-                    const month2 = new Date(sortedMonths[i - 1] + '-01T12:00:00Z');
-                    month3.setUTCMonth(month3.getUTCMonth() - 1);
-                    if (month3.toISOString().slice(0, 7) === sortedMonths[i - 1]) {
-                        const month1 = new Date(sortedMonths[i - 2] + '-01T12:00:00Z');
-                        month3.setUTCMonth(month3.getUTCMonth() - 1);
-                        if (month3.toISOString().slice(0, 7) === sortedMonths[i - 2]) {
-                            playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.points;
-                            unitData.achievements.THREE_MONTH_STREAK = true;
-                            unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.name);
-                            break;
-                        }
-                    }
-                }
+            if (uniqueMonths.size >= 3) {
+                playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.points;
+                unitData.achievements.THREE_MONTH_STREAK = true;
+                unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.name);
             }
         }
 
-        // --- 每週連續檢查 (Weekly Streak) ---
+        // --- 累計每週檢查 (Cumulative Weekly Check) ---
         if (!unitData.achievements.THREE_WEEK_STREAK) {
             const uniqueWeeks = new Set(history.map(ts => {
                 const [year, week] = getWeekNumber(new Date(ts));
                 return `${year}-${String(week).padStart(2, '0')}`;
             }));
-            const sortedWeeks = Array.from(uniqueWeeks).sort();
-            if (sortedWeeks.length >= 3) {
-                for (let i = sortedWeeks.length - 1; i >= 2; i--) {
-                    const [year3, week3] = sortedWeeks[i].split('-').map(Number);
-                    const date3 = new Date(Date.UTC(year3, 0, 1 + (week3 - 1) * 7));
-                    
-                    const prevWeekDate = new Date(date3.getTime() - 7 * 86400000);
-                    const [prevYear, prevWeek] = getWeekNumber(prevWeekDate);
-
-                    if (`${prevYear}-${String(prevWeek).padStart(2, '0')}` === sortedWeeks[i - 1]) {
-                        const prevPrevWeekDate = new Date(prevWeekDate.getTime() - 7 * 86400000);
-                        const [prevPrevYear, prevPrevWeek] = getWeekNumber(prevPrevWeekDate);
-                        if (`${prevPrevYear}-${String(prevPrevWeek).padStart(2, '0')}` === sortedWeeks[i - 2]) {
-                            playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.points;
-                            unitData.achievements.THREE_WEEK_STREAK = true;
-                            unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.name);
-                            break;
-                        }
-                    }
-                }
+            if (uniqueWeeks.size >= 3) {
+                playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.points;
+                unitData.achievements.THREE_WEEK_STREAK = true;
+                unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.name);
             }
         }
     }
