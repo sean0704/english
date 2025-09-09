@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ACHIEVEMENT_HUNTER: { 
             name: '成就獵人 ($100)', 
             description: '累積獲得 9 個單元成就',
+            points: 100,
             progress: (stats) => {
                 const totalUnitAchievements = Object.values(stats.unitData)
                     .reduce((count, unit) => count + Object.keys(unit.achievements).length, 0);
@@ -52,19 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
         PLATINUM: {
             name: '白金獎盃 🏆 ($100)',
             description: '在 3 個不同單元中獲得金牌評價',
+            points: 100,
             progress: (stats) => {
-                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.PERFECT_CLEAR).length;
+                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD).length;
                 return { current: goldMedalCount, target: 3 };
             }
         },
     };
     const UNIT_ACHIEVEMENTS = {
-        SMOOTH_CLEAR: { name: '銅牌 🥉 ($25)', description: '以 3 個或以下的錯誤數完成本單元練習' },
-        ELITE_PERFORMANCE: { name: '銀牌 🥈 ($50)', description: '以 1 個或以下的錯誤數完成本單元練習' },
-        PERFECT_CLEAR: { name: '金牌 🥇 ($100)', description: '以零錯誤的完美表現完成本單元練習' },
-        THREE_DAY_STREAK: { name: '堅持不懈 🏃', description: '連續 3 天完成本單元練習' },
-        THREE_WEEK_STREAK: { name: '週而復始 📅', description: '連續 3 週完成本單元練習' },
-        THREE_MONTH_STREAK: { name: '滴水穿石 🗓️', description: '連續 3 個月完成本單元練習' },
+        BRONZE: { name: '銅牌 🥉 ($25)', description: '以 3 個或以下的錯誤數完成本單元練習', points: 25 },
+        SILVER: { name: '銀牌 🥈 ($50)', description: '以 2 個或以下的錯誤數完成本單元練習', points: 50 },
+        GOLD: { name: '金牌 🥇 ($75)', description: '以 1 個或以下的錯誤數完成本單元練習', points: 75 },
+        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '連續 3 天完成本單元練習', points: 25 },
+        THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '連續 3 週完成本單元練習', points: 50 },
+        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '連續 3 個月完成本單元練習', points: 75 },
     };
 
     // --- 遊戲 & 玩家狀態 ---
@@ -95,8 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedStats = localStorage.getItem('playerStats_v2');
         if (savedStats) {
             playerStats = JSON.parse(savedStats);
+            if (playerStats.totalPoints === undefined) {
+                playerStats.totalPoints = 0;
+            }
         } else {
             playerStats = {
+                totalPoints: 0,
                 unitData: {},
                 globalStats: {
                     totalWordsCorrect: 0,
@@ -132,13 +138,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (id === 'PLATINUM') {
-                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.PERFECT_CLEAR).length;
+                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD).length;
                 if (goldMedalCount >= 3) {
                     unlocked = true;
                 }
             }
 
             if (unlocked) {
+                stats.totalPoints += GLOBAL_ACHIEVEMENTS[id].points;
                 stats.unlockedGlobalAchievements[id] = true;
                 showToast(GLOBAL_ACHIEVEMENTS[id].name);
             }
@@ -147,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateAchievementDisplay() {
         achievementListEl.innerHTML = '';
+        const achievementModalTitle = document.querySelector('#achievement-modal h2');
+        achievementModalTitle.textContent = `我的成就 (總點數: ${playerStats.totalPoints || 0})`;
 
         // Render Global Achievements
         const globalHeader = document.createElement('h3');
@@ -441,6 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (isConsecutive) {
                         const day1 = new Date(sortedDays[i - 2]);
                         if ((day2.getTime() - day1.getTime()) === 86400000) {
+                            playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.points;
                             unitData.achievements.THREE_DAY_STREAK = true;
                             unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.name);
                             break;
@@ -463,6 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const month1 = new Date(sortedMonths[i - 2] + '-01T12:00:00Z');
                         month3.setUTCMonth(month3.getUTCMonth() - 1);
                         if (month3.toISOString().slice(0, 7) === sortedMonths[i - 2]) {
+                            playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.points;
                             unitData.achievements.THREE_MONTH_STREAK = true;
                             unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.name);
                             break;
@@ -491,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const prevPrevWeekDate = new Date(prevWeekDate.getTime() - 7 * 86400000);
                         const [prevPrevYear, prevPrevWeek] = getWeekNumber(prevPrevWeekDate);
                         if (`${prevPrevYear}-${String(prevPrevWeek).padStart(2, '0')}` === sortedWeeks[i - 2]) {
+                            playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.points;
                             unitData.achievements.THREE_WEEK_STREAK = true;
                             unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.name);
                             break;
@@ -517,31 +529,42 @@ document.addEventListener('DOMContentLoaded', () => {
         playerStats.unitData[unitPath].completionHistory.push(Date.now());
 
         const unlockedInSession = [];
-        if (errorCount == 0) {
-            if (!playerStats.unitData[unitPath].achievements.PERFECT_CLEAR) unlockedInSession.push(UNIT_ACHIEVEMENTS.PERFECT_CLEAR.name);
-            playerStats.unitData[unitPath].achievements.PERFECT_CLEAR = true;
+        // NOTE: The logic is inclusive. Gold implies Silver and Bronze.
+        if (errorCount <= 1) { // GOLD
+            if (!playerStats.unitData[unitPath].achievements.GOLD) {
+                playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points;
+                unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name);
+                playerStats.unitData[unitPath].achievements.GOLD = true;
+            }
         }
-        if (errorCount <= 1) {
-            if (!playerStats.unitData[unitPath].achievements.ELITE_PERFORMANCE) unlockedInSession.push(UNIT_ACHIEVEMENTS.ELITE_PERFORMANCE.name);
-            playerStats.unitData[unitPath].achievements.ELITE_PERFORMANCE = true;
+        if (errorCount <= 2) { // SILVER
+            if (!playerStats.unitData[unitPath].achievements.SILVER) {
+                playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points;
+                unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name);
+                playerStats.unitData[unitPath].achievements.SILVER = true;
+            }
         }
-        if (errorCount <= 3) {
-            if (!playerStats.unitData[unitPath].achievements.SMOOTH_CLEAR) unlockedInSession.push(UNIT_ACHIEVEMENTS.SMOOTH_CLEAR.name);
-            playerStats.unitData[unitPath].achievements.SMOOTH_CLEAR = true;
-        }
-
-        if(unlockedInSession.length > 0){
-            showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+        if (errorCount <= 3) { // BRONZE
+            if (!playerStats.unitData[unitPath].achievements.BRONZE) {
+                playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points;
+                unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name);
+                playerStats.unitData[unitPath].achievements.BRONZE = true;
+            }
         }
 
         // 在此處新增對連續成就的檢查
         checkStreakAchievements(unitPath, unlockedInSession);
+
+        if(unlockedInSession.length > 0){
+            showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+        }
 
         checkGlobalAchievements();
         saveProgress();
 
         gameContainer.style.display = 'none';
         completionContainer.style.display = 'flex';
+        updateTotalPointsDisplay();
     }
 
     function showStartScreen() {
@@ -549,6 +572,14 @@ document.addEventListener('DOMContentLoaded', () => {
         completionContainer.style.display = 'none';
         achievementContainer.style.display = 'none';
         startContainer.style.display = 'flex';
+        updateTotalPointsDisplay();
+    }
+
+    function updateTotalPointsDisplay() {
+        const pointsDisplay = document.getElementById('total-points-display');
+        if (pointsDisplay) {
+            pointsDisplay.textContent = `總點數: ${playerStats.totalPoints || 0}`;
+        }
     }
 
     // --- 程式進入點 ---
@@ -564,6 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function main() {
         loadProgress();
         populateWordListSelector();
+        updateTotalPointsDisplay();
 
         // Event Listeners
         spellingFormEl.addEventListener('submit', handleSubmission);
