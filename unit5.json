@@ -1,0 +1,218 @@
+[
+  {
+    "english": "date",
+    "chinese": "日期",
+    "phonetics": "[det]",
+    "example": "The date of the concert is September twenty-first."
+  },
+  {
+    "english": "November",
+    "chinese": "十一月",
+    "phonetics": "[noˈvɛmbər]",
+    "example": "Thanksgiving is in November."
+  },
+  {
+    "english": "first",
+    "chinese": "第一的",
+    "phonetics": "[fɜːrst]",
+    "example": "Sunday is the first day of the week."
+  },
+  {
+    "english": "Thanksgiving",
+    "chinese": "感恩節",
+    "phonetics": "[ˌθæŋksˈɡɪvɪŋ]",
+    "example": "People can have a day off on Thanksgiving in the USA."
+  },
+  {
+    "english": "important",
+    "chinese": "重要的",
+    "phonetics": "[ɪmˈpɔːrtnt]",
+    "example": "Basketball is important to Jesse."
+  },
+  {
+    "english": "holiday",
+    "chinese": "節日; 假日",
+    "phonetics": "[ˈhɑːləˌdeɪ]",
+    "example": "Christmas is my favorite holiday."
+  },
+  {
+    "english": "when",
+    "chinese": "何時",
+    "phonetics": "[wɛn]",
+    "example": "Ben: When is their meet-and-greet? Mia: It's this Saturday."
+  },
+  {
+    "english": "fourth",
+    "chinese": "第四的",
+    "phonetics": "[fɔːrθ]",
+    "example": "The fourth class today is English."
+  },
+  {
+    "english": "birthday",
+    "chinese": "生日",
+    "phonetics": "[ˈbɜːrθˌdeɪ]",
+    "example": "Tomorrow is my birthday."
+  },
+  {
+    "english": "also",
+    "chinese": "也; 此外",
+    "phonetics": "[ˈɔːlsoʊ]",
+    "example": "Ted is my cousin, and he's also my classmate."
+  },
+  {
+    "english": "before",
+    "chinese": "在…之前",
+    "phonetics": "[bɪˈfɔːr]",
+    "example": "Let's play a game before dinner."
+  },
+  {
+    "english": "around",
+    "chinese": "圍繞; 在…附近",
+    "phonetics": "[əˈraʊnd]",
+    "example": "Are there many houses around the park?"
+  },
+  {
+    "english": "How about...?",
+    "chinese": "那…呢?",
+    "phonetics": "[haʊ əˈbaʊt]",
+    "example": "Steven: I am a K-pop fan. How about you, Lauren? Lauren: I'm a fan of K-pop, too."
+  },
+  {
+    "english": "second",
+    "chinese": "第二的",
+    "phonetics": "[ˈsɛkənd]",
+    "example": "Rose is Mr. Bean's second daughter."
+  },
+  {
+    "english": "next",
+    "chinese": "下一個的",
+    "phonetics": "[nɛkst]",
+    "example": "Christmas Eve is next week."
+  },
+  {
+    "english": "month",
+    "chinese": "月份",
+    "phonetics": "[mʌnθ]",
+    "example": "My sister is seven months old."
+  },
+  {
+    "english": "January",
+    "chinese": "一月",
+    "phonetics": "[ˈdʒænjuˌɛri]",
+    "example": "January is the first month of the year."
+  },
+  {
+    "english": "February",
+    "chinese": "二月",
+    "phonetics": "[ˈfɛbruˌɛri]",
+    "example": "The holiday is in February."
+  },
+  {
+    "english": "March",
+    "chinese": "三月",
+    "phonetics": "[mɑːrtʃ]",
+    "example": "The baseball game is on March fifteenth."
+  },
+  {
+    "english": "April",
+    "chinese": "四月",
+    "phonetics": "[ˈeɪprəl]",
+    "example": "April is between March and May."
+  },
+  {
+    "english": "May",
+    "chinese": "五月",
+    "phonetics": "[meɪ]",
+    "example": "Mother's Day is on the second Sunday of May."
+  },
+  {
+    "english": "June",
+    "chinese": "六月",
+    "phonetics": "[dʒuːn]",
+    "example": "June first is on Saturday this year."
+  },
+  {
+    "english": "July",
+    "chinese": "七月",
+    "phonetics": "[dʒuˈlaɪ]",
+    "example": "July fourth is a very important day in the USA."
+  },
+  {
+    "english": "August",
+    "chinese": "八月",
+    "phonetics": "[ˈɔːɡəst]",
+    "example": "Father's Day in Taiwan is on August eighth."
+  },
+  {
+    "english": "September",
+    "chinese": "九月",
+    "phonetics": "[sɛpˈtɛmbər]",
+    "example": "September twenty-eighth is Confucius' birthday."
+  },
+  {
+    "english": "October",
+    "chinese": "十月",
+    "phonetics": "[ɑːkˈtoʊbər]",
+    "example": "October is after September."
+  },
+  {
+    "english": "December",
+    "chinese": "十二月",
+    "phonetics": "[dɪˈsɛmbər]",
+    "example": "Next December I'm going to the USA with my friends."
+  },
+  {
+    "english": "New Year's Eve",
+    "chinese": "元旦前夕",
+    "phonetics": "[ˌnuː jɪərz ˈiːv]",
+    "example": "New Year's Eve is on December 31."
+  },
+  {
+    "english": "Christmas",
+    "chinese": "聖誕節",
+    "phonetics": "[ˈkrɪsməs]",
+    "example": "It's Christmas today."
+  },
+  {
+    "english": "third",
+    "chinese": "第三的",
+    "phonetics": "[θɜːrd]",
+    "example": "March is the third month of the year."
+  },
+  {
+    "english": "animal",
+    "chinese": "動物",
+    "phonetics": "[ˈænɪməl]",
+    "example": "What's your favorite animal?"
+  },
+  {
+    "english": "cow",
+    "chinese": "牛",
+    "phonetics": "[kaʊ]",
+    "example": "Don't touch the cow. It's eating."
+  },
+  {
+    "english": "think",
+    "chinese": "想; 認為",
+    "phonetics": "[θɪŋk]",
+    "example": "Claire: Where can we go for dinner? Asher: I'm thinking about Mia's kitchen. It's great."
+  },
+  {
+    "english": "lucky",
+    "chinese": "幸運的",
+    "phonetics": "[ˈlʌki]",
+    "example": "Twelve is my lucky number."
+  },
+  {
+    "english": "only",
+    "chinese": "只有; 唯一的",
+    "phonetics": "[ˈoʊnli]",
+    "example": "He is only a boy, not a man."
+  },
+  {
+    "english": "dinner",
+    "chinese": "晚餐",
+    "phonetics": "[ˈdɪnər]",
+    "example": "Sammy is having dinner with her family."
+  }
+]

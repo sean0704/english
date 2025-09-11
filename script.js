@@ -29,13 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
-        { name: '國一上 Unit 0', path: 'unit0.csv' },
-        { name: '國一上 Unit 1', path: 'unit1.csv' },
-        { name: '國一上 Unit 2', path: 'unit2.csv' },
-        { name: '國一上 Unit 3', path: 'unit3.csv' },
-        { name: '國一上 Unit 4', path: 'unit4.csv' },
-        { name: '國一上 Unit 5', path: 'unit5.csv' },
-        { name: '國一上 Unit 6', path: 'unit6.csv' },
+        { name: '國一上 Unit 0', path: 'unit0.json' },
+        { name: '國一上 Unit 1', path: 'unit1.json' },
+        { name: '國一上 Unit 2', path: 'unit2.json' },
+        { name: '國一上 Unit 3', path: 'unit3.json' },
+        { name: '國一上 Unit 4', path: 'unit4.json' },
+        { name: '國一上 Unit 5', path: 'unit5.json' },
+        { name: '國一上 Unit 6', path: 'unit6.json' },
     ];
 
     // --- 成就系統定義 ---
@@ -252,32 +252,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 遊戲主要功能 ---
-    function parseCsvLine(line) {
-        const regex = /"([^"]*)"|[^,]+/g;
-        const fields = [];
-        let match;
-        while (match = regex.exec(line)) {
-            const value = match[1] !== undefined ? match[1] : match[0];
-            fields.push(value.trim());
-        }
-        return fields;
-    }
+    
 
     async function loadWords(filePath) {
         try {
             const response = await fetch(filePath);
             if (!response.ok) throw new Error(`無法讀取 ${filePath}: ${response.statusText}`);
-            const csvText = await response.text();
-            wordList = csvText.trim().split('\n').map(line => {
-                const [english, chinese, phonetics, example] = parseCsvLine(line);
-                if (english && chinese && phonetics && example) {
-                    return { english: english.trim(), chinese: chinese.trim(), phonetics: phonetics.trim(), example: example.trim() };
-                }
-                return null;
-            }).filter(word => word !== null);
-            if (wordList.length === 0) throw new Error("單字列表為空或格式錯誤。");
+            // 直接將回應解析為 JSON
+            wordList = await response.json(); 
+            if (!Array.isArray(wordList) || wordList.length === 0) {
+                throw new Error("單字列表為空或格式錯誤。");
+            }
         } catch (error) {
-            alert(`載入單字失敗，請檢查 ${filePath} 檔案是否存在且格式正確。`);
+            alert(`載入單字失敗，請檢查 ${filePath} 檔案是否存在且格式正確。\n${error.message}`);
             showStartScreen();
         }
     }
