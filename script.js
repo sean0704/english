@@ -29,13 +29,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
-        { name: '國一上 Unit 0', path: 'unit0.json' },
-        { name: '國一上 Unit 1', path: 'unit1.json' },
-        { name: '國一上 Unit 2', path: 'unit2.json' },
-        { name: '國一上 Unit 3', path: 'unit3.json' },
-        { name: '國一上 Unit 4', path: 'unit4.json' },
-        { name: '國一上 Unit 5', path: 'unit5.json' },
-        { name: '國一上 Unit 6', path: 'unit6.json' },
+        { name: '國一上 Unit 0', path: 'g7_1_unit0.json' },
+        { name: '國一上 Unit 1', path: 'g7_1_unit1.json' },
+        { name: '國一上 Unit 2', path: 'g7_1_unit2.json' },
+        { name: '國一上 Unit 3', path: 'g7_1_unit3.json' },
+        { name: '國一上 Unit 4', path: 'g7_1_unit4.json' },
+        { name: '國一上 Unit 5', path: 'g7_1_unit5.json' },
+        { name: '國一上 Unit 6', path: 'g7_1_unit6.json' },
     ];
 
     // --- 成就系統定義 ---
