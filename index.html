@@ -15,6 +15,7 @@
         <select id="word-list-select" class="word-list-select"></select>
         <button id="start-game-btn" class="start-button">開始練習</button>
         <button id="show-achievements-btn" class="start-button secondary" style="background-color: #718096; margin-top: 10px;">我的成就</button>
+        <button id="show-redemptions-btn" class="start-button secondary" style="background-color: #4A5568; margin-top: 10px;">我的兌換</button>
         <div id="total-points-display" style="color: var(--notice-color); font-size: 1.2rem; margin-top: 1rem; font-weight: bold;"></div>
     </div>
 
@@ -66,6 +67,22 @@
             <button id="close-achievements-btn">&times;</button>
             <h2>我的成就</h2>
             <ul id="achievement-list"></ul>
+        </div>
+    </div>
+
+    <!-- Redemption Modal -->
+    <div id="redemption-container" style="display: none;">
+        <div id="redemption-modal">
+            <button id="close-redemptions-btn">&times;</button>
+            <h2>我的兌換</h2>
+            <form id="redemption-form" class="redemption-form">
+                <input type="number" id="redeem-points-input" placeholder="兌換點數" required>
+                <input type="text" id="redeem-desc-input" placeholder="兌換說明" required>
+                <button type="submit">確認兌換</button>
+            </form>
+            <hr>
+            <h3>兌換歷史</h3>
+            <ul id="redemption-history-list"></ul>
         </div>
     </div>
 

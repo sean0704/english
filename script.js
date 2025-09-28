@@ -27,6 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const achievementListEl = document.getElementById('achievement-list');
     const achievementToastEl = document.getElementById('achievement-toast');
 
+    // --- 兌換 DOM 元素 ---
+    const redemptionContainer = document.getElementById('redemption-container');
+    const showRedemptionsBtn = document.getElementById('show-redemptions-btn');
+    const closeRedemptionsBtn = document.getElementById('close-redemptions-btn');
+    const redemptionForm = document.getElementById('redemption-form');
+    const redeemPointsInput = document.getElementById('redeem-points-input');
+    const redeemDescInput = document.getElementById('redeem-desc-input');
+    const redemptionHistoryList = document.getElementById('redemption-history-list');
+
     // --- 字庫設定 ---
     const wordLists = [
         { name: '國一上 Unit 0', path: 'g7_1_unit0.json' },
@@ -100,6 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (playerStats.totalPoints === undefined) {
                 playerStats.totalPoints = 0;
             }
+            if (playerStats.redemptionHistory === undefined) { // 確保舊存檔相容
+                playerStats.redemptionHistory = [];
+            }
         } else {
             playerStats = {
                 totalPoints: 0,
@@ -109,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     longestStreak: 0,
                 },
                 unlockedGlobalAchievements: {},
+                redemptionHistory: [], // 新增欄位
             };
         }
     }
@@ -249,6 +262,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 achievementListEl.appendChild(li);
             }
         });
+    }
+
+    // --- 兌換系統 UI & 邏輯 ---
+    function renderRedemptionHistory() {
+        redemptionHistoryList.innerHTML = '';
+        const history = playerStats.redemptionHistory || [];
+        if (history.length === 0) {
+            redemptionHistoryList.innerHTML = '<li>尚無兌換紀錄。</li>';
+            return;
+        }
+        history.forEach(record => {
+            const li = document.createElement('li');
+            const date = new Date(record.timestamp).toLocaleString();
+            li.innerHTML = `
+                <div class="history-item">
+                    <span class="history-date">${date}</span>
+                    <span class="history-desc">${record.description}</span>
+                    <span class="history-points">- ${record.points} 點</span>
+                </div>
+            `;
+            redemptionHistoryList.appendChild(li);
+        });
+    }
+
+    function handleManualRedeem(event) {
+        event.preventDefault();
+
+        const pointsToRedeem = parseInt(redeemPointsInput.value, 10);
+        const description = redeemDescInput.value;
+
+        if (isNaN(pointsToRedeem) || pointsToRedeem <= 0) {
+            alert('請輸入一個有效的正數點數！');
+            return;
+        }
+        if (playerStats.totalPoints < pointsToRedeem) {
+            alert('點數不足！');
+            return;
+        }
+        if (!description.trim()) {
+            alert('請填寫兌換說明！');
+            return;
+        }
+
+        // 新增再次確認視窗
+        const confirmationMessage = `您確定要花費 ${pointsToRedeem} 點來兌換「${description}」嗎？`;
+        if (window.confirm(confirmationMessage)) {
+            playerStats.totalPoints -= pointsToRedeem;
+            playerStats.redemptionHistory.unshift({
+                points: pointsToRedeem,
+                description: description,
+                timestamp: Date.now()
+            });
+
+            saveProgress();
+            updateTotalPointsDisplay();
+            renderRedemptionHistory();
+
+            redeemPointsInput.value = '';
+            redeemDescInput.value = '';
+        }
     }
 
     // --- 遊戲主要功能 ---
@@ -612,6 +685,18 @@ document.addEventListener('DOMContentLoaded', () => {
         closeAchievementsBtn.addEventListener('click', () => {
             achievementContainer.style.display = 'none';
         });
+
+        // 兌換事件監聽器
+        showRedemptionsBtn.addEventListener('click', () => {
+            renderRedemptionHistory();
+            redemptionContainer.style.display = 'flex';
+        });
+
+        closeRedemptionsBtn.addEventListener('click', () => {
+            redemptionContainer.style.display = 'none';
+        });
+
+        redemptionForm.addEventListener('submit', handleManualRedeem);
     }
 
     main();

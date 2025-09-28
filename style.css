@@ -212,7 +212,7 @@ body {
 }
 
 /* --- Achievement System --- */
-#achievement-container {
+#achievement-container, #redemption-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -225,7 +225,7 @@ body {
     z-index: 100;
 }
 
-#achievement-modal {
+#achievement-modal, #redemption-modal {
     background-color: var(--container-bg-color);
     padding: 2rem;
     border-radius: 1rem;
@@ -234,9 +234,10 @@ body {
     max-width: 500px;
     max-height: 80vh;
     overflow-y: auto;
+    position: relative; /* Ensure close button is positioned correctly */
 }
 
-#achievement-list {
+#achievement-list, #redemption-history-list {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -281,19 +282,104 @@ body {
     color: var(--header-color);
 }
 
-#close-achievements-btn {
-    margin-top: 1.5rem;
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1.2rem;
-    /* Re-use start-button styles */
+#close-achievements-btn, #close-redemptions-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    background: none;
+    color: var(--header-color);
+    border: none;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+#close-achievements-btn:hover, #close-redemptions-btn:hover {
+    color: var(--text-color);
+}
+
+/* --- Redemption Form & History --- */
+.redemption-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.redemption-form input {
     font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.redemption-form input:focus {
+    outline: none;
+    border-color: var(--notice-color);
+}
+
+.redemption-form button {
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    font-size: 1rem;
     font-weight: bold;
     color: var(--bg-color);
     background-color: var(--notice-color);
     border: none;
     border-radius: 0.5rem;
+    padding: 0.75rem;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.redemption-form button:hover {
+    background-color: #fbd38d;
+}
+
+#redemption-modal hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 0 0 1rem 0;
+}
+
+#redemption-modal h3 {
+    margin: 0 0 1rem 0;
+    color: var(--header-color);
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+#redemption-history-list li:last-child .history-item {
+    border-bottom: none;
+}
+
+.history-date {
+    color: var(--header-color);
+    font-size: 0.8rem;
+    flex-basis: 35%;
+}
+
+.history-desc {
+    color: var(--text-color);
+    flex-basis: 45%;
+    word-break: break-all;
+}
+
+.history-points {
+    color: var(--incorrect-color);
+    font-weight: bold;
+    flex-basis: 20%;
+    text-align: right;
 }
 
 /* --- Toast Notification --- */
