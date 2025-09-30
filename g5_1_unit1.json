@@ -1,0 +1,98 @@
+[
+  {
+    "english": "coffee",
+    "chinese": "咖啡",
+    "phonetics": "[ˈkɔfɪ]",
+    "example": "Does he like tea? No, he doesn't. He like coffee."
+  },
+  {
+    "english": "cola",
+    "chinese": "可樂",
+    "phonetics": "[ˈkolə]",
+    "example": "Do you like cola? Yes, I do."
+  },
+  {
+    "english": "lemonade",
+    "chinese": "檸檬水",
+    "phonetics": "[ˌlɛməˈned]",
+    "example": "This lemonade is cold."
+  },
+  {
+    "english": "tea",
+    "chinese": "茶",
+    "phonetics": "[ti]",
+    "example": "Does she like tea? Yes, she does."
+  },
+  {
+    "english": "bubble tea",
+    "chinese": "珍珠奶茶",
+    "phonetics": "[ˈbʌbəl ti]",
+    "example": "Bubble tea is very popular in Taiwan."
+  },
+  {
+    "english": "hot chocolate",
+    "chinese": "熱巧克力",
+    "phonetics": "[hɑt ˈtʃɑklət]",
+    "example": "The kids enjoyed hot chocolate on the cold day."
+  },
+  {
+    "english": "soy milk",
+    "chinese": "豆漿",
+    "phonetics": "[sɔɪ mɪlk]",
+    "example": "Do you like cola? No, I don't. I like soy milk."
+  },
+  {
+    "english": "apples",
+    "chinese": "蘋果 (複數)",
+    "phonetics": "[ˈæpəlz]",
+    "example": "How many apples do you need? I need two apples."
+  },
+  {
+    "english": "bananas",
+    "chinese": "香蕉 (複數)",
+    "phonetics": "[bəˈnænəz]",
+    "example": "Monkeys like to eat bananas."
+  },
+  {
+    "english": "grapes",
+    "chinese": "葡萄 (複數)",
+    "phonetics": "[ɡreps]",
+    "example": "She bought some grapes at the market."
+  },
+  {
+    "english": "guavas",
+    "chinese": "芭樂 (複數)",
+    "phonetics": "[ˈɡwɑvəz]",
+    "example": "Guavas are green."
+  },
+  {
+    "english": "oranges",
+    "chinese": "柳橙 (複數)",
+    "phonetics": "[ˈɔrɪndʒɪz]",
+    "example": "How many oranges does he need? He needs seven oranges."
+  },
+  {
+    "english": "papayas",
+    "chinese": "木瓜 (複數)",
+    "phonetics": "[pəˈpaɪəz]",
+    "example": "Papayas are big and yellow."
+  },
+  {
+    "english": "pineapples",
+    "chinese": "鳳梨 (複數)",
+    "phonetics": "[ˈpaɪˌnæpəlz]",
+    "example": "They put pineapples on the pizza."
+  },
+  {
+    "english": "how many",
+    "chinese": "多少 (數量)",
+    "phonetics": "[haʊ ˈmɛni]",
+    "example": "How many books do you have?"
+  },
+  {
+    "english": "need",
+    "chinese": "需要",
+    "phonetics": "[nid]",
+    "example": "I need some water."
+  }
+]
