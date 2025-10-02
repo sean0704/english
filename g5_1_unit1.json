@@ -42,6 +42,48 @@
     "example": "Do you like cola? No, I don't. I like soy milk."
   },
   {
+    "english": "apple",
+    "chinese": "蘋果",
+    "phonetics": "[ˈæpəl]",
+    "example": "This is a red apple."
+  },
+  {
+    "english": "banana",
+    "chinese": "香蕉",
+    "phonetics": "[bəˈnænə]",
+    "example": "I want to eat a banana."
+  },
+  {
+    "english": "grape",
+    "chinese": "葡萄",
+    "phonetics": "[ɡrep]",
+    "example": "This grape is very sweet."
+  },
+  {
+    "english": "guava",
+    "chinese": "芭樂",
+    "phonetics": "[ˈɡwɑvə]",
+    "example": "I like to drink guava juice."
+  },
+  {
+    "english": "orange",
+    "chinese": "柳橙",
+    "phonetics": "[ˈɔrɪndʒ]",
+    "example": "An orange is a type of citrus fruit."
+  },
+  {
+    "english": "papaya",
+    "chinese": "木瓜",
+    "phonetics": "[pəˈpaɪə]",
+    "example": "She is cutting a papaya."
+  },
+  {
+    "english": "pineapple",
+    "chinese": "鳳梨",
+    "phonetics": "[ˈpaɪˌnæpəl]",
+    "example": "A pineapple is a tropical fruit."
+  },
+  {
     "english": "apples",
     "chinese": "蘋果 (複數)",
     "phonetics": "[ˈæpəlz]",

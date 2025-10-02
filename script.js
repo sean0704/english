@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
-        { name: '國五上 Unit 1', path: 'g5_1_unit1.json' },
+        { name: '小五上 Unit 1', path: 'g5_1_unit1.json' },
         { name: '國一上 Unit 0', path: 'g7_1_unit0.json' },
         { name: '國一上 Unit 1', path: 'g7_1_unit1.json' },
         { name: '國一上 Unit 2', path: 'g7_1_unit2.json' },
@@ -50,23 +50,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 成就系統定義 ---
     const GLOBAL_ACHIEVEMENTS = {
-        ACHIEVEMENT_HUNTER: { 
-            name: '成就獵人 ($100)', 
-            description: '累積獲得 9 個單元成就',
-            points: 100,
+
+        PLATINUM: {
+            name: '白金獎盃 🏆 ($150)',
+            description: '在 3 個不同單元中，同時獲得「金牌」與「日積月累」成就',
+            points: 150,
             progress: (stats) => {
-                const totalUnitAchievements = Object.values(stats.unitData)
-                    .reduce((count, unit) => count + Object.keys(unit.achievements).length, 0);
-                return { current: totalUnitAchievements, target: 9 };
+                const platinumUnitCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD && unit.achievements.THREE_DAY_STREAK).length;
+                return { current: platinumUnitCount, target: 3 };
             }
         },
-        PLATINUM: {
-            name: '白金獎盃 🏆 ($100)',
-            description: '在 3 個不同單元中獲得金牌評價',
-            points: 100,
+        CULTIVATION_DEMON: {
+            name: '修練狂魔 😈 ($150)',
+            description: '沉迷於修練，累計在 15 個不同的日子裡完成過練習',
+            points: 150,
             progress: (stats) => {
-                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD).length;
-                return { current: goldMedalCount, target: 3 };
+                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory);
+                const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10)));
+                return { current: uniqueDays.size, target: 15 };
             }
         },
     };
@@ -144,16 +145,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stats.unlockedGlobalAchievements[id]) continue;
 
             let unlocked = false;
-            if (id === 'ACHIEVEMENT_HUNTER') {
-                const totalUnitAchievements = Object.values(stats.unitData)
-                    .reduce((count, unit) => count + Object.keys(unit.achievements).length, 0);
-                if (totalUnitAchievements >= 9) {
+
+            if (id === 'PLATINUM') {
+                const platinumUnitCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD && unit.achievements.THREE_DAY_STREAK).length;
+                if (platinumUnitCount >= 3) {
                     unlocked = true;
                 }
             }
-            if (id === 'PLATINUM') {
-                const goldMedalCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD).length;
-                if (goldMedalCount >= 3) {
+            if (id === 'CULTIVATION_DEMON') {
+                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory);
+                const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10)));
+                if (uniqueDays.size >= 15) {
                     unlocked = true;
                 }
             }
@@ -497,7 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(setupNextWord, 500);
         } else {
-            feedbackEl.textContent = `錯誤！正確答案是: ${currentWord.english} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
+            feedbackEl.textContent = `錯誤！你輸入的是 "${answer}"，正確答案是: ${currentWord.english} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
             feedbackEl.className = 'feedback-message incorrect';
             wordDisplayEl.textContent = currentWord.english;
             currentStreak = 0;
