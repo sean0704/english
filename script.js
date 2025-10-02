@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             description: '沉迷於修練，累計在 15 個不同的日子裡完成過練習',
             points: 150,
             progress: (stats) => {
-                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory);
+                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory || []);
                 const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10)));
                 return { current: uniqueDays.size, target: 15 };
             }
