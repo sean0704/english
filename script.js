@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         CULTIVATION_DEMON: {
             name: '修練狂魔 😈 ($150)',
-            description: '沉迷於修練，累計在 15 個不同的日子裡完成過練習',
+            description: '累計在 15 個不同的日子裡完成過練習',
             points: 150,
             progress: (stats) => {
                 const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory || []);
