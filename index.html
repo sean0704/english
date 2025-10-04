@@ -11,12 +11,20 @@
 </head>
 <body>
     <div id="start-container" class="start-container">
-        <h1 class="start-title">選擇練習字庫</h1>
-        <select id="word-list-select" class="word-list-select"></select>
-        <button id="start-game-btn" class="start-button">開始練習</button>
-        <button id="show-achievements-btn" class="start-button secondary" style="background-color: #718096; margin-top: 10px;">我的成就</button>
-        <button id="show-redemptions-btn" class="start-button secondary" style="background-color: #4A5568; margin-top: 10px;">我的兌換</button>
-        <div id="total-points-display" style="color: var(--notice-color); font-size: 1.2rem; margin-top: 1rem; font-weight: bold;"></div>
+        <header class="dashboard-header">
+            <div id="total-points-display" class="points-display">
+                <!-- Points will be rendered here by JS -->
+            </div>
+            <nav class="dashboard-nav">
+                <button id="show-achievements-btn" class="icon-button" title="我的成就">🏆</button>
+                <button id="show-redemptions-btn" class="icon-button" title="我的兌換">🎁</button>
+            </nav>
+        </header>
+        <main class="dashboard-main">
+            <h1 class="start-title">今天想練習哪個單元？</h1>
+            <select id="word-list-select" class="word-list-select"></select>
+            <button id="start-game-btn" class="start-button">開始練習</button>
+        </main>
     </div>
 
     <div id="game-container" class="game-container" style="display: none;">
@@ -85,6 +93,9 @@
             <ul id="redemption-history-list"></ul>
         </div>
     </div>
+
+    <!-- Flash Overlay for feedback -->
+    <div id="flash-overlay"></div>
 
     <!-- Achievement Toast -->
     <div id="achievement-toast" style="display: none;">

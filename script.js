@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const redeemDescInput = document.getElementById('redeem-desc-input');
     const redemptionHistoryList = document.getElementById('redemption-history-list');
 
+    const flashOverlayEl = document.getElementById('flash-overlay');
+
     // --- 字庫設定 ---
     const wordLists = [
         { name: '小五上 Unit 1', path: 'g5_1_unit1.json' },
@@ -479,6 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 feedbackEl.textContent = `拼寫仍然不對喔，請再試一次: ${currentWord.english}`;
                 spellingInputEl.value = '';
+                // Add shake animation for incorrect correction attempt
+                spellingInputEl.classList.add('input-incorrect');
+                setTimeout(() => spellingInputEl.classList.remove('input-incorrect'), 600);
             }
             return;
         }
@@ -489,6 +494,15 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackEl.textContent = '正確！';
             feedbackEl.className = 'feedback-message correct';
             wordDisplayEl.textContent = currentWord.english;
+
+            // --- Animation Start ---
+            spellingInputEl.classList.add('input-correct');
+            flashOverlayEl.classList.add('flash-correct');
+            setTimeout(() => {
+                spellingInputEl.classList.remove('input-correct');
+                flashOverlayEl.classList.remove('flash-correct');
+            }, 600);
+            // --- Animation End ---
             
             currentStreak++;
             playerStats.globalStats.totalWordsCorrect++;
@@ -503,6 +517,16 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackEl.textContent = `錯誤！你輸入的是 "${answer}"，正確答案是: ${currentWord.english} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
             feedbackEl.className = 'feedback-message incorrect';
             wordDisplayEl.textContent = currentWord.english;
+
+            // --- Animation Start ---
+            spellingInputEl.classList.add('input-incorrect');
+            flashOverlayEl.classList.add('flash-incorrect');
+            setTimeout(() => {
+                spellingInputEl.classList.remove('input-incorrect');
+                flashOverlayEl.classList.remove('flash-incorrect');
+            }, 600);
+            // --- Animation End ---
+
             currentStreak = 0;
             wordsWrongInSession.add(currentWord.english);
             if (!wordsToReview.some(w => w.english === currentWord.english)) {
@@ -632,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateTotalPointsDisplay() {
         const pointsDisplay = document.getElementById('total-points-display');
         if (pointsDisplay) {
-            pointsDisplay.textContent = `總點數: ${playerStats.totalPoints || 0}`;
+            pointsDisplay.textContent = playerStats.totalPoints || 0;
         }
     }
 

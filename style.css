@@ -22,9 +22,71 @@ body {
 
 .start-container {
     display: flex;
-    flex-direction: column; /* 改為垂直排列 */
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 600px;
+    background-color: var(--container-bg-color);
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+}
+
+/* New Dashboard Styles */
+.dashboard-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1.5rem;
+}
+
+.points-display {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--notice-color);
+}
+
+.points-display::before {
+    content: '🪙 ';
+    font-size: 1.5rem;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+.dashboard-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.icon-button {
+    background: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--header-color);
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
     justify-content: center;
     align-items: center;
+    transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+    background-color: var(--bg-color);
+    border-color: var(--notice-color);
+}
+
+.dashboard-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .start-title {
@@ -480,3 +542,162 @@ body {
 #close-achievements-btn:hover {
     color: var(--text-color);
 }
+
+/* --- Visual Feedback Animations (Added) --- */
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1.0); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1.0); }
+}
+
+.input-correct {
+    border-color: var(--correct-color) !important; /* Use !important to override focus styles */
+    animation: pulse 0.5s ease-in-out;
+}
+
+.input-incorrect {
+    border-color: var(--incorrect-color) !important;
+    animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+#flash-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: transparent;
+    z-index: 50; /* Below modals but above content */
+    pointer-events: none; /* Crucial so it doesn't block clicks */
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+}
+
+#flash-overlay.flash-correct {
+    background-color: var(--correct-color);
+    opacity: 0.15;
+}
+
+#flash-overlay.flash-incorrect {
+    background-color: var(--incorrect-color);
+    opacity: 0.15;
+}
+
+/* --- Responsive Design & Mobile Optimization --- */
+@media (max-width: 768px) {
+
+    body {
+        /* Use full screen height on mobile */
+        align-items: flex-start;
+        padding-top: 0;
+    }
+
+    /* Make main containers full-screen for an app-like feel */
+    .start-container,
+    .game-container,
+    .completion-container {
+        width: 100%;
+        height: 100vh;
+        max-width: 100%;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        justify-content: center; /* Center the content within the full-height container */
+        box-sizing: border-box;
+    }
+
+    .game-container {
+        justify-content: space-around; /* Better distribution when keyboard is open */
+    }
+
+    /* --- Dashboard/Start screen adjustments --- */
+    .start-container {
+        padding: 1rem;
+    }
+    .dashboard-header {
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+    .points-display {
+        font-size: 1.2rem;
+    }
+    .icon-button {
+        width: 45px;
+        height: 45px;
+        font-size: 1.3rem;
+    }
+    .start-title {
+        font-size: 1.5rem;
+    }
+    .word-list-select {
+        font-size: 1rem;
+    }
+    .start-button {
+        font-size: 1.2rem;
+        padding: 0.8rem 1.5rem;
+    }
+
+    /* --- Game screen adjustments --- */
+    .game-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .word-display {
+        font-size: 2rem;
+        min-height: 2.5rem;
+        letter-spacing: 0.1em;
+    }
+
+    .pronunciation-area {
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .phonetics-display {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .play-audio-btn {
+        font-size: 1.5rem;
+    }
+
+    .translation-display {
+        font-size: 1.2rem;
+    }
+
+    .example-display {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    #spelling-input {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+    }
+
+    .feedback-message {
+        font-size: 1rem;
+    }
+
+    /* --- Modal adjustments --- */
+    #achievement-modal,
+    #redemption-modal {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        border: none;
+    }
+}
+
+
