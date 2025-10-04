@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (id === 'CULTIVATION_DEMON') {
-                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory);
+                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory || []);
                 const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10)));
                 if (uniqueDays.size >= 15) {
                     unlocked = true;
