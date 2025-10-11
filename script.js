@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const redemptionHistoryList = document.getElementById('redemption-history-list');
 
     const flashOverlayEl = document.getElementById('flash-overlay');
+    const healthDisplayEl = document.getElementById('health-display'); // 新增生命值顯示元素
 
     // --- 字庫設定 ---
     const wordLists = [
@@ -50,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '國一上 Unit 6', path: 'g7_1_unit6.json' },
         { name: '國一上 Unit 1 (句子)', path: 'g7_1_unit1_read.json' },
     ];
+
+    // --- 生命值設定 ---
+    const MAX_HEALTH = 3; // 最大生命值
+    const HEALTH_REPLENISH_ROUNDS = [1, 2]; // 在哪些回合結束時可以回補生命值
 
     // --- 成就系統定義 ---
     const GLOBAL_ACHIEVEMENTS = {
@@ -75,9 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
     const UNIT_ACHIEVEMENTS = {
-        BRONZE: { name: '銅牌 🥉 ($25)', description: '以 3 個或以下的錯誤數完成本單元練習', points: 25 },
-        SILVER: { name: '銀牌 🥈 ($50)', description: '以 2 個或以下的錯誤數完成本單元練習', points: 50 },
-        GOLD: { name: '金牌 🥇 ($75)', description: '以 1 個或以下的錯誤數完成本單元練習', points: 75 },
+        BRONZE: { name: '銅牌 🥉 ($25)', description: '通關時剩餘 1 顆心完成本單元練習', points: 25 },
+        SILVER: { name: '銀牌 🥈 ($50)', description: '通關時剩餘 2 顆心完成本單元練習', points: 50 },
+        GOLD: { name: '金牌 🥇 ($75)', description: '通關時剩餘 3 顆心完成本單元練習', points: 75 },
         THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25 },
         THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '累計 3 週完成本單元練習', points: 50 },
         THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75 },
@@ -101,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const REQUIRED_CORRECTIONS = 2;
     const synth = window.speechSynthesis;
     let isPlaying = false;
+    let currentHealth; // 新增生命值變數
 
     // --- 存儲 & 數據管理 ---
     function saveProgress() {
@@ -355,9 +361,11 @@ document.addEventListener('DOMContentLoaded', () => {
         wordsToReview = [];
         wordsWrongInSession.clear();
         currentStreak = 0;
+        currentHealth = MAX_HEALTH; // 初始化生命值
         wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
         stageTotal = wordsToPractice.length;
         if (!synth) playAudioBtnEl.style.display = 'none';
+        updateHealthDisplay(); // 更新生命值顯示
         setupNextWord();
     }
 
@@ -372,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedbackEl.className = 'feedback-message notice';
             } else {
                 if (roundCount >= 3) {
-                    endGame();
+                    gameOver(true); // 成功通關
                     return;
                 }
                 gameMode = 'practice';
@@ -381,6 +389,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 stageTotal = wordsToPractice.length;
                 feedbackEl.textContent = `太棒了！第 ${roundCount} 回合開始！`;
                 feedbackEl.className = 'feedback-message notice';
+
+                // 回補生命值邏輯
+                if (HEALTH_REPLENISH_ROUNDS.includes(roundCount - 1) && currentHealth < MAX_HEALTH) {
+                    currentHealth++;
+                    updateHealthDisplay();
+                    feedbackEl.textContent += ` 生命值回補！❤️`; // 增加回補提示
+                }
             }
         }
 
@@ -528,6 +543,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Animation End ---
 
             currentStreak = 0;
+            currentHealth--; // 扣除生命值
+            updateHealthDisplay(); // 更新生命值顯示
+
+            if (currentHealth <= 0) {
+                gameOver(false); // 生命值歸零，遊戲失敗
+                return; // 結束函式，不再進行訂正或下一題
+            }
+
             wordsWrongInSession.add(currentWord.english);
             if (!wordsToReview.some(w => w.english === currentWord.english)) {
                 wordsToReview.push(currentWord);
@@ -591,7 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function endGame() {
+    function gameOver(isSuccess) {
         const errorCount = wordsWrongInSession.size;
         const unitPath = currentWordListPath;
         const unitName = currentWordListName;
@@ -603,38 +626,54 @@ document.addEventListener('DOMContentLoaded', () => {
             playerStats.unitData[unitPath].completionHistory = [];
         }
 
-        // Record the timestamp for this completion
-        playerStats.unitData[unitPath].completionHistory.push(Date.now());
+        if (isSuccess) {
+            // Record the timestamp for this completion only on success
+            playerStats.unitData[unitPath].completionHistory.push(Date.now());
+        }
 
         const unlockedInSession = [];
         // NOTE: The logic is inclusive. Gold implies Silver and Bronze.
-        if (errorCount <= 1) { // GOLD
-            if (!playerStats.unitData[unitPath].achievements.GOLD) {
-                playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points;
-                unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name);
-                playerStats.unitData[unitPath].achievements.GOLD = true;
+        if (isSuccess) { // 只有成功通關才檢查成就
+            // 牌級成就根據剩餘生命值判斷
+            if (currentHealth === MAX_HEALTH) { // 金牌
+                if (!playerStats.unitData[unitPath].achievements.GOLD) {
+                    playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points;
+                    unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name);
+                    playerStats.unitData[unitPath].achievements.GOLD = true;
+                }
             }
-        }
-        if (errorCount <= 2) { // SILVER
-            if (!playerStats.unitData[unitPath].achievements.SILVER) {
-                playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points;
-                unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name);
-                playerStats.unitData[unitPath].achievements.SILVER = true;
+            if (currentHealth >= (MAX_HEALTH - 1)) { // 銀牌 (剩餘 2 顆心或以上)
+                if (!playerStats.unitData[unitPath].achievements.SILVER) {
+                    playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points;
+                    unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name);
+                    playerStats.unitData[unitPath].achievements.SILVER = true;
+                }
             }
-        }
-        if (errorCount <= 3) { // BRONZE
-            if (!playerStats.unitData[unitPath].achievements.BRONZE) {
-                playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points;
-                unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name);
-                playerStats.unitData[unitPath].achievements.BRONZE = true;
+            if (currentHealth >= 1) { // 銅牌 (剩餘 1 顆心或以上)
+                if (!playerStats.unitData[unitPath].achievements.BRONZE) {
+                    playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points;
+                    unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name);
+                    playerStats.unitData[unitPath].achievements.BRONZE = true;
+                }
             }
-        }
 
-        // 在此處新增對連續成就的檢查
-        checkStreakAchievements(unitPath, unlockedInSession);
+            // 在此處新增對連續成就的檢查
+            checkStreakAchievements(unitPath, unlockedInSession);
 
-        if(unlockedInSession.length > 0){
-            showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+            if(unlockedInSession.length > 0){
+                showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+            }
+
+            completionContainer.querySelector('.start-title').textContent = '恭喜通關！';
+            completionContainer.querySelector('p').textContent = '你已完成本單元的所有練習。';
+            document.getElementById('restart-btn').style.display = 'block'; // 顯示重新開始按鈕
+            document.getElementById('back-to-menu-btn').style.display = 'block'; // 顯示返回主選單按鈕
+
+        } else { // 遊戲失敗
+            completionContainer.querySelector('.start-title').textContent = '遊戲失敗！';
+            completionContainer.querySelector('p').textContent = '生命值已耗盡，請再接再厲！';
+            document.getElementById('restart-btn').style.display = 'block'; // 顯示重新開始按鈕
+            document.getElementById('back-to-menu-btn').style.display = 'block'; // 顯示返回主選單按鈕
         }
 
         checkGlobalAchievements();
@@ -657,6 +696,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const pointsDisplay = document.getElementById('total-points-display');
         if (pointsDisplay) {
             pointsDisplay.textContent = playerStats.totalPoints || 0;
+        }
+    }
+
+    // --- 生命值 UI 邏輯 ---
+    function updateHealthDisplay() {
+        healthDisplayEl.innerHTML = ''; // 清空現有心形
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            const heartSpan = document.createElement('span');
+            heartSpan.classList.add('heart');
+            heartSpan.textContent = '❤️'; // 或使用圖片
+            if (i < currentHealth) {
+                heartSpan.classList.add('full');
+            }
+            healthDisplayEl.appendChild(heartSpan);
         }
     }
 

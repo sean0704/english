@@ -273,6 +273,26 @@ body {
     transition: width 0.4s ease-in-out;
 }
 
+/* --- Health Display --- */
+.health-display {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 2rem; /* 調整心形大小 */
+    color: var(--incorrect-color); /* 預設心形顏色 */
+    display: flex;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.health-display .heart {
+    opacity: 0.3; /* 空心時的透明度 */
+    transition: opacity 0.3s ease;
+}
+
+.health-display .heart.full {
+    opacity: 1; /* 滿心時的透明度 */
+}
+
 /* --- Achievement System --- */
 #achievement-container, #redemption-container {
     position: fixed;
