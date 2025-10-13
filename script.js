@@ -543,6 +543,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Animation End ---
 
             currentStreak = 0;
+
+            // FIX: Add the wrong word to the sets BEFORE checking for game over.
+            wordsWrongInSession.add(currentWord.english);
+            if (!wordsToReview.some(w => w.english === currentWord.english)) {
+                wordsToReview.push(currentWord);
+            }
+
             currentHealth--; // 扣除生命值
             updateHealthDisplay(); // 更新生命值顯示
 
@@ -551,10 +558,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return; // 結束函式，不再進行訂正或下一題
             }
 
-            wordsWrongInSession.add(currentWord.english);
-            if (!wordsToReview.some(w => w.english === currentWord.english)) {
-                wordsToReview.push(currentWord);
-            }
             isCorrecting = true;
             correctionCount = 0;
             spellingInputEl.value = '';
@@ -670,10 +673,36 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('back-to-menu-btn').style.display = 'block'; // 顯示返回主選單按鈕
 
         } else { // 遊戲失敗
-            completionContainer.querySelector('.start-title').textContent = '遊戲失敗！';
-            completionContainer.querySelector('p').textContent = '生命值已耗盡，請再接再厲！';
-            document.getElementById('restart-btn').style.display = 'block'; // 顯示重新開始按鈕
-            document.getElementById('back-to-menu-btn').style.display = 'block'; // 顯示返回主選單按鈕
+            const completionTitle = completionContainer.querySelector('.start-title');
+            const completionMessage = completionContainer.querySelector('p');
+
+            completionTitle.textContent = '遊戲失敗！';
+
+            // --- 這是主要的修改區域 ---
+            let messageHTML = '生命值已耗盡，請再接再厲！';
+
+            if (wordsWrongInSession.size > 0) {
+                // 將 Set 轉換為陣列並建立 HTML 列表
+                const wrongWordsArray = Array.from(wordsWrongInSession);
+                const wrongWordsListHTML = wrongWordsArray.map(word => 
+                    `<li style="color: var(--text-color); margin-bottom: 0.5rem;">${word}</li>`
+                ).join('');
+
+                messageHTML += `
+                <div style="text-align: left; margin-top: 1.5rem; font-size: 1rem;">
+                    <strong style="color: var(--header-color);">本輪錯題列表：</strong>
+                    <ul style="list-style-type: disc; padding-left: 20px; margin-top: 0.5rem;">
+                        ${wrongWordsListHTML}
+                    </ul>
+                </div>
+            `;
+            }
+            
+            completionMessage.innerHTML = messageHTML;
+            // --- 修改區域結束 ---
+
+            document.getElementById('restart-btn').style.display = 'block';
+            document.getElementById('back-to-menu-btn').style.display = 'block';
         }
 
         checkGlobalAchievements();
