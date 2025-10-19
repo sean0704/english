@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // --- 生命值設定 ---
-    const MAX_HEALTH = 3; // 最大生命值
+    const MAX_HEALTH = 5; // 最大生命值
     const HEALTH_REPLENISH_ROUNDS = [1, 2]; // 在哪些回合結束時可以回補生命值
 
     // --- 成就系統定義 ---
@@ -64,7 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
             description: '在 3 個不同單元中，同時獲得「金牌」與「日積月累」成就',
             points: 150,
             progress: (stats) => {
-                const platinumUnitCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD && unit.achievements.THREE_DAY_STREAK).length;
+                const platinumUnitCount = Object.keys(stats.unitData).filter(unitPath => {
+                    const goldProgress = UNIT_ACHIEVEMENTS.GOLD.progress(stats, unitPath);
+                    const streakProgress = UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.progress(stats, unitPath);
+                    return (goldProgress.current >= goldProgress.target) && (streakProgress.current >= streakProgress.target);
+                }).length;
                 return { current: platinumUnitCount, target: 3 };
             }
         },
@@ -80,12 +84,54 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
     const UNIT_ACHIEVEMENTS = {
-        BRONZE: { name: '銅牌 🥉 ($25)', description: '通關時剩餘 1 顆心完成本單元練習', points: 25 },
-        SILVER: { name: '銀牌 🥈 ($50)', description: '通關時剩餘 2 顆心完成本單元練習', points: 50 },
-        GOLD: { name: '金牌 🥇 ($75)', description: '通關時剩餘 3 顆心完成本單元練習', points: 75 },
-        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25 },
-        THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '累計 3 週完成本單元練習', points: 50 },
-        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75 },
+        BRONZE: { 
+            name: '銅牌 🥉 ($25)', 
+            description: '通關時扣心在 2 顆以內 完成本單元練習', 
+            points: 25,
+            progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.BRONZE ? 1 : 0, target: 1 })
+        },
+        SILVER: { 
+            name: '銀牌 🥈 ($50)', 
+            description: '通關時扣心在 1 顆以內 完成本單元練習', 
+            points: 50,
+            progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.SILVER ? 1 : 0, target: 1 })
+        },
+        GOLD: { 
+            name: '金牌 🥇 ($75)', 
+            description: '通關時未扣心 完成本單元練習', 
+            points: 75,
+            progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.GOLD ? 1 : 0, target: 1 })
+        },
+        THREE_DAY_STREAK: { 
+            name: '日積月累 🏃 ($25)', 
+            description: '累計 3 天完成本單元練習', 
+            points: 25,
+            progress: (stats, unitPath) => {
+                const history = stats.unitData[unitPath]?.completionHistory || [];
+                return { current: new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10))).size, target: 3 };
+            }
+        },
+        THREE_WEEK_STREAK: { 
+            name: '週而復始 📅 ($50)', 
+            description: '累計 3 週完成本單元練習', 
+            points: 50,
+            progress: (stats, unitPath) => {
+                const history = stats.unitData[unitPath]?.completionHistory || [];
+                return { current: new Set(history.map(ts => {
+                    const [year, week] = getWeekNumber(new Date(ts));
+                    return `${year}-${String(week).padStart(2, '0')}`;
+                })).size, target: 3 };
+            }
+        },
+        THREE_MONTH_STREAK: { 
+            name: '持之以恆 🗓️ ($75)', 
+            description: '累計 3 個月完成本單元練習', 
+            points: 75,
+            progress: (stats, unitPath) => {
+                const history = stats.unitData[unitPath]?.completionHistory || [];
+                return { current: new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7))).size, target: 3 };
+            }
+        },
     };
 
     // --- 遊戲 & 玩家狀態 ---
@@ -153,26 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const id in GLOBAL_ACHIEVEMENTS) {
             if (stats.unlockedGlobalAchievements[id]) continue;
 
-            let unlocked = false;
+            const ach = GLOBAL_ACHIEVEMENTS[id];
+            const progress = ach.progress(stats);
 
-            if (id === 'PLATINUM') {
-                const platinumUnitCount = Object.values(stats.unitData).filter(unit => unit.achievements.GOLD && unit.achievements.THREE_DAY_STREAK).length;
-                if (platinumUnitCount >= 3) {
-                    unlocked = true;
-                }
-            }
-            if (id === 'CULTIVATION_DEMON') {
-                const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory || []);
-                const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10)));
-                if (uniqueDays.size >= 15) {
-                    unlocked = true;
-                }
-            }
-
-            if (unlocked) {
-                stats.totalPoints += GLOBAL_ACHIEVEMENTS[id].points;
+            if (progress.current >= progress.target) {
+                stats.totalPoints += ach.points;
                 stats.unlockedGlobalAchievements[id] = true;
-                showToast(GLOBAL_ACHIEVEMENTS[id].name);
+                showToast(ach.name);
             }
         }
     }
@@ -237,26 +270,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 let progressHTML = ''; // Default to no progress bar
 
                 // If it's a cumulative achievement and not unlocked, calculate and generate the progress bar
-                if (!isUnlocked && (id === 'THREE_DAY_STREAK' || id === 'THREE_WEEK_STREAK' || id === 'THREE_MONTH_STREAK')) {
-                    let currentProgress = 0;
-                    const history = playerStats.unitData[unitPath]?.completionHistory || [];
-                    
-                    if (id === 'THREE_DAY_STREAK') {
-                        currentProgress = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10))).size;
-                    } else if (id === 'THREE_WEEK_STREAK') {
-                        currentProgress = new Set(history.map(ts => {
-                            const [year, week] = getWeekNumber(new Date(ts));
-                            return `${year}-${String(week).padStart(2, '0')}`;
-                        })).size;
-                    } else if (id === 'THREE_MONTH_STREAK') {
-                        currentProgress = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7))).size;
-                    }
-
-                    const targetProgress = 3;
-                    const percent = targetProgress > 0 ? Math.min((currentProgress / targetProgress) * 100, 100) : 0;
+                if (!isUnlocked && ach.progress) {
+                    const p = ach.progress(playerStats, unitPath);
+                    const percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
                     
                     progressHTML = `
-                        <div class="ach-progress-text">(${currentProgress} / ${targetProgress})</div>
+                        <div class="ach-progress-text">(${p.current} / ${p.target})</div>
                         <div class="ach-progress-bar-container">
                             <div class="ach-progress-bar" style="width: ${percent}%;"></div>
                         </div>
@@ -580,39 +599,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const unitData = playerStats.unitData[unitPath];
         if (!unitData) return;
 
-        const history = unitData.completionHistory || [];
-        if (history.length < 3) return; // 通關次數少於3次，不可能達成任何連續成就
-
-        // --- 累計每日檢查 (Cumulative Daily Check) ---
-        if (!unitData.achievements.THREE_DAY_STREAK) {
-            const uniqueDays = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10)));
-            if (uniqueDays.size >= 3) {
-                playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.points;
-                unitData.achievements.THREE_DAY_STREAK = true;
-                unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.name);
-            }
-        }
-
-        // --- 累計每月檢查 (Cumulative Monthly Check) ---
-        if (!unitData.achievements.THREE_MONTH_STREAK) {
-            const uniqueMonths = new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7)));
-            if (uniqueMonths.size >= 3) {
-                playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.points;
-                unitData.achievements.THREE_MONTH_STREAK = true;
-                unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_MONTH_STREAK.name);
-            }
-        }
-
-        // --- 累計每週檢查 (Cumulative Weekly Check) ---
-        if (!unitData.achievements.THREE_WEEK_STREAK) {
-            const uniqueWeeks = new Set(history.map(ts => {
-                const [year, week] = getWeekNumber(new Date(ts));
-                return `${year}-${String(week).padStart(2, '0')}`;
-            }));
-            if (uniqueWeeks.size >= 3) {
-                playerStats.totalPoints += UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.points;
-                unitData.achievements.THREE_WEEK_STREAK = true;
-                unlockedInSession.push(UNIT_ACHIEVEMENTS.THREE_WEEK_STREAK.name);
+        for (const id in UNIT_ACHIEVEMENTS) {
+            if (id.includes('STREAK')) { // Only check streak achievements
+                if (!unitData.achievements[id]) {
+                    const ach = UNIT_ACHIEVEMENTS[id];
+                    const progress = ach.progress(playerStats, unitPath);
+                    if (progress.current >= progress.target) {
+                        playerStats.totalPoints += ach.points;
+                        unitData.achievements[id] = true;
+                        unlockedInSession.push(ach.name);
+                    }
+                }
             }
         }
     }
@@ -645,14 +642,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     playerStats.unitData[unitPath].achievements.GOLD = true;
                 }
             }
-            if (currentHealth >= (MAX_HEALTH - 1)) { // 銀牌 (剩餘 2 顆心或以上)
+            if (currentHealth >= (MAX_HEALTH - 1)) { // 銀牌
                 if (!playerStats.unitData[unitPath].achievements.SILVER) {
                     playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points;
                     unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name);
                     playerStats.unitData[unitPath].achievements.SILVER = true;
                 }
             }
-            if (currentHealth >= 1) { // 銅牌 (剩餘 1 顆心或以上)
+            if (currentHealth >= (MAX_HEALTH - 2)) { // 銅牌
                 if (!playerStats.unitData[unitPath].achievements.BRONZE) {
                     playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points;
                     unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name);
