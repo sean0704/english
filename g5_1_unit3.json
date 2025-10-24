@@ -1,0 +1,140 @@
+[
+  {
+    "english": "Sunday",
+    "chinese": "星期日",
+    "phonetics": "[ˋsʌn͵de]",
+    "example": "What day is today? It's Sunday."
+  },
+  {
+    "english": "Monday",
+    "chinese": "星期一",
+    "phonetics": "[ˋmʌn͵de]",
+    "example": "Is it Monday today? Yes, it is."
+  },
+  {
+    "english": "Tuesday",
+    "chinese": "星期二",
+    "phonetics": "[ˋtuzde]",
+    "example": "Is it Monday today? No, it isn't. It's Tuesday."
+  },
+  {
+    "english": "Wednesday",
+    "chinese": "星期三",
+    "phonetics": "[ˋwɛnzde]",
+    "example": "We have PE class on Wednesday."
+  },
+  {
+    "english": "Thursday",
+    "chinese": "星期四",
+    "phonetics": "[ˋθɝzde]",
+    "example": "I have a music class on Thursday."
+  },
+  {
+    "english": "Friday",
+    "chinese": "星期五",
+    "phonetics": "[ˋfraɪde]",
+    "example": "My favorite day is Friday."
+  },
+  {
+    "english": "Saturday",
+    "chinese": "星期六",
+    "phonetics": "[ˋsætɚ͵de]",
+    "example": "I go to the park on Saturday."
+  },
+  {
+    "english": "day",
+    "chinese": "一天，一日",
+    "phonetics": "[de]",
+    "example": "A week has seven days."
+  },
+  {
+    "english": "today",
+    "chinese": "今天",
+    "phonetics": "[təˋde]",
+    "example": "What day is today? It's Monday."
+  },
+  {
+    "english": "art",
+    "chinese": "藝術；美術",
+    "phonetics": "[ɑrt]",
+    "example": "She is good at art."
+  },
+  {
+    "english": "Chinese",
+    "chinese": "國語；中文",
+    "phonetics": "[tʃaɪˋniz]",
+    "example": "He likes Chinese class."
+  },
+  {
+    "english": "English",
+    "chinese": "英語；英文",
+    "phonetics": "[ˋɪŋglɪʃ]",
+    "example": "My favorite subject is English."
+  },
+  {
+    "english": "math",
+    "chinese": "數學",
+    "phonetics": "[mæθ]",
+    "example": "Math is hard, but I like it."
+  },
+  {
+    "english": "music",
+    "chinese": "音樂",
+    "phonetics": "[ˋmjuzɪk]",
+    "example": "We sing and play in music class."
+  },
+  {
+    "english": "PE",
+    "chinese": "體育",
+    "phonetics": "[ˋpiˋi]",
+    "example": "We play dodgeball in PE class."
+  },
+  {
+    "english": "science",
+    "chinese": "自然科學；科學",
+    "phonetics": "[ˋsaɪəns]",
+    "example": "We learn about plants in science class."
+  },
+  {
+    "english": "social studies",
+    "chinese": "社會",
+    "phonetics": "[ˋsoʃəl ˋstʌdiz]",
+    "example": "We learn about Taiwan in social studies class."
+  },
+  {
+    "english": "favorite",
+    "chinese": "最喜愛的",
+    "phonetics": "[ˋfevərɪt]",
+    "example": "What's your favorite subject? My favorite subject is English."
+  },
+  {
+    "english": "subject",
+    "chinese": "科目",
+    "phonetics": "[ˋsʌbdʒɪkt]",
+    "example": "What's your favorite subject? My favorite subject is math."
+  },
+  {
+    "english": "his",
+    "chinese": "他的",
+    "phonetics": "[hɪz]",
+    "example": "What's his favorite subject? His favorite subject is social studies."
+  },
+  {
+    "english": "her",
+    "chinese": "她的",
+    "phonetics": "[hɚ]",
+    "example": "What's her favorite subject? Her favorite subject is music."
+  },
+  {
+    "english": "our",
+    "chinese": "我們的",
+    "phonetics": "[aʊr]",
+    "example": "Our teacher is very kind."
+  },
+  {
+    "english": "their",
+    "chinese": "他們的",
+    "phonetics": "[ðɛr]",
+    "example": "Their classroom is next to ours."
+  }
+]
