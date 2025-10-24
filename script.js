@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '國一上 Unit 4', path: 'g7_1_unit4.json' },
         { name: '國一上 Unit 5', path: 'g7_1_unit5.json' },
         { name: '國一上 Unit 6', path: 'g7_1_unit6.json' },
-        { name: '國一上 Unit 1 (句子)', path: 'g7_1_unit1_read.json' },
     ];
 
     // --- 生命值設定 ---
