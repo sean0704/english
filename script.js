@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
-        { name: '小五上 Unit 1', path: 'g5_1_unit1.json' },
+        { name: '小五上 Unit 1,2', path: 'g5_1_unit1.json' },
+        { name: '小五上 Unit 3,4', path: 'g5_3_unit1.json' },
         { name: '國一上 Unit 0', path: 'g7_1_unit0.json' },
         { name: '國一上 Unit 1', path: 'g7_1_unit1.json' },
         { name: '國一上 Unit 2', path: 'g7_1_unit2.json' },
