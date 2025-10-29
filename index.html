@@ -21,9 +21,24 @@
             </nav>
         </header>
         <main class="dashboard-main">
-            <h1 class="start-title">今天想練習哪個單元？</h1>
-            <select id="word-list-select" class="word-list-select"></select>
-            <button id="start-game-btn" class="start-button">開始練習</button>
+            <h1 class="start-title">練習設定</h1>
+
+            <div class="start-step">
+                <h2>步驟一：選擇練習模式</h2>
+                <div class="mode-selection">
+                    <button id="mode-btn-spelling" class="start-button" data-mode="spelling">單字拼寫</button>
+                    <button id="mode-btn-sentence" class="start-button secondary" data-mode="sentence">句型重組</button>
+                </div>
+            </div>
+
+            <div class="start-step">
+                <h2>步驟二：選擇練習單元</h2>
+                <select id="word-list-select" class="word-list-select" disabled></select>
+            </div>
+
+            <div class="start-step">
+                <button id="start-game-btn" class="start-button" disabled>開始練習</button>
+            </div>
         </main>
     </div>
 
@@ -69,6 +84,22 @@
         <p style="color: var(--text-secondary); margin-bottom: 2rem;">你已完成本單元的所有練習。</p>
         <button id="restart-btn" class="start-button">再次練習</button>
         <button id="back-to-menu-btn" class="start-button secondary" style="background-color: #a0aec0; margin-top: 10px;">返回主選單</button>
+    </div>
+
+    <div id="sentence-container" class="game-container" style="display: none;">
+        <h1 class="sentence-title">句型重組</h1>
+        <div id="sentence-hint-display" class="sentence-hint"></div>
+        
+        <div id="sentence-answer-area" class="sentence-build-area"></div>
+        <div id="sentence-word-bank" class="sentence-build-area"></div>
+
+        <div id="sentence-feedback-display" class="feedback-message"></div>
+
+        <div class="sentence-controls">
+            <button id="check-sentence-btn" class="sentence-button">檢查答案</button>
+            <button id="next-sentence-btn" class="sentence-button" style="display: none;">下一題</button>
+        </div>
+        <button id="sentence-back-to-menu-btn" class="start-button secondary" style="margin-top: 20px;">返回主選單</button>
     </div>
 
     <script src="script.js"></script>

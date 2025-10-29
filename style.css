@@ -720,4 +720,157 @@ body {
     }
 }
 
+/* --- Start Screen Steps --- */
+.start-step {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.start-step h2 {
+    font-size: 1.2rem;
+    color: var(--header-color);
+    margin-bottom: 1rem;
+}
+
+.mode-selection .start-button {
+    border: 2px solid transparent;
+}
+
+.mode-selection .start-button.mode-selected {
+    border-color: var(--notice-color);
+    box-shadow: 0 0 10px var(--notice-color);
+}
+
+#word-list-select:disabled,
+#start-game-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#word-list-select:disabled:hover,
+#start-game-btn:disabled:hover {
+    background-color: initial; /* Revert hover effects when disabled */
+}
+
+#start-game-btn:disabled:hover {
+    background-color: var(--notice-color); /* Keep original color for start button */
+}
+
+.start-button.secondary#start-game-btn:disabled:hover {
+    background-color: #718096; /* Keep original color for secondary start button */
+}
+
+
+/* --- Sentence Mode Styles --- */
+.mode-selection {
+    display: flex;
+    gap: 1rem;
+    justify-content: center; /* Center the buttons */
+}
+
+.start-button.secondary {
+    background-color: #718096; /* A different color for the secondary button */
+}
+
+.start-button.secondary:hover {
+    background-color: #a0aec0;
+}
+
+.sentence-title {
+    font-size: 1.8rem;
+    color: var(--header-color);
+    margin-bottom: 1rem;
+}
+
+.sentence-hint {
+    font-size: 1.2rem;
+    color: var(--header-color);
+    margin-bottom: 1.5rem;
+    min-height: 1.5rem;
+}
+
+.sentence-build-area {
+    background-color: var(--bg-color);
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    min-height: 80px;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-content: flex-start;
+}
+
+.word-block {
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    background-color: var(--container-bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.2rem;
+}
+
+.word-block:hover {
+    background-color: var(--bg-color);
+    border-color: var(--notice-color);
+}
+
+.sentence-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.sentence-button {
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--bg-color);
+    background-color: var(--notice-color);
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sentence-button:hover {
+    background-color: #fbd38d;
+}
+
+@media (max-width: 768px) {
+    .mode-selection {
+        flex-direction: column;
+        width: 80%;
+        margin: 0 auto; /* Center the column */
+    }
+
+    .start-button {
+        width: 100%;
+    }
+
+    .sentence-title {
+        font-size: 1.5rem;
+    }
+
+    .sentence-hint {
+        font-size: 1rem;
+    }
+
+    .word-block {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .sentence-button {
+        font-size: 1rem;
+    }
+}
+
 
