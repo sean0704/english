@@ -26,7 +26,7 @@
             <div class="start-step">
                 <h2>步驟一：選擇練習模式</h2>
                 <div class="mode-selection">
-                    <button id="mode-btn-spelling" class="start-button" data-mode="spelling">單字拼寫</button>
+                    <button id="mode-btn-spelling" class="start-button secondary" data-mode="spelling">單字拼寫</button>
                     <button id="mode-btn-sentence" class="start-button secondary" data-mode="sentence">句型重組</button>
                 </div>
             </div>
@@ -88,7 +88,10 @@
 
     <div id="sentence-container" class="game-container" style="display: none;">
         <h1 class="sentence-title">句型重組</h1>
-        <div id="sentence-hint-display" class="sentence-hint"></div>
+        <div class="pronunciation-area">
+            <div id="sentence-hint-display" class="sentence-hint"></div>
+            <button id="play-sentence-audio-btn" class="play-audio-btn" title="播放發音">🔊</button>
+        </div>
         
         <div id="sentence-answer-area" class="sentence-build-area"></div>
         <div id="sentence-word-bank" class="sentence-build-area"></div>
@@ -99,7 +102,6 @@
             <button id="check-sentence-btn" class="sentence-button">檢查答案</button>
             <button id="next-sentence-btn" class="sentence-button" style="display: none;">下一題</button>
         </div>
-        <button id="sentence-back-to-menu-btn" class="start-button secondary" style="margin-top: 20px;">返回主選單</button>
     </div>
 
     <script src="script.js"></script>

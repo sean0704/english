@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sentenceFeedbackEl = document.getElementById('sentence-feedback-display');
     const checkSentenceBtn = document.getElementById('check-sentence-btn');
     const nextSentenceBtn = document.getElementById('next-sentence-btn');
-    const sentenceBackToMenuBtn = document.getElementById('sentence-back-to-menu-btn');
+    const playSentenceAudioBtn = document.getElementById('play-sentence-audio-btn');
 
     const flashOverlayEl = document.getElementById('flash-overlay');
     const healthDisplayEl = document.getElementById('health-display');
@@ -294,14 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (HEALTH_REPLENISH_ROUNDS.includes(roundCount - 1) && currentHealth < MAX_HEALTH) {
                     currentHealth++;
                     updateHealthDisplay();
-                    feedbackEl.textContent += ` 生命值回補！❤️`;
+                    feedbackEl.textContent += '生命值回補！❤️';
                 }
             }
         }
         const practicedInStage = stageTotal - wordsToPractice.length;
         const progressPercent = stageTotal > 0 ? (practicedInStage / stageTotal) * 100 : 0;
         progressBarEl.style.width = `${progressPercent}%`;
-        roundDisplayEl.textContent = gameMode === 'review' ? `訂正時間` : `第 ${roundCount} 回合`;
+        roundDisplayEl.textContent = gameMode === 'review' ? '訂正時間' : `第 ${roundCount} 回合`;
         progressBarEl.style.backgroundImage = gameMode === 'review' ? 'linear-gradient(45deg, var(--incorrect-color), #f56565)' : 'linear-gradient(45deg, var(--correct-color), #68d391)';
         currentWord = wordsToPractice.shift();
         playAudioBtnEl.style.display = synth ? 'block' : 'none';
@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     feedbackEl.className = 'feedback-message notice';
                     setTimeout(setupNextWord, 1000);
                 } else {
-                    feedbackEl.textContent = `拼寫仍然不對喔，請再試一次 (${correctionCount}/${REQUIRED_CORRECTIONS})`;
+                    feedbackEl.textContent = `請再輸入一次 (${correctionCount}/${REQUIRED_CORRECTIONS})`;
                     spellingInputEl.value = '';
                 }
             } else {
@@ -421,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .filter(item => {
                 const cleanedSentence = (item.sentence || '').replace(/<[^>]*>/g, '').trim();
                 const wordCount = cleanedSentence.split(' ').length;
-                return wordCount >= 2 && wordCount <= 20; // Loosened filter
+                return wordCount >= 2 && wordCount <= 20;
             })
             .sort(() => Math.random() - 0.5);
         
@@ -433,12 +433,31 @@ document.addEventListener('DOMContentLoaded', () => {
         setupNextSentence();
     }
 
+    function playSentenceAudio() {
+        if (isPlaying || !currentSentence || !synth) return;
+        synth.cancel();
+        const textToSpeak = currentSentence.sentence;
+        if (!textToSpeak) return;
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.onstart = () => { isPlaying = true; playSentenceAudioBtn.disabled = true; };
+        utterance.onend = () => { isPlaying = false; playSentenceAudioBtn.disabled = false; };
+        utterance.onerror = (event) => {
+            console.error('語音合成發生錯誤:', event);
+            isPlaying = false;
+            playSentenceAudioBtn.disabled = false;
+        };
+        synth.speak(utterance);
+    }
+
     function setupNextSentence() {
         if (sentencePool.length === 0) {
             sentenceFeedbackEl.textContent = '恭喜！已完成本單元所有句型練習！';
             sentenceFeedbackEl.className = 'feedback-message notice';
             checkSentenceBtn.style.display = 'none';
             nextSentenceBtn.style.display = 'none';
+            playSentenceAudioBtn.style.display = 'none';
             return;
         }
         currentSentence = sentencePool.pop();
@@ -446,12 +465,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const words = cleanedSentence.split(' ').filter(w => w && !w.includes(':'));
         if (words.length < 2) { setupNextSentence(); return; }
         const shuffledWords = [...words].sort(() => Math.random() - 0.5);
-        sentenceHintEl.textContent = `提示：${currentSentence.hint}`;
+        sentenceHintEl.textContent = `${currentSentence.hint}`;
         sentenceAnswerAreaEl.innerHTML = '';
         sentenceWordBankEl.innerHTML = '';
         sentenceFeedbackEl.textContent = '';
         checkSentenceBtn.style.display = 'block';
         nextSentenceBtn.style.display = 'none';
+        playSentenceAudioBtn.style.display = synth ? 'block' : 'none';
+
         shuffledWords.forEach(word => {
             const wordEl = document.createElement('div');
             wordEl.textContent = word;
@@ -459,6 +480,8 @@ document.addEventListener('DOMContentLoaded', () => {
             wordEl.addEventListener('click', () => moveWord(wordEl));
             sentenceWordBankEl.appendChild(wordEl);
         });
+        
+        setTimeout(playSentenceAudio, 100);
     }
 
     function moveWord(wordEl) {
@@ -682,7 +705,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 句型遊戲按鈕
         checkSentenceBtn.addEventListener('click', checkSentence);
         nextSentenceBtn.addEventListener('click', setupNextSentence);
-        sentenceBackToMenuBtn.addEventListener('click', showStartScreen);
+        playSentenceAudioBtn.addEventListener('click', playSentenceAudio);
 
         // 成就和兌換按鈕
         showAchievementsBtn.addEventListener('click', () => { updateAchievementDisplay(); achievementContainer.style.display = 'flex'; });
