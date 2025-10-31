@@ -28,6 +28,7 @@
                 <div class="mode-selection">
                     <button id="mode-btn-spelling" class="start-button secondary" data-mode="spelling">單字拼寫</button>
                     <button id="mode-btn-sentence" class="start-button secondary" data-mode="sentence">句型重組</button>
+                    <button id="mode-btn-translation" class="start-button secondary" data-mode="translation">引導式翻譯</button>
                 </div>
             </div>
 
@@ -68,7 +69,12 @@
 
         <audio id="word-audio" style="display: none;"></audio>
 
-        <form id="spelling-form" class="spelling-input-area">
+        <div id="translation-controls" class="sentence-controls" style="display: none;">
+            <button id="check-translation-btn" class="sentence-button">檢查答案</button>
+            <button id="next-translation-btn" class="sentence-button" style="display: none;">下一題</button>
+        </div>
+
+        <form id="spelling-form" class="spelling-input-area" style="display: none;">
             <input type="text" id="spelling-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="請在此拼寫單字並按 Enter">
         </form>
 

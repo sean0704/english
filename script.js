@@ -9,20 +9,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // 新的啟動流程元素
     const modeBtnSpelling = document.getElementById('mode-btn-spelling');
     const modeBtnSentence = document.getElementById('mode-btn-sentence');
+    const modeBtnTranslation = document.getElementById('mode-btn-translation');
     const wordListSelectEl = document.getElementById('word-list-select');
     const startGameBtn = document.getElementById('start-game-btn');
 
-    // 拼寫遊戲元素
+    // 遊戲通用元素
     const wordDisplayEl = document.getElementById('current-word-display');
     const translationEl = document.getElementById('translation-display');
     const phoneticsEl = document.getElementById('phonetics-display');
     const exampleEl = document.getElementById('example-display');
-    const spellingFormEl = document.getElementById('spelling-form');
-    const spellingInputEl = document.getElementById('spelling-input');
     const feedbackEl = document.getElementById('feedback-message');
     const playAudioBtnEl = document.getElementById('play-audio-btn');
     const progressBarEl = document.getElementById('progress-bar');
     const roundDisplayEl = document.getElementById('round-display');
+    
+    // 拼寫遊戲專用
+    const spellingFormEl = document.getElementById('spelling-form');
+    const spellingInputEl = document.getElementById('spelling-input');
+
+    // 翻譯填空專用
+    const translationControls = document.getElementById('translation-controls');
+    const checkTranslationBtn = document.getElementById('check-translation-btn');
+    const nextTranslationBtn = document.getElementById('next-translation-btn');
 
     const restartBtn = document.getElementById('restart-btn');
     const backToMenuBtn = document.getElementById('back-to-menu-btn');
@@ -93,17 +101,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentWordListName = '';
     let activeGameMode = '';
 
-    // 拼寫狀態
+    // 遊戲狀態
     let roundCount = 1;
     let wordsToPractice = [];
     let wordsToReview = [];
     let wordsWrongInSession = new Set();
     let currentStreak = 0;
-    let gameMode = 'practice';
+    let gameMode = 'practice'; // 'practice', 'review', 'translation'
     let stageTotal = 0;
     let currentWord = null;
     let isCorrecting = false;
-    let correctionCount = 0;
+    let isWaitingForNextQuestion = false;
     const REQUIRED_CORRECTIONS = 2;
     const synth = window.speechSynthesis;
     let isPlaying = false;
@@ -325,19 +333,194 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(playWordAudio, 100);
     }
 
+    // --- 翻譯填空遊戲邏輯 ---
+    function initializeTranslationGame() {
+        if (wordList.length === 0) return;
+        gameMode = 'translation';
+        wordsToReview = [];
+        wordsWrongInSession.clear();
+        currentStreak = 0;
+        currentHealth = MAX_HEALTH;
+        wordsToPractice = [...wordList].filter(item => item.english && item.chinese && item.english.split(' ').length > 3).sort(() => Math.random() - 0.5);
+        stageTotal = wordsToPractice.length;
+        if (stageTotal === 0) {
+            alert('這個單元沒有適合進行翻譯練習的句子(長度 > 3)。');
+            showStartScreen();
+            return;
+        }
+        if (!synth) playAudioBtnEl.style.display = 'none';
+        updateHealthDisplay();
+        setupNextTranslationWord();
+    }
+
+    function setupNextTranslationWord() {
+        isWaitingForNextQuestion = false;
+        hasLostHealthOnCurrentWord = false;
+        feedbackEl.textContent = '';
+        exampleEl.textContent = '';
+        checkTranslationBtn.style.display = 'inline-block';
+        nextTranslationBtn.style.display = 'none';
+
+        if (wordsToPractice.length === 0) {
+            if (wordsToReview.length > 0) {
+                gameMode = 'review';
+                wordsToPractice = [...wordsToReview].sort(() => Math.random() - 0.5);
+                stageTotal = wordsToPractice.length;
+                wordsToReview = [];
+                feedbackEl.textContent = `回合結束！現在開始訂正錯題...`;
+                feedbackEl.className = 'feedback-message notice';
+            } else {
+                gameOver(true);
+                return;
+            }
+        }
+
+        const practicedInStage = stageTotal - wordsToPractice.length;
+        const progressPercent = stageTotal > 0 ? (practicedInStage / stageTotal) * 100 : 0;
+        progressBarEl.style.width = `${progressPercent}%`;
+        roundDisplayEl.textContent = gameMode === 'review' ? '訂正時間' : '翻譯填空';
+        progressBarEl.style.backgroundImage = gameMode === 'review' ? 'linear-gradient(45deg, var(--incorrect-color), #f56565)' : 'linear-gradient(45deg, #4299e1, #63b3ed)';
+
+        currentWord = wordsToPractice.shift();
+        
+        const sentence = currentWord.english;
+        const words = sentence.split(' ');
+
+        let blanksCount = 1;
+        if (words.length > 10) {
+            blanksCount = 3;
+        } else if (words.length > 5) {
+            blanksCount = 2;
+        }
+
+        const nonCommonWords = words.map((word, index) => ({ word, index })).filter(item => item.word.length > 3 && !/^(the|and|but|for|not|you|are|was|were)$/i.test(item.word));
+        let wordsToBlankInfo = [];
+        let availableWords = [...nonCommonWords];
+        for (let i = 0; i < blanksCount; i++) {
+            if (availableWords.length === 0) break;
+            const randomIndex = Math.floor(Math.random() * availableWords.length);
+            wordsToBlankInfo.push(availableWords[randomIndex]);
+            availableWords.splice(randomIndex, 1);
+        }
+
+        if (wordsToBlankInfo.length === 0 && words.length > 0) {
+            const randomIndex = Math.floor(Math.random() * words.length);
+            wordsToBlankInfo.push({ word: words[randomIndex], index: randomIndex });
+        }
+        
+        wordsToBlankInfo.sort((a, b) => a.index - b.index);
+
+        currentWord.answers = wordsToBlankInfo.map(info => info.word);
+        const blankedIndexes = wordsToBlankInfo.map(info => info.index);
+
+        wordDisplayEl.innerHTML = '';
+        words.forEach((word, index) => {
+            if (blankedIndexes.includes(index)) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'translation-input';
+                input.autocomplete = 'off';
+                input.autocorrect = 'off';
+                input.autocapitalize = 'off';
+                input.spellcheck = false;
+                wordDisplayEl.appendChild(input);
+            } else {
+                const span = document.createElement('span');
+                span.textContent = word;
+                span.className = 'translation-text';
+                wordDisplayEl.appendChild(span);
+            }
+            wordDisplayEl.appendChild(document.createTextNode(' '));
+        });
+
+        playAudioBtnEl.style.display = synth ? 'block' : 'none';
+        phoneticsEl.textContent = '';
+        translationEl.textContent = currentWord.chinese;
+
+        const firstInput = wordDisplayEl.querySelector('.translation-input');
+        if (firstInput) {
+            firstInput.focus();
+        }
+        
+        setTimeout(playWordAudio, 100);
+    }
+
+    function checkTranslationAnswer() {
+        const inputs = Array.from(wordDisplayEl.querySelectorAll('.translation-input'));
+        const userAnswers = inputs.map(input => input.value.trim());
+        const correctAnswers = currentWord.answers;
+        let allCorrect = true;
+
+        userAnswers.forEach((userAnswer, index) => {
+            const cleanCorrectAnswer = correctAnswers[index].replace(/[.,?!;:]+$/, "");
+            const cleanUserAnswer = userAnswer.replace(/[.,?!;:]+$/, "");
+            const inputEl = inputs[index];
+
+            if (cleanUserAnswer.toLowerCase() === cleanCorrectAnswer.toLowerCase()) {
+                inputEl.classList.remove('input-incorrect');
+                inputEl.classList.add('input-correct');
+                inputEl.disabled = true;
+            } else {
+                inputEl.classList.add('input-incorrect');
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            feedbackEl.textContent = '正確！ 按 Enter 進入下一題...';
+            feedbackEl.className = 'feedback-message correct';
+            flashOverlayEl.classList.add('flash-correct');
+            setTimeout(() => { flashOverlayEl.classList.remove('flash-correct'); }, 600);
+            
+            currentStreak++;
+            playerStats.globalStats.totalWordsCorrect++;
+            if (currentStreak > playerStats.globalStats.longestStreak) playerStats.globalStats.longestStreak = currentStreak;
+            checkGlobalAchievements();
+            saveProgress();
+            
+            checkTranslationBtn.style.display = 'none';
+            nextTranslationBtn.style.display = 'inline-block';
+            isWaitingForNextQuestion = true;
+        } else {
+            feedbackEl.textContent = '部分答案不正確，請修正紅色框內的答案。';
+            exampleEl.textContent = `正確句子: ${currentWord.english}`;
+            feedbackEl.className = 'feedback-message incorrect';
+            
+            if (!hasLostHealthOnCurrentWord) {
+                currentHealth--;
+                updateHealthDisplay();
+                wordsWrongInSession.add(currentWord.english);
+                if (!wordsToReview.some(w => w.english === currentWord.english)) {
+                    wordsToReview.push(currentWord);
+                }
+                hasLostHealthOnCurrentWord = true;
+            }
+
+            if (currentHealth <= 0) {
+                gameOver(false);
+            }
+        }
+    }
+
     function playWordAudio() {
         if (isPlaying || !currentWord || !synth) return;
         synth.cancel();
         let textToSpeak = '';
-        const word = currentWord.english.split('(')[0].trim();
-        const example = currentWord.example;
-        if (gameMode === 'practice') {
-            if (roundCount === 1) textToSpeak = `${word}. ${example}`;
-            else if (roundCount === 2) textToSpeak = word;
-            else textToSpeak = example;
-        } else {
-            textToSpeak = word;
+        
+        if (activeGameMode === 'spelling') {
+            const word = currentWord.english.split('(')[0].trim();
+            const example = currentWord.example;
+            if (gameMode === 'practice') {
+                if (roundCount === 1) textToSpeak = `${word}. ${example}`;
+                else if (roundCount === 2) textToSpeak = word;
+                else textToSpeak = example;
+            } else { // review mode
+                textToSpeak = word;
+            }
+        } else if (activeGameMode === 'translation') {
+            textToSpeak = currentWord.english;
         }
+
         if (!textToSpeak) return;
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
         utterance.lang = 'en-US';
@@ -348,64 +531,76 @@ document.addEventListener('DOMContentLoaded', () => {
         synth.speak(utterance);
     }
 
-    function handleSubmission(e) {
+    function handleSpellingSubmission(e) {
         e.preventDefault();
         const userAnswer = spellingInputEl.value.trim();
-        if (userAnswer) checkAnswer(userAnswer);
+        if (userAnswer) checkSpellingAnswer(userAnswer);
     }
 
-    function checkAnswer(answer) {
+    function checkSpellingAnswer(answer) {
+        const cleanCorrectAnswer = currentWord.english.replace(/[.,?!;:]+$/, "");
+        const cleanUserAnswer = answer.trim().replace(/[.,?!;:]+$/, "");
+        const nextWordSetupFn = setupNextWord;
+
         if (isCorrecting) {
-            if (answer.toLowerCase() === currentWord.english.toLowerCase()) {
+            if (cleanUserAnswer.toLowerCase() === cleanCorrectAnswer.toLowerCase()) {
                 correctionCount++;
                 if (correctionCount >= REQUIRED_CORRECTIONS) {
                     isCorrecting = false;
                     correctionCount = 0;
                     feedbackEl.textContent = '很好，現在記住了！';
                     feedbackEl.className = 'feedback-message notice';
-                    setTimeout(setupNextWord, 1000);
+                    setTimeout(nextWordSetupFn, 1000);
                 } else {
                     feedbackEl.textContent = `請再輸入一次 (${correctionCount}/${REQUIRED_CORRECTIONS})`;
                     spellingInputEl.value = '';
                 }
             } else {
-                feedbackEl.textContent = `拼寫仍然不對喔，請再試一次: ${currentWord.english}`;
+                feedbackEl.textContent = `拼寫仍然不對喔，請再試一次: ${cleanCorrectAnswer}`;
                 spellingInputEl.value = '';
                 spellingInputEl.classList.add('input-incorrect');
                 setTimeout(() => spellingInputEl.classList.remove('input-incorrect'), 600);
             }
             return;
         }
+
         spellingInputEl.disabled = true;
-        if (answer.toLowerCase() === currentWord.english.toLowerCase()) {
+        if (cleanUserAnswer.toLowerCase() === cleanCorrectAnswer.toLowerCase()) {
             feedbackEl.textContent = '正確！';
             feedbackEl.className = 'feedback-message correct';
             wordDisplayEl.textContent = currentWord.english;
             spellingInputEl.classList.add('input-correct');
             flashOverlayEl.classList.add('flash-correct');
             setTimeout(() => { spellingInputEl.classList.remove('input-correct'); flashOverlayEl.classList.remove('flash-correct'); }, 600);
+            
             currentStreak++;
             playerStats.globalStats.totalWordsCorrect++;
             if (currentStreak > playerStats.globalStats.longestStreak) playerStats.globalStats.longestStreak = currentStreak;
             checkGlobalAchievements();
             saveProgress();
-            setTimeout(setupNextWord, 500);
+            
+            setTimeout(nextWordSetupFn, 500);
         } else {
-            feedbackEl.textContent = `錯誤！你輸入的是 "${answer}"，正確答案是: ${currentWord.english} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
+            feedbackEl.textContent = `錯誤！你輸入的是 "${answer}"，正確答案是: ${cleanCorrectAnswer} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
             feedbackEl.className = 'feedback-message incorrect';
             wordDisplayEl.textContent = currentWord.english;
             spellingInputEl.classList.add('input-incorrect');
             flashOverlayEl.classList.add('flash-incorrect');
             setTimeout(() => { spellingInputEl.classList.remove('input-incorrect'); flashOverlayEl.classList.remove('flash-incorrect'); }, 600);
+            
             currentStreak = 0;
-            wordsWrongInSession.add(currentWord.english);
-            if (!wordsToReview.some(w => w.english === currentWord.english)) wordsToReview.push(currentWord);
+            wordsWrongInSession.add(cleanCorrectAnswer);
+            if (!wordsToReview.some(w => w.english === currentWord.english)) {
+                wordsToReview.push(currentWord);
+            }
+            
             currentHealth--;
             updateHealthDisplay();
             if (currentHealth <= 0) {
                 gameOver(false);
                 return;
             }
+            
             isCorrecting = true;
             correctionCount = 0;
             spellingInputEl.value = '';
@@ -596,11 +791,16 @@ document.addEventListener('DOMContentLoaded', () => {
         achievementContainer.style.display = 'none';
         sentenceContainer.style.display = 'none';
         startContainer.style.display = 'flex';
+        
+        translationControls.style.display = 'none';
+        spellingFormEl.style.display = 'none';
+
         wordListSelectEl.disabled = true;
         wordListSelectEl.innerHTML = '<option value="">請先選擇模式</option>';
         startGameBtn.disabled = true;
         modeBtnSpelling.classList.remove('mode-selected');
         modeBtnSentence.classList.remove('mode-selected');
+        modeBtnTranslation.classList.remove('mode-selected');
         updateTotalPointsDisplay();
     }
 
@@ -625,7 +825,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 新的啟動流程 ---
     function updateWordListDropdown(selectedMode) {
         wordListSelectEl.innerHTML = '';
-        const filteredLists = wordLists.filter(list => list.type === selectedMode);
+        // For translation mode, we use 'sentence' type lists
+        const typeToFilter = selectedMode === 'translation' ? 'sentence' : selectedMode;
+        const filteredLists = wordLists.filter(list => list.type === typeToFilter);
         
         if (filteredLists.length === 0) {
             const option = document.createElement('option');
@@ -659,11 +861,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         startContainer.style.display = 'none';
         if (activeGameMode === 'spelling') {
+            spellingFormEl.style.display = 'block';
+            translationControls.style.display = 'none';
             gameContainer.style.display = 'block';
             initializeGame();
         } else if (activeGameMode === 'sentence') {
             sentenceContainer.style.display = 'block';
             initializeSentenceGame();
+        } else if (activeGameMode === 'translation') {
+            spellingFormEl.style.display = 'none';
+            translationControls.style.display = 'block';
+            gameContainer.style.display = 'block';
+            initializeTranslationGame();
         }
     }
 
@@ -677,6 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
             activeGameMode = 'spelling';
             modeBtnSpelling.classList.add('mode-selected');
             modeBtnSentence.classList.remove('mode-selected');
+            modeBtnTranslation.classList.remove('mode-selected');
             updateWordListDropdown('spelling');
         });
 
@@ -684,19 +894,49 @@ document.addEventListener('DOMContentLoaded', () => {
             activeGameMode = 'sentence';
             modeBtnSentence.classList.add('mode-selected');
             modeBtnSpelling.classList.remove('mode-selected');
+            modeBtnTranslation.classList.remove('mode-selected');
             updateWordListDropdown('sentence');
+        });
+
+        modeBtnTranslation.addEventListener('click', () => {
+            activeGameMode = 'translation';
+            modeBtnTranslation.classList.add('mode-selected');
+            modeBtnSpelling.classList.remove('mode-selected');
+            modeBtnSentence.classList.remove('mode-selected');
+            updateWordListDropdown('translation');
         });
 
         startGameBtn.addEventListener('click', startGame);
 
-        spellingFormEl.addEventListener('submit', handleSubmission);
+        spellingFormEl.addEventListener('submit', handleSpellingSubmission);
         playAudioBtnEl.addEventListener('click', playWordAudio);
+
+        // 全域 Enter 鍵處理
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter') return;
+
+            if (activeGameMode === 'translation') {
+                if (isWaitingForNextQuestion) {
+                    e.preventDefault();
+                    setupNextTranslationWord();
+                } else if (document.activeElement.classList.contains('translation-input')) {
+                    e.preventDefault();
+                    checkTranslationAnswer();
+                }
+            }
+        });
+
+        checkTranslationBtn.addEventListener('click', checkTranslationAnswer);
+        nextTranslationBtn.addEventListener('click', setupNextTranslationWord);
 
         restartBtn.addEventListener('click', () => {
             completionContainer.style.display = 'none';
             if (activeGameMode === 'spelling') {
                 gameContainer.style.display = 'block';
                 initializeGame();
+            } else if (activeGameMode === 'translation') {
+                gameContainer.style.display = 'block';
+                initializeTranslationGame();
             }
         });
 
