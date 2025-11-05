@@ -386,11 +386,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const sentence = currentWord.english;
         const words = sentence.split(' ');
 
-        let blanksCount = 1;
+        let blanksCount = 10;
         if (words.length > 10) {
-            blanksCount = 3;
+            blanksCount = 30;
         } else if (words.length > 5) {
-            blanksCount = 2;
+            blanksCount = 20;
         }
 
         const nonCommonWords = words.map((word, index) => ({ word, index })).filter(item => item.word.length > 3 && !/^(the|and|but|for|not|you|are|was|were)$/i.test(item.word));
