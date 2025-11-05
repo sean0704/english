@@ -1,44 +1,115 @@
 [
   {
+    "english": "Guys, look at this. It's a magic door.",
+    "chinese": "大伙們，看這個。這是一扇神奇的門。"
+  },
+  {
     "english": "With this door, we can go to many places.",
     "chinese": "藉由這扇門，我們可以去很多地方。"
   },
   {
-    "english": "We're in a museum. People can see us.",
-    "chinese": "我們在博物館裡。人們可以看見我們。"
+    "english": "Can we use it?",
+    "chinese": "我們可以使用它嗎？"
   },
   {
-    "english": "Zac, open the magic door.",
-    "chinese": "札克，打開神奇的門。"
+    "english": "Sure. Let's go!",
+    "chinese": "當然。 我們走吧！"
   },
-  
   {
-    "english": "Hurry!",
-    "chinese": "快點！"
+    "english": "What's this?",
+    "chinese": "這是什麼？"
+  },
+  {
+    "english": "Oh my! It's a mummy.",
+    "chinese": "天哪！它是一個木乃伊。"
+  },
+  {
+    "english": "Ahh!",
+    "chinese": "啊！"
+  },
+  {
+    "english": "Be careful, Yuki.",
+    "chinese": "小心， 由紀。"
+  },
+  {
+    "english": "Oh, no! We're in a museum. People can see us.",
+    "chinese": "喔，不！我們在博物館裡。人們可以看見我們。"
+  },
+  {
+    "english": "Zac, open the magic door. Hurry!",
+    "chinese": "札克，打開神奇的門。快點！"
+  },
+  {
+    "english": "Wow, this is a beautiful park.",
+    "chinese": "哇，好漂亮的公園。"
+  },
+  {
+    "english": "Are these rocks?",
+    "chinese": "這些是石頭嗎？"
   },
   {
     "english": "I'm not sure.",
     "chinese": "我不確定。"
   },
   {
-    "english": "I can jump on these rocks.",
-    "chinese": "我可以在這些石頭上跳。"
+    "english": "Look! I can jump on these rocks.",
+    "chinese": "看！我可以在這些石頭上跳。"
   },
   {
     "english": "Zac, don't do that, please.",
     "chinese": "札克，請不要這樣做。"
   },
   {
+    "english": "Wait! What's that?",
+    "chinese": "等一下！那是什麼？"
+  },
+  {
+    "english": "It's a man.",
+    "chinese": "那是一個男人。"
+  },
+  {
     "english": "Look behind you, Zac.",
     "chinese": "看看你後面，札克。"
+  },
+  {
+    "english": "A dinosaur!",
+    "chinese": "是恐龍！"
+  },
+  {
+    "english": "Run!",
+    "chinese": "快跑！"
+  },
+  {
+    "english": "Where are we now?",
+    "chinese": "我們現在在哪裡？"
   },
   {
     "english": "Please... no mummies or dinosaurs this time.",
     "chinese": "拜託... 這次不要再有木乃伊或恐龍。"
   },
   {
+    "english": "Are we in the Keret House?",
+    "chinese": "我們是在凱瑞特房子裡嗎？"
+  },
+  {
+    "english": "Yes, we are.",
+    "chinese": "是的，我們是。"
+  },
+  {
     "english": "This house is really small, but it's very special.",
     "chinese": "這個房子真的很小，但它非常特別。"
+  },
+  {
+    "english": "The bed is nice.",
+    "chinese": "這張床不錯。"
+  },
+  {
+    "english": "A nice bed...",
+    "chinese": "一張挺不錯的床..."
+  },
+  {
+    "english": "Cody Wei! Wake up!",
+    "chinese": "魏科迪！ 醒醒呀！"
   },
   {
     "english": "Time for class.",
