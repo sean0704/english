@@ -5,11 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const completionContainer = document.getElementById('completion-container');
     const achievementContainer = document.getElementById('achievement-container');
     const sentenceContainer = document.getElementById('sentence-container');
+    const passageTranslationContainer = document.getElementById('passage-translation-container');
 
     // 新的啟動流程元素
     const modeBtnSpelling = document.getElementById('mode-btn-spelling');
     const modeBtnSentence = document.getElementById('mode-btn-sentence');
     const modeBtnTranslation = document.getElementById('mode-btn-translation');
+    const modeBtnPassageTranslation = document.getElementById('mode-btn-passage-translation');
     const wordListSelectEl = document.getElementById('word-list-select');
     const startGameBtn = document.getElementById('start-game-btn');
 
@@ -59,6 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextSentenceBtn = document.getElementById('next-sentence-btn');
     const playSentenceAudioBtn = document.getElementById('play-sentence-audio-btn');
 
+    // --- 文章翻譯 DOM 元素 ---
+    const passageEnglishDisplayEl = document.getElementById('passage-english-display');
+    const passageTranslationInputEl = document.getElementById('passage-translation-input');
+    const passageFeedbackDisplayEl = document.getElementById('passage-feedback-display');
+    const checkPassageBtn = document.getElementById('check-passage-btn');
+    const nextPassageBtn = document.getElementById('next-passage-btn');
+    const playPassageAudioBtn = document.getElementById('play-passage-audio-btn');
+
     const flashOverlayEl = document.getElementById('flash-overlay');
     const healthDisplayEl = document.getElementById('health-display');
 
@@ -71,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '七年級 上 Unit 2', path: 'g7_1_unit2.json', type: 'spelling' },
         { name: '七年級 上 Unit 3', path: 'g7_1_unit3.json', type: 'spelling' },
         { name: '七年級 上 Unit 3 (課文句型)', path: 'g7_1_unit3_s.json', type: 'sentence' },
+        { name: '七年級 上 Unit 3 (文章翻譯)', path: 'g7_1_unit3_a.json', type: 'passage-translation' },
         { name: '七年級 上 Unit 4', path: 'g7_1_unit4.json', type: 'spelling' },
         { name: '七年級 上 Unit 5', path: 'g7_1_unit5.json', type: 'spelling' },
         { name: '七年級 上 Unit 6', path: 'g7_1_unit6.json', type: 'spelling' },
@@ -112,14 +123,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentWord = null;
     let isCorrecting = false;
     let isWaitingForNextQuestion = false;
+    let isWaitingForNextPassage = false;
     const REQUIRED_CORRECTIONS = 2;
     const synth = window.speechSynthesis;
     let isPlaying = false;
     let currentHealth;
+    let hasLostHealthOnCurrentWord = false;
 
     // 句型狀態
     let sentencePool = [];
     let currentSentence = null;
+    let hasLostHealthOnCurrentSentence = false;
+
+    // 文章填空狀態
+    let passagePool = [];
+    let currentPassage = null; // This is actually the current question object
+    let hasLostHealthOnCurrentQuestion = false;
 
     // --- 存儲 & 數據管理 ---
     function saveProgress() {
@@ -253,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 遊戲主要功能 ---
     async function loadWords(filePath) {
         try {
-            const response = await fetch(filePath);
+            const response = await fetch(`${filePath}?v=${Date.now()}`);
             if (!response.ok) throw new Error(`無法讀取 ${filePath}: ${response.statusText}`);
             wordList = await response.json();
             if (!Array.isArray(wordList) || wordList.length === 0) throw new Error("單字列表為空或格式錯誤。");
@@ -625,6 +644,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showStartScreen();
             return;
         }
+        
+        currentHealth = MAX_HEALTH;
+        wordsWrongInSession.clear();
+        updateHealthDisplay();
         setupNextSentence();
     }
 
@@ -647,12 +670,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setupNextSentence() {
+        hasLostHealthOnCurrentSentence = false;
         if (sentencePool.length === 0) {
-            sentenceFeedbackEl.textContent = '恭喜！已完成本單元所有句型練習！';
-            sentenceFeedbackEl.className = 'feedback-message notice';
-            checkSentenceBtn.style.display = 'none';
-            nextSentenceBtn.style.display = 'none';
-            playSentenceAudioBtn.style.display = 'none';
+            // Call gameOver(true) for sentence mode completion
+            gameOver(true);
             return;
         }
         currentSentence = sentencePool.pop();
@@ -704,40 +725,225 @@ document.addEventListener('DOMContentLoaded', () => {
             sentenceAnswerAreaEl.innerHTML = '';
             sentenceAnswerAreaEl.appendChild(finalSentence);
         } else {
-            sentenceFeedbackEl.textContent = '不正確，請再試一次。';
+            sentenceFeedbackEl.innerHTML = `不正確，請再試一次。<br>正確答案是: <strong>${currentSentence.sentence}</strong>`;
             sentenceFeedbackEl.className = 'feedback-message incorrect';
+
+            if (!hasLostHealthOnCurrentSentence) {
+                currentHealth--;
+                updateHealthDisplay();
+                wordsWrongInSession.add(currentSentence.sentence);
+                hasLostHealthOnCurrentSentence = true;
+            }
+
+            if (currentHealth <= 0) {
+                sentenceFeedbackEl.innerHTML = `生命值耗盡！<br>正確答案是: <strong>${currentSentence.sentence}</strong>`;
+                checkSentenceBtn.style.display = 'none';
+                nextSentenceBtn.style.display = 'none';
+                setTimeout(() => gameOver(false), 2000);
+            }
         }
     }
+
+    // --- 文章填空遊戲邏輯 ---
+    function playPassageAudio() {
+        if (isPlaying || !currentPassage || !synth) return;
+        synth.cancel();
+        const textToSpeak = currentPassage.fullEnglish;
+        if (!textToSpeak) return;
+        const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.onstart = () => { isPlaying = true; playPassageAudioBtn.disabled = true; };
+        utterance.onend = () => { isPlaying = false; playPassageAudioBtn.disabled = false; };
+        utterance.onerror = (event) => {
+            console.error('語音合成發生錯誤:', event);
+            isPlaying = false;
+            playPassageAudioBtn.disabled = false;
+        };
+        synth.speak(utterance);
+    }
+
+    function initializePassageFillGame() {
+        const passages = wordList.reduce((acc, item) => {
+            if (!acc[item.passage]) {
+                acc[item.passage] = [];
+            }
+            acc[item.passage].push(item);
+            return acc;
+        }, {});
+
+        const questionPool = [];
+        for (const passageNum in passages) {
+            const sentences = passages[passageNum].sort((a, b) => a.sort - b.sort);
+            sentences.forEach((sentence, index) => {
+                if (sentence.cloze) {
+                    questionPool.push({
+                        contextSentences: sentences,
+                        blankIndex: index,
+                        answer: sentence.cloze,
+                        hint: sentence.chinese,
+                        fullEnglish: sentence.english
+                    });
+                }
+            });
+        }
+
+        passagePool = questionPool.sort(() => Math.random() - 0.5);
+        currentHealth = MAX_HEALTH;
+        wordsWrongInSession.clear();
+        updateHealthDisplay();
+
+        if (passagePool.length === 0) {
+            alert('這個單元沒有適合進行文章填空練習的內容 (缺少 "cloze" 屬性)。');
+            showStartScreen();
+            return;
+        }
+        setupNextPassageFill();
+    }
+
+    function setupNextPassageFill() {
+        if (passagePool.length === 0) {
+            // Since there's no separate review round, we consider the game won.
+            gameOver(true); 
+            return;
+        }
+        currentPassage = passagePool.shift();
+        hasLostHealthOnCurrentQuestion = false;
+        isWaitingForNextPassage = false;
+
+        passageEnglishDisplayEl.innerHTML = '';
+        currentPassage.contextSentences.forEach((sentence, index) => {
+            const sentenceEl = document.createElement('div');
+            sentenceEl.className = 'passage-sentence';
+
+            if (index === currentPassage.blankIndex) {
+                sentenceEl.classList.add('blank');
+                
+                const hintEl = document.createElement('p');
+                hintEl.className = 'passage-hint';
+                hintEl.textContent = `提示: ${currentPassage.hint}`;
+                
+                const clozeText = currentPassage.answer;
+                const fullText = currentPassage.fullEnglish;
+                const parts = fullText.split(clozeText);
+
+                const lineContainer = document.createElement('div');
+                lineContainer.className = 'passage-line-container';
+                
+                const inputEl = document.createElement('input');
+                inputEl.type = 'text';
+                inputEl.className = 'passage-fill-input';
+                inputEl.placeholder = '請填寫此處';
+                inputEl.style.width = `${Math.max(clozeText.length * 0.9, 15)}ch`;
+
+                lineContainer.appendChild(document.createTextNode(parts[0]));
+                lineContainer.appendChild(inputEl);
+                lineContainer.appendChild(document.createTextNode(parts[1]));
+
+                sentenceEl.appendChild(lineContainer);
+                sentenceEl.appendChild(hintEl);
+
+            } else {
+                sentenceEl.textContent = sentence.english;
+            }
+            passageEnglishDisplayEl.appendChild(sentenceEl);
+        });
+
+        passageFeedbackDisplayEl.innerHTML = '';
+        checkPassageBtn.style.display = 'block';
+        nextPassageBtn.style.display = 'none';
+        playPassageAudioBtn.style.display = synth ? 'block' : 'none';
+        
+        const input = passageEnglishDisplayEl.querySelector('.passage-fill-input');
+        if (input) input.focus();
+
+        setTimeout(playPassageAudio, 100);
+    }
+
+    function checkPassageFill() {
+        const inputEl = passageEnglishDisplayEl.querySelector('.passage-fill-input');
+        if (!inputEl || isWaitingForNextPassage) return;
+
+        const userAnswer = inputEl.value.trim();
+        const correctAnswer = currentPassage.answer;
+        
+        const cleanUserAnswer = userAnswer.replace(/[.,?!;:]/g, '').replace(/\s/g, '').toLowerCase();
+        const cleanCorrectAnswer = correctAnswer.replace(/[.,?!;:]/g, '').replace(/\s/g, '').toLowerCase();
+
+        if (cleanUserAnswer === cleanCorrectAnswer) {
+            passageFeedbackDisplayEl.innerHTML = '正確！ <span class="enter-hint">按 Enter 繼續...</span>';
+            passageFeedbackDisplayEl.className = 'feedback-message correct';
+            
+            const lineContainer = inputEl.parentElement;
+            lineContainer.innerHTML = currentPassage.fullEnglish;
+
+            checkPassageBtn.style.display = 'none';
+            nextPassageBtn.style.display = 'block';
+            nextPassageBtn.textContent = '下一題';
+            nextPassageBtn.onclick = setupNextPassageFill;
+            isWaitingForNextPassage = true;
+
+        } else {
+            passageFeedbackDisplayEl.innerHTML = `不正確，請修正紅色框內的答案。<br>正確答案是: <strong>${currentPassage.answer}</strong>`;
+            passageFeedbackDisplayEl.className = 'feedback-message incorrect';
+            inputEl.classList.add('input-incorrect');
+            setTimeout(() => inputEl.classList.remove('input-incorrect'), 600);
+
+            if (!hasLostHealthOnCurrentQuestion) {
+                currentHealth--;
+                updateHealthDisplay();
+                wordsWrongInSession.add(currentPassage.answer);
+                hasLostHealthOnCurrentQuestion = true;
+            }
+
+            if (currentHealth <= 0) {
+                passageFeedbackDisplayEl.innerHTML = `生命值耗盡！<br>正確答案是: <strong>${currentPassage.answer}</strong>`;
+                checkPassageBtn.style.display = 'none';
+                nextPassageBtn.style.display = 'none';
+                setTimeout(() => gameOver(false), 2000);
+            }
+        }
+    }
+
 
     // --- 通用遊戲邏輯 ---
     function gameOver(isSuccess) {
         const unitPath = currentWordListPath;
         const unitName = currentWordListName;
-        if (!playerStats.unitData[unitPath]) {
-            playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
-        } else if (!playerStats.unitData[unitPath].completionHistory) {
-            playerStats.unitData[unitPath].completionHistory = [];
-        }
+        
         if (isSuccess) {
-            playerStats.unitData[unitPath].completionHistory.push(Date.now());
-        }
-        const unlockedInSession = [];
-        if (isSuccess) {
-            if (currentHealth === MAX_HEALTH) {
-                if (!playerStats.unitData[unitPath].achievements.GOLD) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name); playerStats.unitData[unitPath].achievements.GOLD = true; }
+            // Achievement tracking and history for spelling mode only
+            if (activeGameMode === 'spelling') {
+                if (!playerStats.unitData[unitPath]) {
+                    playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
+                } else if (!playerStats.unitData[unitPath].completionHistory) {
+                    playerStats.unitData[unitPath].completionHistory = [];
+                }
+                playerStats.unitData[unitPath].completionHistory.push(Date.now());
+
+                const unlockedInSession = [];
+                if (currentHealth === MAX_HEALTH) {
+                    if (!playerStats.unitData[unitPath].achievements.GOLD) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name); playerStats.unitData[unitPath].achievements.GOLD = true; }
+                }
+                if (currentHealth >= (MAX_HEALTH - 1)) {
+                    if (!playerStats.unitData[unitPath].achievements.SILVER) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name); playerStats.unitData[unitPath].achievements.SILVER = true; }
+                }
+                if (currentHealth >= (MAX_HEALTH - 2)) {
+                    if (!playerStats.unitData[unitPath].achievements.BRONZE) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name); playerStats.unitData[unitPath].achievements.BRONZE = true; }
+                }
+                checkStreakAchievements(unitPath, unlockedInSession);
+                if(unlockedInSession.length > 0) showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+                
+                checkGlobalAchievements(); // Global achievements are still checked for spelling mode completions
+                completionContainer.querySelector('.start-title').textContent = '恭喜通關！';
+                completionContainer.querySelector('p').textContent = '你已完成本單元的所有練習。';
+            } else if (['translation', 'passage-translation', 'sentence'].includes(activeGameMode)) {
+                // Reward for non-spelling modes
+                playerStats.totalPoints += 10;
+                showToast('完成練習，獲得 10 點獎勵！');
+                completionContainer.querySelector('.start-title').textContent = '恭喜完成練習！';
+                completionContainer.querySelector('p').textContent = '你已完成本單元的練習，獲得 10 點獎勵。';
             }
-            if (currentHealth >= (MAX_HEALTH - 1)) {
-                if (!playerStats.unitData[unitPath].achievements.SILVER) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name); playerStats.unitData[unitPath].achievements.SILVER = true; }
-            }
-            if (currentHealth >= (MAX_HEALTH - 2)) {
-                if (!playerStats.unitData[unitPath].achievements.BRONZE) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name); playerStats.unitData[unitPath].achievements.BRONZE = true; }
-            }
-            checkStreakAchievements(unitPath, unlockedInSession);
-            if(unlockedInSession.length > 0) showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
-            completionContainer.querySelector('.start-title').textContent = '恭喜通關！';
-            completionContainer.querySelector('p').textContent = '你已完成本單元的所有練習。';
-            document.getElementById('restart-btn').style.display = 'block';
-            document.getElementById('back-to-menu-btn').style.display = 'block';
         } else {
             const completionTitle = completionContainer.querySelector('.start-title');
             const completionMessage = completionContainer.querySelector('p');
@@ -749,10 +955,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 messageHTML += `<div style="text-align: left; margin-top: 1.5rem; font-size: 1rem;"><strong style="color: var(--header-color);">本輪錯題列表：</strong><ul style="list-style-type: disc; padding-left: 20px; margin-top: 0.5rem;">${wrongWordsListHTML}</ul></div>`;
             }
             completionMessage.innerHTML = messageHTML;
-            document.getElementById('restart-btn').style.display = 'block';
-            document.getElementById('back-to-menu-btn').style.display = 'block';
         }
-        checkGlobalAchievements();
+        
+        document.getElementById('restart-btn').style.display = 'block';
+        document.getElementById('back-to-menu-btn').style.display = 'block';
+        
         saveProgress();
         gameContainer.style.display = 'none';
         completionContainer.style.display = 'flex';
@@ -790,6 +997,7 @@ document.addEventListener('DOMContentLoaded', () => {
         completionContainer.style.display = 'none';
         achievementContainer.style.display = 'none';
         sentenceContainer.style.display = 'none';
+        passageTranslationContainer.style.display = 'none';
         startContainer.style.display = 'flex';
         
         translationControls.style.display = 'none';
@@ -801,6 +1009,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modeBtnSpelling.classList.remove('mode-selected');
         modeBtnSentence.classList.remove('mode-selected');
         modeBtnTranslation.classList.remove('mode-selected');
+        modeBtnPassageTranslation.classList.remove('mode-selected');
         updateTotalPointsDisplay();
     }
 
@@ -810,16 +1019,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateHealthDisplay() {
-        healthDisplayEl.innerHTML = '';
-        for (let i = 0; i < MAX_HEALTH; i++) {
-            const heartSpan = document.createElement('span');
-            heartSpan.classList.add('heart');
-            heartSpan.textContent = '❤️';
-            if (i < currentHealth) {
-                heartSpan.classList.add('full');
+        const healthDisplays = document.querySelectorAll('.health-display');
+        healthDisplays.forEach(displayEl => {
+            displayEl.innerHTML = '';
+            for (let i = 0; i < MAX_HEALTH; i++) {
+                const heartSpan = document.createElement('span');
+                heartSpan.classList.add('heart');
+                heartSpan.textContent = '❤️';
+                if (i < currentHealth) {
+                    heartSpan.classList.add('full');
+                }
+                displayEl.appendChild(heartSpan);
             }
-            healthDisplayEl.appendChild(heartSpan);
-        }
+        });
     }
 
     // --- 新的啟動流程 ---
@@ -873,6 +1085,9 @@ document.addEventListener('DOMContentLoaded', () => {
             translationControls.style.display = 'block';
             gameContainer.style.display = 'block';
             initializeTranslationGame();
+        } else if (activeGameMode === 'passage-translation') {
+            passageTranslationContainer.style.display = 'block';
+            initializePassageFillGame();
         }
     }
 
@@ -887,6 +1102,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modeBtnSpelling.classList.add('mode-selected');
             modeBtnSentence.classList.remove('mode-selected');
             modeBtnTranslation.classList.remove('mode-selected');
+            modeBtnPassageTranslation.classList.remove('mode-selected');
             updateWordListDropdown('spelling');
         });
 
@@ -895,6 +1111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modeBtnSentence.classList.add('mode-selected');
             modeBtnSpelling.classList.remove('mode-selected');
             modeBtnTranslation.classList.remove('mode-selected');
+            modeBtnPassageTranslation.classList.remove('mode-selected');
             updateWordListDropdown('sentence');
         });
 
@@ -903,7 +1120,17 @@ document.addEventListener('DOMContentLoaded', () => {
             modeBtnTranslation.classList.add('mode-selected');
             modeBtnSpelling.classList.remove('mode-selected');
             modeBtnSentence.classList.remove('mode-selected');
+            modeBtnPassageTranslation.classList.remove('mode-selected');
             updateWordListDropdown('translation');
+        });
+
+        modeBtnPassageTranslation.addEventListener('click', () => {
+            activeGameMode = 'passage-translation';
+            modeBtnPassageTranslation.classList.add('mode-selected');
+            modeBtnSpelling.classList.remove('mode-selected');
+            modeBtnSentence.classList.remove('mode-selected');
+            modeBtnTranslation.classList.remove('mode-selected');
+            updateWordListDropdown('passage-translation');
         });
 
         startGameBtn.addEventListener('click', startGame);
@@ -923,6 +1150,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     e.preventDefault();
                     checkTranslationAnswer();
                 }
+            } else if (activeGameMode === 'passage-translation') {
+                if (isWaitingForNextPassage) {
+                    e.preventDefault();
+                    setupNextPassageFill();
+                } else if (document.activeElement.classList.contains('passage-fill-input')) {
+                    e.preventDefault();
+                    checkPassageFill();
+                }
             }
         });
 
@@ -937,6 +1172,12 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (activeGameMode === 'translation') {
                 gameContainer.style.display = 'block';
                 initializeTranslationGame();
+            } else if (activeGameMode === 'sentence') {
+                sentenceContainer.style.display = 'block';
+                initializeSentenceGame();
+            } else if (activeGameMode === 'passage-translation') {
+                passageTranslationContainer.style.display = 'block';
+                initializePassageFillGame();
             }
         });
 
@@ -946,6 +1187,11 @@ document.addEventListener('DOMContentLoaded', () => {
         checkSentenceBtn.addEventListener('click', checkSentence);
         nextSentenceBtn.addEventListener('click', setupNextSentence);
         playSentenceAudioBtn.addEventListener('click', playSentenceAudio);
+
+        // 文章填空按鈕
+        checkPassageBtn.addEventListener('click', checkPassageFill);
+        nextPassageBtn.addEventListener('click', setupNextPassageFill);
+        playPassageAudioBtn.addEventListener('click', playPassageAudio);
 
         // 成就和兌換按鈕
         showAchievementsBtn.addEventListener('click', () => { updateAchievementDisplay(); achievementContainer.style.display = 'flex'; });
