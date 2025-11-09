@@ -8,6 +8,7 @@
   {
     "passage": 1,
     "sort": 2,
+    "cloze": "With this door, we can go to many places.",
     "english": "With this door, we can go to many places.",
     "chinese": "藉由這扇門，我們可以去很多地方。"
   },
@@ -50,12 +51,14 @@
   {
     "passage": 1,
     "sort": 9,
+    "cloze": "We're in a museum.",
     "english": "Yuki: Oh, no! We're in a museum. People can see us.",
     "chinese": "由紀: 喔，不！我們在博物館裡。人們可以看見我們。"
   },
   {
     "passage": 1,
     "sort": 10,
+    "cloze": "Zac, open the magic door. Hurry!",
     "english": "Cody: Zac, open the magic door. Hurry!",
     "chinese": "科迪: 札克，打開神奇的門。快點！"
   },
@@ -74,18 +77,21 @@
   {
     "passage": 2,
     "sort": 3,
+    "cloze": "I'm not sure.",
     "english": "Yuki: I'm not sure.",
     "chinese": "由紀: 我不確定。"
   },
   {
     "passage": 2,
     "sort": 4,
+    "cloze": "I can jump on these rocks.",
     "english": "Zac: Look! I can jump on these rocks.",
     "chinese": "札克: 看！我可以在這些石頭上跳。"
   },
   {
     "passage": 2,
     "sort": 5,
+    "cloze": "Zac, don't do that, please.",
     "english": "Jamie: Zac, don't do that, please.",
     "chinese": "潔米: 札克，請不要這樣做。"
   },
@@ -104,6 +110,7 @@
   {
     "passage": 2,
     "sort": 8,
+    "cloze": "Look behind you, Zac.",
     "english": "Cody: Look behind you, Zac.",
     "chinese": "科迪: 看看你後面，札克。"
   },
@@ -128,6 +135,7 @@
   {
     "passage": 3,
     "sort": 2,
+    "cloze": "Please... no mummies or dinosaurs this time.",
     "english": "Yuki: Please... no mummies or dinosaurs this time.",
     "chinese": "由紀: 拜託... 這次不要再有木乃伊或恐龍。"
   },
@@ -146,6 +154,7 @@
   {
     "passage": 3,
     "sort": 5,
+    "cloze": "it's very special.",
     "english": "Zac: This house is really small, but it's very special.",
     "chinese": "札克: 這個房子真的很小，但它非常特別。"
   },
@@ -170,37 +179,43 @@
   {
     "passage": 3,
     "sort": 9,
+    "cloze": "Time for class.",
     "english": "Yuki: Time for class.",
     "chinese": "由紀: 上課時間到了。"
   },
   {
     "passage": 4,
     "sort": 1,
+    "cloze": "Please follow these lab rules and be safe.",
     "english": "Please follow these lab rules and be safe.",
     "chinese": "請遵守這些實驗室規則並小心安全。"
   },
   {
     "passage": 4,
     "sort": 2,
-    "english": "Listen to your teacher.",
-    "chinese": "聽老師的話。"
+    "cloze": "1. Listen to your teacher.",
+    "english": "1. Listen to your teacher.",
+    "chinese": "1. 聽老師的話。"
   },
   {
     "passage": 4,
     "sort": 3,
-    "english": "Do not run in the lab.",
-    "chinese": "禁止在實驗室裡奔跑。"
+    "cloze": "2. Do not run in the lab.",
+    "english": "2. Do not run in the lab.",
+    "chinese": "2. 禁止在實驗室裡奔跑。"
   },
   {
     "passage": 4,
     "sort": 4,
-    "english": "Do not eat or drink in the lab.",
-    "chinese": "禁止在實驗室裡飲食。"
+    "cloze": "3. Do not eat or drink in the lab.",
+    "english": "3. Do not eat or drink in the lab.",
+    "chinese": "3. 禁止在實驗室裡飲食。"
   },
   {
     "passage": 4,
     "sort": 5,
-    "english": "Wash your hands after class.",
-    "chinese": "下課後要洗手。"
+    "cloze": "4. Wash your hands after class.",
+    "english": "4. Wash your hands after class.",
+    "chinese": "4. 下課後要洗手。"
   }
 ]
