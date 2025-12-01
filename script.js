@@ -308,10 +308,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedbackEl.textContent = `第 ${roundCount} 回合結束！現在開始訂正錯題...`;
                 feedbackEl.className = 'feedback-message notice';
             } else {
+                // Successfully completed a round. Award points before moving to the next round or ending the game.
+                if (activeGameMode === 'spelling') {
+                    if (roundCount === 1) {
+                        playerStats.totalPoints += 5;
+                        showToast('完成第 1 回合，獲得 5 點！');
+                        saveProgress();
+                        updateTotalPointsDisplay();
+                    } else if (roundCount === 2) {
+                        playerStats.totalPoints += 5;
+                        showToast('完成第 2 回合，獲得 5 點！');
+                        saveProgress();
+                        updateTotalPointsDisplay();
+                    }
+                }
+
                 if (roundCount >= 3) {
+                    // Award points for completing the final round right before the game ends.
+                    if (activeGameMode === 'spelling' && roundCount === 3) {
+                        playerStats.totalPoints += 10;
+                        showToast('完成第 3 回合，獲得 10 點！');
+                    }
                     gameOver(true);
                     return;
                 }
+
+                // Start next round
                 gameMode = 'practice';
                 roundCount++;
                 wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
@@ -1199,6 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showRedemptionsBtn.addEventListener('click', () => { renderRedemptionHistory(); redemptionContainer.style.display = 'flex'; });
         closeRedemptionsBtn.addEventListener('click', () => { redemptionContainer.style.display = 'none'; });
         redemptionForm.addEventListener('submit', handleManualRedeem);
+
     }
 
     main();
