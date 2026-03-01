@@ -380,6 +380,37 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(playWordAudio, 100);
     }
 
+    // --- 語音輔助函式 ---
+    function getPreferredVoice() {
+        const voices = synth.getVoices();
+        if (voices.length === 0) return null;
+
+        // 優先尋找 Google 提供的女聲 (通常品質較好，特別是 Chrome)
+        let preferredVoice = voices.find(voice => voice.name === 'Google US English');
+        
+        // 蘋果 macOS/iOS 上常見的高品質女聲
+        if (!preferredVoice) {
+            preferredVoice = voices.find(voice => voice.name === 'Samantha' && voice.lang.includes('en'));
+        }
+        
+        // 微軟 Edge 上的高品質女聲
+        if (!preferredVoice) {
+            preferredVoice = voices.find(voice => voice.name.includes('Microsoft Zira') && voice.lang.includes('en'));
+        }
+
+        // 如果上面都沒找到，退而求其次找任何標示為 en-US 的聲音 (盡量避開有 'Male' 標籤的)
+        if (!preferredVoice) {
+            preferredVoice = voices.find(voice => voice.lang === 'en-US' && !voice.name.includes('Male'));
+        }
+
+        // 最後手段：隨便挑一個英文聲音
+        if (!preferredVoice) {
+            preferredVoice = voices.find(voice => voice.lang.startsWith('en'));
+        }
+        
+        return preferredVoice || voices[0];
+    }
+
     // --- 翻譯填空遊戲邏輯 ---
     function initializeTranslationGame() {
         if (wordList.length === 0) return;
@@ -570,6 +601,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!textToSpeak) return;
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        const preferredVoice = getPreferredVoice();
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
         utterance.onstart = () => { isPlaying = true; playAudioBtnEl.disabled = true; };
@@ -685,6 +720,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const textToSpeak = currentSentence.sentence;
         if (!textToSpeak) return;
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        const preferredVoice = getPreferredVoice();
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
         utterance.onstart = () => { isPlaying = true; playSentenceAudioBtn.disabled = true; };
@@ -779,6 +818,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const textToSpeak = currentPassage.fullEnglish;
         if (!textToSpeak) return;
         const utterance = new SpeechSynthesisUtterance(textToSpeak);
+        const preferredVoice = getPreferredVoice();
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
         utterance.onstart = () => { isPlaying = true; playPassageAudioBtn.disabled = true; };
