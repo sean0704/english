@@ -85,6 +85,12 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '七年級 上 Unit 4', path: 'g7_1_unit4.json', type: 'spelling' },
         { name: '七年級 上 Unit 5', path: 'g7_1_unit5.json', type: 'spelling' },
         { name: '七年級 上 Unit 6', path: 'g7_1_unit6.json', type: 'spelling' },
+        { name: '七年級 下 Unit 1', path: 'g7_2_unit1.json', type: 'spelling' },
+        { name: '七年級 下 Unit 2', path: 'g7_2_unit2.json', type: 'spelling' },
+        { name: '七年級 下 Unit 3', path: 'g7_2_unit3.json', type: 'spelling' },
+        { name: '七年級 下 Unit 4', path: 'g7_2_unit4.json', type: 'spelling' },
+        { name: '七年級 下 Unit 5', path: 'g7_2_unit5.json', type: 'spelling' },
+        { name: '七年級 下 Unit 6', path: 'g7_2_unit6.json', type: 'spelling' },
     ];
 
     // --- 生命值設定 ---

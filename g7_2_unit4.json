@@ -1,0 +1,254 @@
+[
+  {
+    "english": "why",
+    "chinese": "為什麼",
+    "phonetics": "[(h)waɪ]",
+    "example": "Why is the sea blue?"
+  },
+  {
+    "english": "wear",
+    "chinese": "戴；穿",
+    "phonetics": "[wɛr]",
+    "example": "I never wear a watch."
+  },
+  {
+    "english": "mask",
+    "chinese": "口罩；面具",
+    "phonetics": "[mæsk]",
+    "example": "Dr. Smith is wearing a mask."
+  },
+  {
+    "english": "because",
+    "chinese": "因為",
+    "phonetics": "[bɪ`kɔz]",
+    "example": "I drink coffee in the morning because it wakes me up."
+  },
+  {
+    "english": "sick",
+    "chinese": "生病的",
+    "phonetics": "[sɪk]",
+    "example": "Mindy can't come to the party because she's sick."
+  },
+  {
+    "english": "water",
+    "chinese": "水",
+    "phonetics": "[`wɔtɚ]",
+    "example": "A: How may I help you? B: Can I have some water, please?"
+  },
+  {
+    "english": "glass",
+    "chinese": "玻璃杯；玻璃",
+    "phonetics": "[glæs]",
+    "example": "A: What is that? B: That's a glass of milk shake."
+  },
+  {
+    "english": "flour",
+    "chinese": "麵粉",
+    "phonetics": "[flaʊr]",
+    "example": "There are three bags of flour on the table."
+  },
+  {
+    "english": "need",
+    "chinese": "需要；需求",
+    "phonetics": "[nid]",
+    "example": "A: How many apples do you need? B: Six is enough. Thanks."
+  },
+  {
+    "english": "pie",
+    "chinese": "派",
+    "phonetics": "[paɪ]",
+    "example": "Do you want some apple pie?"
+  },
+  {
+    "english": "still",
+    "chinese": "仍然",
+    "phonetics": "[stɪl]",
+    "example": "The boy is still hungry after the big meal."
+  },
+  {
+    "english": "thing",
+    "chinese": "東西；事情",
+    "phonetics": "[θɪŋ]",
+    "example": "Can you buy these things for me?"
+  },
+  {
+    "english": "a little",
+    "chinese": "一點點",
+    "phonetics": "[ə `lɪtl]",
+    "example": "A: Do you have any milk? I only need a little. B: No, I don't have any."
+  },
+  {
+    "english": "salt",
+    "chinese": "鹽",
+    "phonetics": "[sɔlt]",
+    "example": "Do not eat too much salt. It is not good for you."
+  },
+  {
+    "english": "something",
+    "chinese": "某物；某事",
+    "phonetics": "[`sʌmθɪŋ]",
+    "example": "I have something for you."
+  },
+  {
+    "english": "sugar",
+    "chinese": "糖",
+    "phonetics": "[`ʃʊgɚ]",
+    "example": "A: How much is a bag of sugar? B: It's NT$45."
+  },
+  {
+    "english": "get",
+    "chinese": "取得",
+    "phonetics": "[gɛt]",
+    "example": "We can get some food over there."
+  },
+  {
+    "english": "all right",
+    "chinese": "好的；好吧",
+    "phonetics": "[ˌɔl `raɪt]",
+    "example": "A: I don't have any eggs. Can you give me some? B: All right. Here you go."
+  },
+  {
+    "english": "so",
+    "chinese": "所以",
+    "phonetics": "[so]",
+    "example": "Marvin is always tired in the morning, so he sometimes takes a shower before work."
+  },
+  {
+    "english": "back off",
+    "chinese": "退後；走開",
+    "phonetics": "[ˌbæk `ɔf]",
+    "example": "Back off! Don't play with the dog. It's not safe."
+  },
+  {
+    "english": "meal",
+    "chinese": "餐",
+    "phonetics": "[mil]",
+    "example": "My family always has a big meal on Christmas Eve."
+  },
+  {
+    "english": "bottle",
+    "chinese": "瓶子",
+    "phonetics": "[`bɑtl]",
+    "example": "There is a bottle of juice on the sofa."
+  },
+  {
+    "english": "candy",
+    "chinese": "糖果",
+    "phonetics": "[`kændɪ]",
+    "example": "Is there any candy in the box?"
+  },
+  {
+    "english": "popcorn",
+    "chinese": "爆米花",
+    "phonetics": "[`pɑpˌkɔrn]",
+    "example": "A tub of popcorn is NT$80."
+  },
+  {
+    "english": "cup",
+    "chinese": "杯",
+    "phonetics": "[kʌp]",
+    "example": "A: I am so tired. B: A cup of coffee can help."
+  },
+  {
+    "english": "bowl",
+    "chinese": "碗",
+    "phonetics": "[bol]",
+    "example": "She eats a bowl of fruit every morning."
+  },
+  {
+    "english": "fruit salad",
+    "chinese": "水果沙拉",
+    "phonetics": "[`frut ˌsæləd]",
+    "example": "How about a plate of fruit salad for breakfast?"
+  },
+  {
+    "english": "pizza",
+    "chinese": "披薩",
+    "phonetics": "[`pitsə]",
+    "example": "These five pizzas are for Andy's party."
+  },
+  {
+    "english": "milk shake",
+    "chinese": "奶昔 (= milkshake)",
+    "phonetics": "[`mɪlk ˌʃek]",
+    "example": "I'm making some milk shake. Do you want some?"
+  },
+  {
+    "english": "can",
+    "chinese": "罐子",
+    "phonetics": "[kæn]",
+    "example": "The can of juice is bad. Don't drink it."
+  },
+  {
+    "english": "toast",
+    "chinese": "烤吐司；烘烤",
+    "phonetics": "[tost]",
+    "example": "Miss Parker often has toast for breakfast."
+  },
+  {
+    "english": "bread",
+    "chinese": "麵包",
+    "phonetics": "[brɛd]",
+    "example": "Do you like white bread or brown bread?"
+  },
+  {
+    "english": "yummy",
+    "chinese": "好吃的",
+    "phonetics": "[`jʌmɪ]",
+    "example": "These cookies are yummy. Where can I get them?"
+  },
+  {
+    "english": "easy",
+    "chinese": "容易的",
+    "phonetics": "[`izɪ]",
+    "example": "Life is not easy for many people."
+  },
+  {
+    "english": "snack",
+    "chinese": "點心",
+    "phonetics": "[snæk]",
+    "example": "I'm hungry. I want some snacks."
+  },
+  {
+    "english": "kid",
+    "chinese": "小孩",
+    "phonetics": "[kɪd]",
+    "example": "A: Is this your kid? He's cute. B: Yes, he is my son."
+  },
+  {
+    "english": "cheese",
+    "chinese": "乳酪",
+    "phonetics": "[tʃiz]",
+    "example": "Kyle always puts a lot of cheese on his pizza."
+  },
+  {
+    "english": "plate",
+    "chinese": "盤子",
+    "phonetics": "[plet]",
+    "example": "Please be careful. This is my mom's favorite plate."
+  },
+  {
+    "english": "last",
+    "chinese": "最後（的）",
+    "phonetics": "[læst]",
+    "example": "This is our last bottle of water, guys."
+  },
+  {
+    "english": "enjoy",
+    "chinese": "享受；喜愛",
+    "phonetics": "[ɪn`dʒɔɪ]",
+    "example": "A: Don't be nervous. Enjoy your time! B: Thanks."
+  },
+  {
+    "english": "turn into",
+    "chinese": "（使）變成",
+    "phonetics": "[ˌtɝn `ɪntə]",
+    "example": "We can turn this sofa into a bed."
+  },
+  {
+    "english": "each",
+    "chinese": "每一個（的）",
+    "phonetics": "[itʃ]",
+    "example": "Each family is enjoying the holidays."
+  }
+]

@@ -1,0 +1,230 @@
+[
+  {
+    "english": "painting",
+    "chinese": "畫作",
+    "phonetics": "[`pentɪŋ]",
+    "example": "The paintings on the wall are beautiful."
+  },
+  {
+    "english": "flower",
+    "chinese": "花",
+    "phonetics": "[`flaʊɚ]",
+    "example": "Do we have enough flowers for our dinner party?"
+  },
+  {
+    "english": "which",
+    "chinese": "哪一個",
+    "phonetics": "[hwɪtʃ]",
+    "example": "A: Which is Kyle's house? B: The red house over there is."
+  },
+  {
+    "english": "thirsty",
+    "chinese": "口渴的",
+    "phonetics": "[`θɝstɪ]",
+    "example": "I am always hot and thirsty after baseball games."
+  },
+  {
+    "english": "coffee",
+    "chinese": "咖啡",
+    "phonetics": "[`kɔfɪ]",
+    "example": "Too much coffee is not good for you."
+  },
+  {
+    "english": "shop",
+    "chinese": "商店",
+    "phonetics": "[ʃɑp]",
+    "example": "There aren't many shops near my house."
+  },
+  {
+    "english": "later",
+    "chinese": "稍後；晚點",
+    "phonetics": "[`letɚ]",
+    "example": "A: I'm going home now. Bye. B: See you later."
+  },
+  {
+    "english": "Of course.",
+    "chinese": "當然。",
+    "phonetics": "[əv `kɔrs]",
+    "example": "A: Are you going to Ed's birthday party later? B: Of course."
+  },
+  {
+    "english": "clerk",
+    "chinese": "店員",
+    "phonetics": "[klɝk]",
+    "example": "The clerk is very nice. She helps me a lot."
+  },
+  {
+    "english": "may",
+    "chinese": "可以；可能",
+    "phonetics": "[me]",
+    "example": "A: May I come in? B: Sure. Please come in."
+  },
+  {
+    "english": "juice",
+    "chinese": "果汁",
+    "phonetics": "[dʒus]",
+    "example": "I always have orange juice for breakfast."
+  },
+  {
+    "english": "want",
+    "chinese": "想要",
+    "phonetics": "[wɑnt]",
+    "example": "Mr. Chen wants a baby, but Mrs. Chen doesn't."
+  },
+  {
+    "english": "anything",
+    "chinese": "任何事物",
+    "phonetics": "[`ɛnɪˌθɪŋ]",
+    "example": "Do you know anything about Van Gogh?"
+  },
+  {
+    "english": "else",
+    "chinese": "其他",
+    "phonetics": "[ɛls]",
+    "example": "Joanne is not happy, but everyone else is."
+  },
+  {
+    "english": "treat",
+    "chinese": "請客；款待",
+    "phonetics": "[trit]",
+    "example": "Let me treat you to dinner later."
+  },
+  {
+    "english": "sweet",
+    "chinese": "甜美的；甜的",
+    "phonetics": "[swit]",
+    "example": "Holly is a sweet girl. People love her."
+  },
+  {
+    "english": "hot",
+    "chinese": "熱的",
+    "phonetics": "[hɑt]",
+    "example": "It's so hot. I want some ice cream."
+  },
+  {
+    "english": "chocolate",
+    "chinese": "巧克力",
+    "phonetics": "[`tʃɑkəlɪt]",
+    "example": "Chocolate ice cream is my favorite."
+  },
+  {
+    "english": "dollar",
+    "chinese": "元",
+    "phonetics": "[`dɑlɚ]",
+    "example": "A: How much is that comic book? B: It's two hundred dollars."
+  },
+  {
+    "english": "for here",
+    "chinese": "內用",
+    "phonetics": "[fɚ `hɪr]",
+    "example": "May I have black coffee for here, please?"
+  },
+  {
+    "english": "to go",
+    "chinese": "外帶",
+    "phonetics": "[tə `go]",
+    "example": "A: Do you want your juice for here or to go? B: To go. Thanks."
+  },
+  {
+    "english": "Here you are.",
+    "chinese": "給你。(= Here you go.)",
+    "phonetics": "[ˌhɪr ju `ɑr]",
+    "example": "A: May I have some tea, please? B: Sure. Here you are."
+  },
+  {
+    "english": "bright",
+    "chinese": "鮮豔的；明亮的",
+    "phonetics": "[braɪt]",
+    "example": "The man is painting the wall bright blue."
+  },
+  {
+    "english": "dark",
+    "chinese": "黑的；暗的",
+    "phonetics": "[dɑrk]",
+    "example": "It's too dark in my room. I can't read."
+  },
+  {
+    "english": "art",
+    "chinese": "美術；藝術",
+    "phonetics": "[ɑrt]",
+    "example": "Miss Lee is an art teacher at Green Junior High School."
+  },
+  {
+    "english": "milk",
+    "chinese": "牛奶",
+    "phonetics": "[mɪlk]",
+    "example": "Have some hot milk before bed."
+  },
+  {
+    "english": "hamburger",
+    "chinese": "漢堡 (= burger)",
+    "phonetics": "[`hæmbɝgɚ]",
+    "example": "The hamburger house on Elm Street is great."
+  },
+  {
+    "english": "chicken rice",
+    "chinese": "雞肉飯",
+    "phonetics": "[`tʃɪkɪn ˌraɪs]",
+    "example": "My mom makes good chicken rice."
+  },
+  {
+    "english": "tea",
+    "chinese": "茶",
+    "phonetics": "[ti]",
+    "example": "Do you have some ice? My tea is too hot."
+  },
+  {
+    "english": "ice cream",
+    "chinese": "冰淇淋",
+    "phonetics": "[`aɪs ˌkrim]",
+    "example": "Lara's favorite food is ice cream."
+  },
+  {
+    "english": "soup",
+    "chinese": "湯",
+    "phonetics": "[sup]",
+    "example": "In English, we always say "eat soup," not "drink soup.""
+  },
+  {
+    "english": "sandwich",
+    "chinese": "三明治",
+    "phonetics": "[`sændwɪtʃ]",
+    "example": "That shop has really good sandwiches."
+  },
+  {
+    "english": "work",
+    "chinese": "作品",
+    "phonetics": "[wɝk]",
+    "example": "The Mona Lisa is a work by Leonardo da Vinci."
+  },
+  {
+    "english": "show",
+    "chinese": "表現；秀出",
+    "phonetics": "[ʃo]",
+    "example": "She's showing her new watch to her friends."
+  },
+  {
+    "english": "part",
+    "chinese": "部分",
+    "phonetics": "[pɑrt]",
+    "example": "Music is an important part in a movie."
+  },
+  {
+    "english": "sky",
+    "chinese": "天空",
+    "phonetics": "[skaɪ]",
+    "example": "The sky is gray today."
+  },
+  {
+    "english": "street",
+    "chinese": "街道",
+    "phonetics": "[strit]",
+    "example": "It's a quiet night. There are no people on the street."
+  },
+  {
+    "english": "by",
+    "chinese": "被；由",
+    "phonetics": "[baɪ]",
+    "example": "I'm reading some books by Charles Dickens."
+  }
+]

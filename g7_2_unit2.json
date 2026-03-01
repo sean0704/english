@@ -1,0 +1,236 @@
+[
+  {
+    "english": "early",
+    "chinese": "早的",
+    "phonetics": "[`ɝlɪ]",
+    "example": "A: I go to bed at ten. B: That's early."
+  },
+  {
+    "english": "work",
+    "chinese": "工作",
+    "phonetics": "[wɝk]",
+    "example": "They work eight hours a day."
+  },
+  {
+    "english": "often",
+    "chinese": "經常",
+    "phonetics": "[`ɔf(t)ən]",
+    "example": "Timothy is often quiet in class."
+  },
+  {
+    "english": "get up",
+    "chinese": "起床",
+    "phonetics": "[ˌgɛt `ʌp]",
+    "example": "I'm not a morning person. I never get up before 10 a.m."
+  },
+  {
+    "english": "usually",
+    "chinese": "通常",
+    "phonetics": "[`juʒʊəlɪ]",
+    "example": "We usually have dinner at six."
+  },
+  {
+    "english": "seldom",
+    "chinese": "很少",
+    "phonetics": "[`sɛldəm]",
+    "example": "I seldom see my cousin. He is studying in Poland."
+  },
+  {
+    "english": "sometimes",
+    "chinese": "有時候",
+    "phonetics": "[`sʌmˌtaɪmz]",
+    "example": "A: Do you eat out? B: Yeah, sometimes."
+  },
+  {
+    "english": "even",
+    "chinese": "甚至",
+    "phonetics": "[`ivən]",
+    "example": "A: Do you like Alice? B: Alice? I don't even know her."
+  },
+  {
+    "english": "late",
+    "chinese": "晚的",
+    "phonetics": "[let]",
+    "example": "A: The movie is at 11 p.m. B: Wow, that's late."
+  },
+  {
+    "english": "do one's homework",
+    "chinese": "做功課",
+    "phonetics": "[ˌdu wʌnz `homˌwɝk]",
+    "example": "My brothers do their homework in the living room."
+  },
+  {
+    "english": "hour",
+    "chinese": "小時",
+    "phonetics": "[aʊr]",
+    "example": "That video is an hour and twenty minutes long."
+  },
+  {
+    "english": "always",
+    "chinese": "總是",
+    "phonetics": "[`ɔlwez]",
+    "example": "Hank is always nervous in front of girls."
+  },
+  {
+    "english": "tired",
+    "chinese": "疲累的",
+    "phonetics": "[taɪrd]",
+    "example": "The fans are tired after the meet-and-greet."
+  },
+  {
+    "english": "shower",
+    "chinese": "淋浴",
+    "phonetics": "[`ʃaʊɚ]",
+    "example": "Ashley is in the shower."
+  },
+  {
+    "english": "never",
+    "chinese": "從未",
+    "phonetics": "[`nɛvɚ]",
+    "example": "John is never late for school."
+  },
+  {
+    "english": "by the way",
+    "chinese": "順帶一提",
+    "phonetics": "[ˌbaɪ ðə `we]",
+    "example": "By the way, is your sister at home?"
+  },
+  {
+    "english": "library",
+    "chinese": "圖書館",
+    "phonetics": "[`laɪˌbrɛrɪ]",
+    "example": "Do you often go to the library?"
+  },
+  {
+    "english": "check out",
+    "chinese": "借（書）",
+    "phonetics": "[ˌtʃɛk `aʊt]",
+    "example": "I check out books from the library once a month."
+  },
+  {
+    "english": "once",
+    "chinese": "一次",
+    "phonetics": "[wʌns]",
+    "example": "I clean my room once a week."
+  },
+  {
+    "english": "twice",
+    "chinese": "兩次",
+    "phonetics": "[twaɪs]",
+    "example": "They walk the dogs twice a day."
+  },
+  {
+    "english": "walk",
+    "chinese": "遛（寵物）",
+    "phonetics": "[wɔk]",
+    "example": "We don't walk our dogs every day."
+  },
+  {
+    "english": "I can't help it.",
+    "chinese": "我沒辦法。 / 我控制不了。",
+    "phonetics": "[aɪ `kænt `hɛlp ɪt]",
+    "example": "A: You're listening to that song again. B: I can't help it. It's so good."
+  },
+  {
+    "english": "then",
+    "chinese": "然後",
+    "phonetics": "[ðɛn]",
+    "example": "Wash your hands, and then you can eat."
+  },
+  {
+    "english": "too",
+    "chinese": "太...",
+    "phonetics": "[tu]",
+    "example": "The table is too small for five people."
+  },
+  {
+    "english": "How often...?",
+    "chinese": "多常...？",
+    "phonetics": "[ˌhaʊ `ɔf(t)ən]",
+    "example": "A: How often do you say "I love you" to your family? B: Not very often."
+  },
+  {
+    "english": "about",
+    "chinese": "大約",
+    "phonetics": "[ə`baʊt]",
+    "example": "A: How often do you clean up your room? B: About once a month."
+  },
+  {
+    "english": "brush one's teeth",
+    "chinese": "刷牙",
+    "phonetics": "[ˌbrʌʃ wʌnz `tiθ]",
+    "example": "Do you brush your teeth after lunch?"
+  },
+  {
+    "english": "face",
+    "chinese": "臉",
+    "phonetics": "[fes]",
+    "example": "The girl's face is cute."
+  },
+  {
+    "english": "breakfast",
+    "chinese": "早餐",
+    "phonetics": "[`brɛkfəst]",
+    "example": "Some people don't eat breakfast."
+  },
+  {
+    "english": "lunch",
+    "chinese": "午餐",
+    "phonetics": "[lʌntʃ]",
+    "example": "The Chen family goes out for lunch on Sundays."
+  },
+  {
+    "english": "exercise",
+    "chinese": "運動",
+    "phonetics": "[`ɛksɚˌsaɪz]",
+    "example": "They often exercise at the park after dinner."
+  },
+  {
+    "english": "computer",
+    "chinese": "電腦",
+    "phonetics": "[kəm`pjutɚ]",
+    "example": "Students can't use the computer in class."
+  },
+  {
+    "english": "minute",
+    "chinese": "分鐘",
+    "phonetics": "[`mɪnɪt]",
+    "example": "A: Can we go in now? B: Please wait a minute. The classroom is not ready."
+  },
+  {
+    "english": "answer",
+    "chinese": "回答；答案",
+    "phonetics": "[`ænsɚ]",
+    "example": "A: Do you know the answer to this question? B: Sure."
+  },
+  {
+    "english": "question",
+    "chinese": "問題",
+    "phonetics": "[`kwɛstʃən]",
+    "example": "Sherry has a question about her homework."
+  },
+  {
+    "english": "trouble",
+    "chinese": "困難；麻煩",
+    "phonetics": "[`trʌbl]",
+    "example": "Mr. Chen's sons often make trouble at school."
+  },
+  {
+    "english": "life",
+    "chinese": "生活；生命",
+    "phonetics": "[laɪf]",
+    "example": "I have great friends and family. My life is good."
+  },
+  {
+    "english": "love",
+    "chinese": "愛",
+    "phonetics": "[lʌv]",
+    "example": "We have three dogs, and we love them very much."
+  },
+  {
+    "english": "real",
+    "chinese": "真實的",
+    "phonetics": "[`riəl]",
+    "example": "Ross Lee is not the writer's real name."
+  }
+]
