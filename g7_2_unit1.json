@@ -84,7 +84,7 @@
     "example": "The ruler is fifteen centimeters long."
   },
   {
-    "english": "You can say that again!",
+    "english": "You can say that again",
     "chinese": "一點也沒錯！",
     "phonetics": "[ju kən ˌse `ðæt ə`gɛn]",
     "example": "A: That band is really popular in the USA. B: You can say that again!"
@@ -240,8 +240,8 @@
     "example": "Adam is very good at basketball. On the other hand, he's new to baseball."
   },
   {
-    "english": "make up for...",
-    "chinese": "彌補...",
+    "english": "make up for",
+    "chinese": "彌補",
     "phonetics": "[mek `ʌp ˌfɔr]",
     "example": "For a baseball player, he's not very strong, but he makes up for it with a lot of practice."
   }

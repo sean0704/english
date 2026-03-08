@@ -1,0 +1,98 @@
+[
+  {
+    "english": "cook",
+    "chinese": "煮",
+    "phonetics": "[kʊk]",
+    "example": "I like to cook dinner for my family."
+  },
+  {
+    "english": "cooking",
+    "chinese": "正在煮",
+    "phonetics": "[ˈkʊkɪŋ]",
+    "example": "What are you doing? I'm cooking."
+  },
+  {
+    "english": "jump",
+    "chinese": "跳",
+    "phonetics": "[dʒʌmp]",
+    "example": "Can you jump high?"
+  },
+  {
+    "english": "jumping",
+    "chinese": "正在跳",
+    "phonetics": "[ˈdʒʌmpɪŋ]",
+    "example": "The boy is jumping on the bed."
+  },
+  {
+    "english": "sleep",
+    "chinese": "睡",
+    "phonetics": "[slip]",
+    "example": "I need to sleep early tonight."
+  },
+  {
+    "english": "sleeping",
+    "chinese": "正在睡",
+    "phonetics": "[ˈslipɪŋ]",
+    "example": "The baby is sleeping now."
+  },
+  {
+    "english": "study",
+    "chinese": "讀書",
+    "phonetics": "[ˈstʌdi]",
+    "example": "I study English every day."
+  },
+  {
+    "english": "studying",
+    "chinese": "正在讀書",
+    "phonetics": "[ˈstʌdiɪŋ]",
+    "example": "She is studying in the library."
+  },
+  {
+    "english": "write",
+    "chinese": "寫",
+    "phonetics": "[raɪt]",
+    "example": "Please write your name here."
+  },
+  {
+    "english": "writing",
+    "chinese": "正在寫",
+    "phonetics": "[ˈraɪtɪŋ]",
+    "example": "He is writing a letter."
+  },
+  {
+    "english": "dance",
+    "chinese": "跳舞",
+    "phonetics": "[dæns]",
+    "example": "They like to dance to the music."
+  },
+  {
+    "english": "dancing",
+    "chinese": "正在跳舞",
+    "phonetics": "[ˈdænsɪŋ]",
+    "example": "What's he doing? He's dancing."
+  },
+  {
+    "english": "run",
+    "chinese": "跑",
+    "phonetics": "[rʌn]",
+    "example": "I can run very fast."
+  },
+  {
+    "english": "running",
+    "chinese": "正在跑",
+    "phonetics": "[ˈrʌnɪŋ]",
+    "example": "What's she doing? She's running."
+  },
+  {
+    "english": "do",
+    "chinese": "做",
+    "phonetics": "[du]",
+    "example": "What do you do on weekends?"
+  },
+  {
+    "english": "doing",
+    "chinese": "正在做",
+    "phonetics": "[ˈduɪŋ]",
+    "example": "What are you doing?"
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "english": "by bike",
+    "chinese": "騎腳踏車",
+    "phonetics": "[baɪ baɪk]",
+    "example": "I go to school by bike."
+  },
+  {
+    "english": "by bus",
+    "chinese": "搭公車",
+    "phonetics": "[baɪ bʌs]",
+    "example": "You can get there by bus."
+  },
+  {
+    "english": "by car",
+    "chinese": "搭汽車；開車",
+    "phonetics": "[baɪ kɑr]",
+    "example": "We can get there by car."
+  },
+  {
+    "english": "by metro",
+    "chinese": "搭捷運",
+    "phonetics": "[baɪ ˈmɛtro]",
+    "example": "They go to work by metro."
+  },
+  {
+    "english": "by train",
+    "chinese": "搭火車",
+    "phonetics": "[baɪ tren]",
+    "example": "She travels by train."
+  },
+  {
+    "english": "by scooter",
+    "chinese": "搭機車；騎機車",
+    "phonetics": "[baɪ ˈskutɚ]",
+    "example": "He goes to the market by scooter."
+  },
+  {
+    "english": "on foot",
+    "chinese": "走路；步行",
+    "phonetics": "[ɑn fʊt]",
+    "example": "Can we get to the bookstore on foot?"
+  },
+  {
+    "english": "get",
+    "chinese": "到達",
+    "phonetics": "[ɡɛt]",
+    "example": "How can I get to the zoo?"
+  }
+]

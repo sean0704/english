@@ -74,8 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
+        /*  上學期已結束 故關閉
         { name: '五年級 上 Unit 1,2', path: 'g5_1_unit1.json', type: 'spelling' },
         { name: '五年級 上 Unit 3,4', path: 'g5_1_unit3.json', type: 'spelling' },
+        */
+        { name: '五年級 下 Unit 1', path: 'g5_2_unit1.json', type: 'spelling' },
+        { name: '五年級 下 Unit 2', path: 'g5_2_unit2.json', type: 'spelling' },
+        { name: '五年級 下 Unit 3', path: 'g5_2_unit3.json', type: 'spelling' },
+        { name: '五年級 下 Unit 4', path: 'g5_2_unit4.json', type: 'spelling' },
+        /*  上學期已結束 故關閉
         { name: '七年級 上 Unit 0', path: 'g7_1_unit0.json', type: 'spelling' },
         { name: '七年級 上 Unit 1', path: 'g7_1_unit1.json', type: 'spelling' },
         { name: '七年級 上 Unit 2', path: 'g7_1_unit2.json', type: 'spelling' },
@@ -85,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '七年級 上 Unit 4', path: 'g7_1_unit4.json', type: 'spelling' },
         { name: '七年級 上 Unit 5', path: 'g7_1_unit5.json', type: 'spelling' },
         { name: '七年級 上 Unit 6', path: 'g7_1_unit6.json', type: 'spelling' },
+        */
         { name: '七年級 下 Unit 1', path: 'g7_2_unit1.json', type: 'spelling' },
         { name: '七年級 下 Unit 2', path: 'g7_2_unit2.json', type: 'spelling' },
         { name: '七年級 下 Unit 3', path: 'g7_2_unit3.json', type: 'spelling' },

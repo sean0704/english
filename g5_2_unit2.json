@@ -1,0 +1,86 @@
+[
+  {
+    "english": "fever",
+    "chinese": "發燒",
+    "phonetics": "[ˈfivɚ]",
+    "example": "She has a fever."
+  },
+  {
+    "english": "runny nose",
+    "chinese": "流鼻水",
+    "phonetics": "[ˈrʌni noz]",
+    "example": "I have a runny nose."
+  },
+  {
+    "english": "toothache",
+    "chinese": "牙痛",
+    "phonetics": "[ˈtuθˌek]",
+    "example": "He has a toothache."
+  },
+  {
+    "english": "headache",
+    "chinese": "頭痛",
+    "phonetics": "[ˈhɛdˌek]",
+    "example": "He has a headache."
+  },
+  {
+    "english": "leg",
+    "chinese": "腿 (單數)",
+    "phonetics": "[lɛɡ]",
+    "example": "My leg hurts."
+  },
+  {
+    "english": "legs",
+    "chinese": "腿 (複數)",
+    "phonetics": "[lɛɡz]",
+    "example": "My legs hurt."
+  },
+  {
+    "english": "foot",
+    "chinese": "腳 (單數)",
+    "phonetics": "[fʊt]",
+    "example": "My left foot is sore."
+  },
+  {
+    "english": "feet",
+    "chinese": "腳 (複數)",
+    "phonetics": "[fit]",
+    "example": "I need to wash my feet."
+  },
+  {
+    "english": "hand",
+    "chinese": "手 (單數)",
+    "phonetics": "[hænd]",
+    "example": "My hand hurts."
+  },
+  {
+    "english": "hands",
+    "chinese": "手 (複數)",
+    "phonetics": "[hændz]",
+    "example": "Wash your hands before dinner."
+  },
+  {
+    "english": "eye",
+    "chinese": "眼 (單數)",
+    "phonetics": "[aɪ]",
+    "example": "I have something in my eye."
+  },
+  {
+    "english": "eyes",
+    "chinese": "眼 (複數)",
+    "phonetics": "[aɪz]",
+    "example": "Close your eyes."
+  },
+  {
+    "english": "wrong",
+    "chinese": "不對的；不對勁",
+    "phonetics": "[rɔŋ]",
+    "example": "What's wrong?"
+  },
+  {
+    "english": "hurt",
+    "chinese": "疼痛",
+    "phonetics": "[hɝt]",
+    "example": "Where does it hurt?"
+  }
+]

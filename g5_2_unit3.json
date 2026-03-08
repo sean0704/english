@@ -1,0 +1,62 @@
+[
+  {
+    "english": "park",
+    "chinese": "公園",
+    "phonetics": "[pɑrk]",
+    "example": "I'm going to the park."
+  },
+  {
+    "english": "library",
+    "chinese": "圖書館",
+    "phonetics": "[ˈlaɪˌbrɛri]",
+    "example": "Where's the library?"
+  },
+  {
+    "english": "hospital",
+    "chinese": "醫院",
+    "phonetics": "[ˈhɑspɪtl]",
+    "example": "The hospital is near here."
+  },
+  {
+    "english": "supermarket",
+    "chinese": "超市",
+    "phonetics": "[ˈsupɚˌmɑrkɪt]",
+    "example": "Let's go to the supermarket."
+  },
+  {
+    "english": "bookstore",
+    "chinese": "書店",
+    "phonetics": "[ˈbʊkˌstɔr]",
+    "example": "Can we get to the bookstore on foot?"
+  },
+  {
+    "english": "tea shop",
+    "chinese": "飲料店",
+    "phonetics": "[ti ʃɑp]",
+    "example": "I'm going to the tea shop."
+  },
+  {
+    "english": "post office",
+    "chinese": "郵局",
+    "phonetics": "[post ˈɔfɪs]",
+    "example": "I need to go to the post office."
+  },
+  {
+    "english": "zoo",
+    "chinese": "動物園",
+    "phonetics": "[zu]",
+    "example": "It's next to the zoo."
+  },
+  {
+    "english": "road",
+    "chinese": "路；道路",
+    "phonetics": "[rod]",
+    "example": "It's on Park Road."
+  },
+  {
+    "english": "next to...",
+    "chinese": "在…旁邊",
+    "phonetics": "[nɛkst tu]",
+    "example": "The cat is next to the box."
+  }
+]
