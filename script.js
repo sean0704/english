@@ -74,25 +74,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
-        /*  上學期已結束 故關閉
-        { name: '五年級 上 Unit 1,2', path: 'g5_1_unit1.json', type: 'spelling' },
-        { name: '五年級 上 Unit 3,4', path: 'g5_1_unit3.json', type: 'spelling' },
-        */
+        // 上學期已結束 故關閉，標記為 disabled
+        { name: '五年級 上 Unit 1,2', path: 'g5_1_unit1.json', type: 'spelling', disabled: true },
+        { name: '五年級 上 Unit 3,4', path: 'g5_1_unit3.json', type: 'spelling', disabled: true },
+        
         { name: '五年級 下 Unit 1', path: 'g5_2_unit1.json', type: 'spelling' },
         { name: '五年級 下 Unit 2', path: 'g5_2_unit2.json', type: 'spelling' },
         { name: '五年級 下 Unit 3', path: 'g5_2_unit3.json', type: 'spelling' },
         { name: '五年級 下 Unit 4', path: 'g5_2_unit4.json', type: 'spelling' },
-        /*  上學期已結束 故關閉
-        { name: '七年級 上 Unit 0', path: 'g7_1_unit0.json', type: 'spelling' },
-        { name: '七年級 上 Unit 1', path: 'g7_1_unit1.json', type: 'spelling' },
-        { name: '七年級 上 Unit 2', path: 'g7_1_unit2.json', type: 'spelling' },
-        { name: '七年級 上 Unit 3', path: 'g7_1_unit3.json', type: 'spelling' },
-        { name: '七年級 上 Unit 3 (課文句型)', path: 'g7_1_unit3_s.json', type: 'sentence' },
-        { name: '七年級 上 Unit 3 (文章翻譯)', path: 'g7_1_unit3_a.json', type: 'passage-translation' },
-        { name: '七年級 上 Unit 4', path: 'g7_1_unit4.json', type: 'spelling' },
-        { name: '七年級 上 Unit 5', path: 'g7_1_unit5.json', type: 'spelling' },
-        { name: '七年級 上 Unit 6', path: 'g7_1_unit6.json', type: 'spelling' },
-        */
+        
+        // 上學期已結束 故關閉，標記為 disabled
+        { name: '七年級 上 Unit 0', path: 'g7_1_unit0.json', type: 'spelling', disabled: true },
+        { name: '七年級 上 Unit 1', path: 'g7_1_unit1.json', type: 'spelling', disabled: true },
+        { name: '七年級 上 Unit 2', path: 'g7_1_unit2.json', type: 'spelling', disabled: true },
+        { name: '七年級 上 Unit 3', path: 'g7_1_unit3.json', type: 'spelling', disabled: true },
+        { name: '七年級 上 Unit 3 (課文句型)', path: 'g7_1_unit3_s.json', type: 'sentence', disabled: true },
+        { name: '七年級 上 Unit 3 (文章翻譯)', path: 'g7_1_unit3_a.json', type: 'passage-translation', disabled: true },
+        { name: '七年級 上 Unit 4', path: 'g7_1_unit4.json', type: 'spelling', disabled: true },
+        { name: '七年級 上 Unit 5', path: 'g7_1_unit5.json', type: 'spelling', disabled: true },
+        { name: '七年級 上 Unit 6', path: 'g7_1_unit6.json', type: 'spelling', disabled: true },
+        
         { name: '七年級 下 Unit 1', path: 'g7_2_unit1.json', type: 'spelling' },
         { name: '七年級 下 Unit 2', path: 'g7_2_unit2.json', type: 'spelling' },
         { name: '七年級 下 Unit 3', path: 'g7_2_unit3.json', type: 'spelling' },
@@ -205,46 +206,93 @@ document.addEventListener('DOMContentLoaded', () => {
         achievementListEl.innerHTML = '';
         const achievementModalTitle = document.querySelector('#achievement-modal h2');
         achievementModalTitle.textContent = `我的成就 (總點數: ${playerStats.totalPoints || 0})`;
+
+        // Helper to sort achievements: Unlocked > In progress > Locked
+        const sortAchievements = (a, b) => {
+            if (a.isUnlocked !== b.isUnlocked) return a.isUnlocked ? -1 : 1;
+            return b.percent - a.percent;
+        };
+
+        // --- 全域成就 ---
+        const globalSection = document.createElement('div');
+        globalSection.className = 'ach-section';
         const globalHeader = document.createElement('h3');
         globalHeader.className = 'ach-section-header';
         globalHeader.textContent = '全域成就';
-        achievementListEl.appendChild(globalHeader);
+        globalSection.appendChild(globalHeader);
+        
+        const globalList = document.createElement('ul');
+        globalList.className = 'ach-list';
+
+        let globalAchItems = [];
         for (const id in GLOBAL_ACHIEVEMENTS) {
             const ach = GLOBAL_ACHIEVEMENTS[id];
             const isUnlocked = playerStats.unlockedGlobalAchievements[id];
-            const li = document.createElement('li');
-            li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+            let percent = 0;
             let progressHTML = '';
             if (!isUnlocked && ach.progress) {
                 const p = ach.progress(playerStats);
-                const percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
+                percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
                 progressHTML = `<div class="ach-progress-text">(${p.current} / ${p.target})</div><div class="ach-progress-bar-container"><div class="ach-progress-bar" style="width: ${percent}%;"></div></div>`;
+            } else if (isUnlocked) {
+                percent = 100;
             }
-            li.innerHTML = `<div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div><div class="ach-text"><h3>${ach.name}</h3><p>${ach.description}</p>${progressHTML}</div>`;
-            achievementListEl.appendChild(li);
+            
+            const li = document.createElement('li');
+            li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+            li.innerHTML = `<div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div><div class="ach-text"><h3>${ach.name}</h3><p>${ach.description}</p></div>${progressHTML}`;
+            
+            globalAchItems.push({ li, isUnlocked, percent });
         }
+        globalAchItems.sort(sortAchievements).forEach(item => globalList.appendChild(item.li));
+        globalSection.appendChild(globalList);
+        achievementListEl.appendChild(globalSection);
+
+        // --- 單元成就 ---
         const playedUnits = Object.keys(playerStats.unitData);
         playedUnits.forEach(unitPath => {
-            const unitName = wordLists.find(w => w.path === unitPath)?.name || unitPath;
+            const listInfo = wordLists.find(w => w.path === unitPath);
+            
+            // Skip rendering achievements for disabled courses
+            if (listInfo && listInfo.disabled) {
+                return;
+            }
+
+            const unitName = listInfo?.name || unitPath;
+            const unitSection = document.createElement('div');
+            unitSection.className = 'ach-section';
+            
             const unitHeader = document.createElement('h3');
             unitHeader.className = 'ach-section-header';
             unitHeader.textContent = unitName;
-            achievementListEl.appendChild(unitHeader);
+            unitSection.appendChild(unitHeader);
+
+            const unitList = document.createElement('ul');
+            unitList.className = 'ach-list';
+
             const unitData = playerStats.unitData[unitPath];
+            let unitAchItems = [];
             for (const id in UNIT_ACHIEVEMENTS) {
                 const ach = UNIT_ACHIEVEMENTS[id];
                 const isUnlocked = unitData.achievements[id];
-                const li = document.createElement('li');
-                li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+                let percent = 0;
                 let progressHTML = '';
                 if (!isUnlocked && ach.progress) {
                     const p = ach.progress(playerStats, unitPath);
-                    const percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
+                    percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
                     progressHTML = `<div class="ach-progress-text">(${p.current} / ${p.target})</div><div class="ach-progress-bar-container"><div class="ach-progress-bar" style="width: ${percent}%;"></div></div>`;
+                } else if (isUnlocked) {
+                    percent = 100;
                 }
-                li.innerHTML = `<div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div><div class="ach-text"><h3>${ach.name}</h3><p>${ach.description}</p>${progressHTML}</div>`;
-                achievementListEl.appendChild(li);
+                const li = document.createElement('li');
+                li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+                li.innerHTML = `<div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div><div class="ach-text"><h3>${ach.name}</h3><p>${ach.description}</p></div>${progressHTML}`;
+                unitAchItems.push({ li, isUnlocked, percent });
             }
+            
+            unitAchItems.sort(sortAchievements).forEach(item => unitList.appendChild(item.li));
+            unitSection.appendChild(unitList);
+            achievementListEl.appendChild(unitSection);
         });
     }
 
@@ -1118,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wordListSelectEl.innerHTML = '';
         // For translation mode, we use 'sentence' type lists
         const typeToFilter = selectedMode === 'translation' ? 'sentence' : selectedMode;
-        const filteredLists = wordLists.filter(list => list.type === typeToFilter);
+        const filteredLists = wordLists.filter(list => list.type === typeToFilter && !list.disabled);
         
         if (filteredLists.length === 0) {
             const option = document.createElement('option');
