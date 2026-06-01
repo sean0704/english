@@ -43,10 +43,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const achievementListEl = document.getElementById('achievement-list');
     const achievementToastEl = document.getElementById('achievement-toast');
 
-    // --- 兌換 DOM 元素 ---
+    // --- 管理者/兌換 DOM 元素 ---
+    const adminModalContainer = document.getElementById('admin-modal-container');
+    const adminPasswordForm = document.getElementById('admin-password-form');
+    const adminPasswordInput = document.getElementById('admin-password-input');
+    const closeAdminModalBtn = document.getElementById('close-admin-modal-btn');
+    const adminAddPointsBtn = document.getElementById('admin-add-points-btn');
+
     const redemptionContainer = document.getElementById('redemption-container');
     const showRedemptionsBtn = document.getElementById('show-redemptions-btn');
-    const adminAddPointsBtn = document.getElementById('admin-add-points-btn');
     const closeRedemptionsBtn = document.getElementById('close-redemptions-btn');
     const redemptionForm = document.getElementById('redemption-form');
     const redeemPointsInput = document.getElementById('redeem-points-input');
@@ -1330,9 +1335,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showAchievementsBtn.addEventListener('click', () => { updateAchievementDisplay(); achievementContainer.style.display = 'flex'; });
         closeAchievementsBtn.addEventListener('click', () => { achievementContainer.style.display = 'none'; });
         showRedemptionsBtn.addEventListener('click', () => { renderRedemptionHistory(); redemptionContainer.style.display = 'flex'; });
-        
-        // --- 管理員加點功能 (SHA-256 驗證) ---
-        const ADMIN_PASSWORD_HASH = '5406151279c1cf649ced0b0c66dfca309cb446ea15ddfb2ef3565d17089ac71a'; // 加密後的密碼
+
+        // --- 管理員加點功能 (SHA-256 驗證 + 隱私遮罩) ---
+        const ADMIN_PASSWORD_HASH = '5406151279c1cf649ced0b0c66dfca309cb446ea15ddfb2ef3565d17089ac71a'; // 加密密碼
 
         async function sha256(message) {
             const msgUint8 = new TextEncoder().encode(message);
@@ -1342,12 +1347,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return hashHex;
         }
 
-        adminAddPointsBtn.addEventListener('click', async () => {
-            const pwd = prompt('請輸入管理員密碼:');
-            if (!pwd) return;
+        adminAddPointsBtn.addEventListener('click', () => {
+            adminModalContainer.style.display = 'flex';
+            adminPasswordInput.value = '';
+            adminPasswordInput.focus();
+        });
 
+        closeAdminModalBtn.addEventListener('click', () => {
+            adminModalContainer.style.display = 'none';
+        });
+
+        adminPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const pwd = adminPasswordInput.value;
             const inputHash = await sha256(pwd);
+
             if (inputHash === ADMIN_PASSWORD_HASH) {
+                adminModalContainer.style.display = 'none';
                 const pointsStr = prompt('驗證成功！請輸入要增加的點數:', '100');
                 const points = parseInt(pointsStr, 10);
                 const reason = prompt('請輸入加點原因:', '管理員手動獎勵');
@@ -1355,19 +1371,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isNaN(points) && points > 0 && reason) {
                     playerStats.totalPoints += points;
                     playerStats.redemptionHistory.unshift({
-                        points: -points, // 使用負數表示「獲得」（因為原系統兌換是扣點）
+                        points: -points,
                         description: `[獎勵] ${reason}`,
                         timestamp: Date.now()
                     });
                     saveProgress();
                     updateTotalPointsDisplay();
                     alert(`成功增加 ${points} 點！`);
-                } else {
-                    alert('輸入無效，操作取消。');
                 }
             } else {
                 alert('密碼錯誤！');
-                console.log('輸入的密碼雜湊值為:', inputHash); // 方便你設定新密碼
+                adminPasswordInput.value = '';
+                adminPasswordInput.focus();
             }
         });
 
