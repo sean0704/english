@@ -507,6 +507,10 @@ body {
     text-align: right;
 }
 
+.history-points.reward {
+    color: var(--correct-color);
+}
+
 /* --- Toast Notification --- */
 #achievement-toast {
     position: fixed;
