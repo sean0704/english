@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '七年級 下 Unit 4', path: 'g7_2_unit4.json', type: 'spelling' },
         { name: '七年級 下 Unit 5', path: 'g7_2_unit5.json', type: 'spelling' },
         { name: '七年級 下 Unit 6', path: 'g7_2_unit6.json', type: 'spelling' },
+        { name: '七年級 下 動詞三態', path: 'g7_2_verbs.json', type: 'spelling' },
     ];
 
     // --- 生命值設定 ---
