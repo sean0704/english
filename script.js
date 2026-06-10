@@ -731,7 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             setTimeout(nextWordSetupFn, 500);
         } else {
-            feedbackEl.textContent = `錯誤！你輸入的是 "${answer}"，正確答案是: ${cleanCorrectAnswer} (請照著輸入 ${REQUIRED_CORRECTIONS} 次)`;
+            feedbackEl.innerHTML = `<div style="text-align: left; width: 50%; margin: 0 auto;">你輸入的是: ${answer} <br>正確答案是: ${cleanCorrectAnswer} <br>請照著輸入 ${REQUIRED_CORRECTIONS} 次</div>`;
             feedbackEl.className = 'feedback-message incorrect';
             wordDisplayEl.textContent = currentWord.english;
             spellingInputEl.classList.add('input-incorrect');
