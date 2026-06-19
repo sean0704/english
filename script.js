@@ -700,6 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     correctionCount = 0;
                     feedbackEl.textContent = '很好，現在記住了！';
                     feedbackEl.className = 'feedback-message notice';
+                    spellingInputEl.disabled = true;
                     setTimeout(nextWordSetupFn, 1000);
                 } else {
                     feedbackEl.textContent = `請再輸入一次 (${correctionCount}/${REQUIRED_CORRECTIONS})`;
