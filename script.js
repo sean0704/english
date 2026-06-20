@@ -119,9 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
         CULTIVATION_DEMON: { name: '修練狂魔 😈 ($150)', description: '累計在 15 個不同的日子裡完成過練習', points: 150, progress: (stats) => { const allTimestamps = Object.values(stats.unitData).flatMap(unit => unit.completionHistory || []); const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10))); return { current: uniqueDays.size, target: 15 }; } },
     };
     const UNIT_ACHIEVEMENTS = {
-        BRONZE: { name: '銅牌 🥉 ($25)', description: '通關時扣心在 2 顆以內 完成本單元練習', points: 25, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.BRONZE ? 1 : 0, target: 1 }) },
-        SILVER: { name: '銀牌 🥈 ($50)', description: '通關時扣心在 1 顆以內 完成本單元練習', points: 50, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.SILVER ? 1 : 0, target: 1 }) },
-        GOLD: { name: '金牌 🥇 ($75)', description: '通關時未扣心 完成本單元練習', points: 75, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.GOLD ? 1 : 0, target: 1 }) },
+        FIRST_CLEAR: { name: '初試身手 🔰 ($50)', description: '首次完成本單元練習', points: 50, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.FIRST_CLEAR ? 1 : 0, target: 1 }) },
+        BRONZE: { name: '銅牌 🥉 ($5)', description: '通關時扣心在 2 顆以內 完成本單元練習', points: 5, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.BRONZE ? 1 : 0, target: 1 }) },
+        SILVER: { name: '銀牌 🥈 ($10)', description: '通關時扣心在 1 顆以內 完成本單元練習', points: 10, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.SILVER ? 1 : 0, target: 1 }) },
+        GOLD: { name: '金牌 🥇 ($15)', description: '通關時未扣心 完成本單元練習', points: 15, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements.GOLD ? 1 : 0, target: 1 }) },
         THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10))).size, target: 3 }; } },
         THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '累計 3 週完成本單元練習', points: 50, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => { const [year, week] = getWeekNumber(new Date(ts)); return `${year}-${String(week).padStart(2, '0')}`; })).size, target: 3 }; } },
         THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7))).size, target: 3 }; } },
@@ -173,6 +174,18 @@ document.addEventListener('DOMContentLoaded', () => {
             playerStats = JSON.parse(savedStats);
             if (playerStats.totalPoints === undefined) playerStats.totalPoints = 0;
             if (playerStats.redemptionHistory === undefined) playerStats.redemptionHistory = [];
+            
+            // 補齊舊玩家的「初試身手」成就標記，避免重複領取點數
+            if (playerStats.unitData) {
+                for (const unitPath in playerStats.unitData) {
+                    const unit = playerStats.unitData[unitPath];
+                    if (unit.completionHistory && unit.completionHistory.length > 0) {
+                        if (unit.achievements && !unit.achievements.FIRST_CLEAR) {
+                            unit.achievements.FIRST_CLEAR = true;
+                        }
+                    }
+                }
+            }
         } else {
             playerStats = {
                 totalPoints: 0,
@@ -1062,6 +1075,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 playerStats.unitData[unitPath].completionHistory.push(Date.now());
 
                 const unlockedInSession = [];
+                if (!playerStats.unitData[unitPath].achievements.FIRST_CLEAR) {
+                    playerStats.totalPoints += UNIT_ACHIEVEMENTS.FIRST_CLEAR.points;
+                    unlockedInSession.push(UNIT_ACHIEVEMENTS.FIRST_CLEAR.name);
+                    playerStats.unitData[unitPath].achievements.FIRST_CLEAR = true;
+                }
                 if (currentHealth === MAX_HEALTH) {
                     if (!playerStats.unitData[unitPath].achievements.GOLD) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name); playerStats.unitData[unitPath].achievements.GOLD = true; }
                 }
