@@ -397,25 +397,42 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Successfully completed a round. Award points before moving to the next round or ending the game.
                 if (activeGameMode === 'spelling') {
-                    if (roundCount === 1) {
-                        playerStats.totalPoints += 5;
-                        showToast('完成第 1 回合，獲得 5 點！');
+                    const unitPath = currentWordListPath;
+                    if (!playerStats.unitData[unitPath]) {
+                        playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
+                    }
+                    if (!playerStats.unitData[unitPath].spellingRoundRewardsClaimed) {
+                        playerStats.unitData[unitPath].spellingRoundRewardsClaimed = {};
+                    }
+
+                    const d = new Date();
+                    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const hasClaimed = playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] === today;
+
+                    if (roundCount === 1 || roundCount === 2) {
+                        const pointsAwarded = 5;
+                        if (!hasClaimed) {
+                            playerStats.totalPoints += pointsAwarded;
+                            playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] = today;
+                            showToast(`完成第 ${roundCount} 回合，獲得 ${pointsAwarded} 點！`);
+                        } else {
+                            showToast(`完成第 ${roundCount} 回合！（今日點數已領取）`);
+                        }
                         saveProgress();
                         updateTotalPointsDisplay();
-                    } else if (roundCount === 2) {
-                        playerStats.totalPoints += 5;
-                        showToast('完成第 2 回合，獲得 5 點！');
-                        saveProgress();
-                        updateTotalPointsDisplay();
+                    } else if (roundCount === 3) {
+                        const pointsAwarded = 10;
+                        if (!hasClaimed) {
+                            playerStats.totalPoints += pointsAwarded;
+                            playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] = today;
+                            showToast(`完成第 3 回合，獲得 ${pointsAwarded} 點！`);
+                        } else {
+                            showToast('完成第 3 回合！（今日點數已領取）');
+                        }
                     }
                 }
 
                 if (roundCount >= 3) {
-                    // Award points for completing the final round right before the game ends.
-                    if (activeGameMode === 'spelling' && roundCount === 3) {
-                        playerStats.totalPoints += 10;
-                        showToast('完成第 3 回合，獲得 10 點！');
-                    }
                     gameOver(true);
                     return;
                 }
