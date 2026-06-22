@@ -1186,6 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modeBtnTranslation.classList.remove('mode-selected');
         modeBtnPassageTranslation.classList.remove('mode-selected');
         updateTotalPointsDisplay();
+        updateUnitRewardsBadge();
     }
 
     function updateTotalPointsDisplay() {
@@ -1222,6 +1223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             wordListSelectEl.appendChild(option);
             wordListSelectEl.disabled = true;
             startGameBtn.disabled = true;
+            updateUnitRewardsBadge();
             return;
         }
 
@@ -1233,6 +1235,94 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         wordListSelectEl.disabled = false;
         startGameBtn.disabled = false;
+        updateUnitRewardsBadge();
+    }
+
+    function updateUnitRewardsBadge() {
+        const badgeContainer = document.getElementById('unit-rewards-badge-container');
+        let hintEl = document.getElementById('unit-rewards-hint');
+        if (!badgeContainer) return;
+
+        // 如果 hintEl 不存在，動態建立它並放到 badgeContainer 後方
+        if (!hintEl) {
+            hintEl = document.createElement('div');
+            hintEl.id = 'unit-rewards-hint';
+            hintEl.style.textAlign = 'center';
+            hintEl.style.marginTop = '1rem';
+            hintEl.style.fontSize = '0.9rem';
+            hintEl.style.color = '#ffd700'; // 漂亮的金色
+            hintEl.style.textShadow = '0 0 5px rgba(255, 215, 0, 0.2)';
+            badgeContainer.parentNode.insertBefore(hintEl, badgeContainer.nextSibling);
+        }
+
+        // 如果不是拼寫模式，或沒有選擇有效的單元，就隱藏
+        if (activeGameMode !== 'spelling' || !wordListSelectEl.value || wordListSelectEl.value === "") {
+            badgeContainer.style.display = 'none';
+            hintEl.style.display = 'none';
+            return;
+        }
+
+        const unitPath = wordListSelectEl.value;
+        
+        // 初始化或讀取該單元的今日獎勵進度
+        if (!playerStats.unitData[unitPath]) {
+            playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
+        }
+        if (!playerStats.unitData[unitPath].spellingRoundRewardsClaimed) {
+            playerStats.unitData[unitPath].spellingRoundRewardsClaimed = {};
+        }
+
+        const d = new Date();
+        const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const claimedInfo = playerStats.unitData[unitPath].spellingRoundRewardsClaimed;
+
+        badgeContainer.innerHTML = '';
+        badgeContainer.style.display = 'flex';
+        hintEl.style.display = 'block';
+
+        let completedRounds = 0;
+        const rounds = [
+            { round: 1, points: 5, label: '第1回合' },
+            { round: 2, points: 5, label: '第2回合' },
+            { round: 3, points: 10, label: '第3回合' }
+        ];
+
+        rounds.forEach(r => {
+            const hasClaimed = claimedInfo[r.round] === today;
+            
+            const badge = document.createElement('div');
+            badge.className = `reward-badge ${hasClaimed ? 'active' : ''}`;
+            
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.textContent = `+${r.points}`;
+            
+            const label = document.createElement('div');
+            label.className = 'badge-label';
+            label.textContent = r.label;
+            
+            badge.appendChild(coin);
+            badge.appendChild(label);
+            badgeContainer.appendChild(badge);
+
+            if (hasClaimed) {
+                completedRounds++;
+            }
+        });
+
+        // 更新引導文案
+        if (completedRounds === 0) {
+            hintEl.textContent = '💡 完成今日拼寫挑戰，最高可獲得 20 點！';
+            hintEl.style.color = '#e2e8f0'; // 灰色偏白
+        } else if (completedRounds < 3) {
+            const nextRound = completedRounds + 1;
+            const nextPoints = nextRound === 3 ? 10 : 5;
+            hintEl.textContent = `🔥 再接再厲！今日通過第 ${nextRound} 回合可再獲得 ${nextPoints} 點！`;
+            hintEl.style.color = '#ffd700'; // 金色
+        } else {
+            hintEl.textContent = '🎉 太棒了！今日此單元的所有拼寫回合獎勵已全數拿滿！';
+            hintEl.style.color = '#48bb78'; // 綠色
+        }
     }
 
     async function startGame() {
@@ -1309,6 +1399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         startGameBtn.addEventListener('click', startGame);
+        wordListSelectEl.addEventListener('change', updateUnitRewardsBadge);
 
         spellingFormEl.addEventListener('submit', handleSpellingSubmission);
         playAudioBtnEl.addEventListener('click', playWordAudio);
