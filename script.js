@@ -80,16 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 字庫設定 ---
     const wordLists = [
-        // 上學期已結束 故關閉，標記為 disabled
+        // 學期已結束 故關閉，標記為 disabled
         { name: '五年級 上 Unit 1,2', path: 'g5_1_unit1.json', type: 'spelling', disabled: true },
         { name: '五年級 上 Unit 3,4', path: 'g5_1_unit3.json', type: 'spelling', disabled: true },
-        
         { name: '五年級 下 Unit 1', path: 'g5_2_unit1.json', type: 'spelling', disabled: true },
         { name: '五年級 下 Unit 2', path: 'g5_2_unit2.json', type: 'spelling', disabled: true },
         { name: '五年級 下 Unit 3', path: 'g5_2_unit3.json', type: 'spelling', disabled: true },
         { name: '五年級 下 Unit 4', path: 'g5_2_unit4.json', type: 'spelling', disabled: true },
-        
-        // 上學期已結束 故關閉，標記為 disabled
         { name: '七年級 上 Unit 0', path: 'g7_1_unit0.json', type: 'spelling', disabled: true },
         { name: '七年級 上 Unit 1', path: 'g7_1_unit1.json', type: 'spelling', disabled: true },
         { name: '七年級 上 Unit 2', path: 'g7_1_unit2.json', type: 'spelling', disabled: true },
@@ -99,14 +96,15 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '七年級 上 Unit 4', path: 'g7_1_unit4.json', type: 'spelling', disabled: true },
         { name: '七年級 上 Unit 5', path: 'g7_1_unit5.json', type: 'spelling', disabled: true },
         { name: '七年級 上 Unit 6', path: 'g7_1_unit6.json', type: 'spelling', disabled: true },
-        
         { name: '七年級 下 Unit 1', path: 'g7_2_unit1.json', type: 'spelling', disabled: true },
         { name: '七年級 下 Unit 2', path: 'g7_2_unit2.json', type: 'spelling', disabled: true },
         { name: '七年級 下 Unit 3', path: 'g7_2_unit3.json', type: 'spelling', disabled: true },
         { name: '七年級 下 Unit 4', path: 'g7_2_unit4.json', type: 'spelling', disabled: true },
         { name: '七年級 下 Unit 5', path: 'g7_2_unit5.json', type: 'spelling', disabled: true },
         { name: '七年級 下 Unit 6', path: 'g7_2_unit6.json', type: 'spelling', disabled: true },
-        { name: '七年級 下 動詞三態', path: 'g7_2_verbs.json', type: 'spelling' },
+        { name: '七年級 下 動詞三態', path: 'g7_2_verbs.json', type: 'spelling', disabled: true },
+        // 開放練習的學期選單
+        { name: '八年級 上 Unit 1', path: 'g8_1_unit1.json', type: 'spelling' },
     ];
 
     // --- 生命值設定 ---
