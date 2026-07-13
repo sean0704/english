@@ -1,0 +1,242 @@
+[
+  {
+    "english": "summer vacation",
+    "chinese": "暑假",
+    "phonetics": "[ˈsʌmɚ veˈkeʃən]",
+    "example": "Hey, how was your summer vacation?"
+  },
+  {
+    "english": "weather",
+    "chinese": "天氣",
+    "phonetics": "[ˈwɛðɚ]",
+    "example": "How was the weather there?"
+  },
+  {
+    "english": "Taiwan",
+    "chinese": "臺灣",
+    "phonetics": "[ˈtaɪˈwɑn]",
+    "example": "Just like the weather in Taiwan."
+  },
+  {
+    "english": "fun",
+    "chinese": "樂趣；有趣的",
+    "phonetics": "[fʌn]",
+    "example": "It was fun."
+  },
+  {
+    "english": "snow",
+    "chinese": "下雪；雪",
+    "phonetics": "[sno]",
+    "example": "It was cold, and it snowed for a few days."
+  },
+  {
+    "english": "send",
+    "chinese": "寄；送",
+    "phonetics": "[sɛnd]",
+    "example": "I sent you a postcard from Australia."
+  },
+  {
+    "english": "postcard",
+    "chinese": "明信片",
+    "phonetics": "[ˈpostˌkɑrd]",
+    "example": "I sent you a postcard from Australia."
+  },
+  {
+    "english": "borrow",
+    "chinese": "借（入）",
+    "phonetics": "[ˈbɑro]",
+    "example": "I borrowed it from my aunt."
+  },
+  {
+    "english": "lend",
+    "chinese": "借（出）",
+    "phonetics": "[lɛnd]",
+    "example": "She also lent me her gloves."
+  },
+  {
+    "english": "glove",
+    "chinese": "手套",
+    "phonetics": "[glʌv]",
+    "example": "She also lent me her gloves."
+  },
+  {
+    "english": "kind",
+    "chinese": "親切的；有同情心的",
+    "phonetics": "[kaɪnd]",
+    "example": "That was kind of her."
+  },
+  {
+    "english": "lovely",
+    "chinese": "可愛的；美好的",
+    "phonetics": "[ˈlʌvli]",
+    "example": "And where did you get the lovely jacket?"
+  },
+  {
+    "english": "jacket",
+    "chinese": "夾克",
+    "phonetics": "[ˈdʒækɪt]",
+    "example": "And where did you get the lovely jacket?"
+  },
+  {
+    "english": "give",
+    "chinese": "給予",
+    "phonetics": "[gɪv]",
+    "example": "My parents gave it to me for my birthday."
+  },
+  {
+    "english": "hate",
+    "chinese": "討厭",
+    "phonetics": "[het]",
+    "example": "I hate heavy jackets, but this one is warm and not too heavy."
+  },
+  {
+    "english": "heavy",
+    "chinese": "厚重的；大量的",
+    "phonetics": "[ˈhɛvi]",
+    "example": "I hate heavy jackets, but this one is warm and not too heavy."
+  },
+  {
+    "english": "season",
+    "chinese": "季節",
+    "phonetics": "[ˈsizn]",
+    "example": "There are four seasons in a year."
+  },
+  {
+    "english": "spring",
+    "chinese": "春天",
+    "phonetics": "[sprɪŋ]",
+    "example": "Spring is my favorite season."
+  },
+  {
+    "english": "cloud",
+    "chinese": "雲",
+    "phonetics": "[klaʊd]",
+    "example": "There are many white clouds in the sky."
+  },
+  {
+    "english": "sun",
+    "chinese": "太陽",
+    "phonetics": "[sʌn]",
+    "example": "The sun is shining brightly today."
+  },
+  {
+    "english": "autumn",
+    "chinese": "秋天",
+    "phonetics": "[ˈɔtəm]",
+    "example": "The leaves turn yellow in autumn."
+  },
+  {
+    "english": "wind",
+    "chinese": "風",
+    "phonetics": "[wɪnd]",
+    "example": "A cold wind is blowing."
+  },
+  {
+    "english": "winter",
+    "chinese": "冬天",
+    "phonetics": "[ˈwɪntɚ]",
+    "example": "It is very cold in winter."
+  },
+  {
+    "english": "sunny",
+    "chinese": "陽光普照的",
+    "phonetics": "[ˈsʌni]",
+    "example": "It's a sunny day today."
+  },
+  {
+    "english": "snowy",
+    "chinese": "有雪的；下雪的",
+    "phonetics": "[ˈsnoɪ]",
+    "example": "We went skiing on a snowy day."
+  },
+  {
+    "english": "rainy",
+    "chinese": "有雨的；下雨的",
+    "phonetics": "[ˈreɪni]",
+    "example": "I don't like to go out on rainy days."
+  },
+  {
+    "english": "cloudy",
+    "chinese": "多雲的",
+    "phonetics": "[ˈklaʊdi]",
+    "example": "It is cloudy today, and it might rain later."
+  },
+  {
+    "english": "windy",
+    "chinese": "風大的",
+    "phonetics": "[ˈwɪndi]",
+    "example": "It's too windy to play badminton outside."
+  },
+  {
+    "english": "cool",
+    "chinese": "涼爽的",
+    "phonetics": "[kul]",
+    "example": "The weather is cool and comfortable in autumn."
+  },
+  {
+    "english": "speak",
+    "chinese": "講話",
+    "phonetics": "[spik]",
+    "example": "People here speak Australian English."
+  },
+  {
+    "english": "mad",
+    "chinese": "生氣的",
+    "phonetics": "[mæd]",
+    "example": "I was so mad."
+  },
+  {
+    "english": "in fact",
+    "chinese": "事實上",
+    "phonetics": "[ɪn fækt]",
+    "example": "But in fact, he meant \"good day.\""
+  },
+  {
+    "english": "mean",
+    "chinese": "意指",
+    "phonetics": "[min]",
+    "example": "But in fact, he meant \"good day.\""
+  },
+  {
+    "english": "another",
+    "chinese": "另一（的）",
+    "phonetics": "[əˈnʌðɚ]",
+    "example": "Another time, I went to a coffee shop."
+  },
+  {
+    "english": "order",
+    "chinese": "點餐；訂購",
+    "phonetics": "[ˈɔrdɚ]",
+    "example": "I ordered cookies and hot chocolate because the weather was cold."
+  },
+  {
+    "english": "strange",
+    "chinese": "奇怪的；陌生的",
+    "phonetics": "[strendʒ]",
+    "example": "How strange!"
+  },
+  {
+    "english": "soon",
+    "chinese": "很快地",
+    "phonetics": "[sun]",
+    "example": "Anyway, see you at school soon."
+  },
+  {
+    "english": "Rd.",
+    "chinese": "路（Road的縮寫）",
+    "phonetics": "[rod]",
+    "example": "No. 30, Yuren Rd.,"
+  },
+  {
+    "english": "snowboard",
+    "chinese": "滑雪板",
+    "phonetics": "[ˈsnoˌbɔrd]",
+    "example": "You have a snowboard?"
+  },
+  {
+    "english": "anyway",
+    "chinese": "無論如何",
+    "phonetics": "[ˈɛniˌwe]",
+    "example": "Anyway, see you at school soon."
+  }
+]
