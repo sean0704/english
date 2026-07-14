@@ -118,5 +118,125 @@
     "chinese": "太陽",
     "phonetics": "[sʌn]",
     "example": "The sun is shining brightly today."
+  },
+  {
+    "english": "autumn",
+    "chinese": "秋天",
+    "phonetics": "[ˈɔtəm]",
+    "example": "The leaves turn yellow in autumn."
+  },
+  {
+    "english": "wind",
+    "chinese": "風",
+    "phonetics": "[wɪnd]",
+    "example": "A cold wind is blowing."
+  },
+  {
+    "english": "winter",
+    "chinese": "冬天",
+    "phonetics": "[ˈwɪntɚ]",
+    "example": "It is very cold in winter."
+  },
+  {
+    "english": "sunny",
+    "chinese": "陽光普照的",
+    "phonetics": "[ˈsʌni]",
+    "example": "It's a sunny day today."
+  },
+  {
+    "english": "snowy",
+    "chinese": "有雪的；下雪的",
+    "phonetics": "[ˈsnoɪ]",
+    "example": "We went skiing on a snowy day."
+  },
+  {
+    "english": "rainy",
+    "chinese": "有雨的；下雨的",
+    "phonetics": "[ˈreɪni]",
+    "example": "I don't like to go out on rainy days."
+  },
+  {
+    "english": "cloudy",
+    "chinese": "多雲的",
+    "phonetics": "[ˈklaʊdi]",
+    "example": "It is cloudy today, and it might rain later."
+  },
+  {
+    "english": "windy",
+    "chinese": "風大的",
+    "phonetics": "[ˈwɪndi]",
+    "example": "It's too windy to play badminton outside."
+  },
+  {
+    "english": "cool",
+    "chinese": "涼爽的",
+    "phonetics": "[kul]",
+    "example": "The weather is cool and comfortable in autumn."
+  },
+  {
+    "english": "speak",
+    "chinese": "講話",
+    "phonetics": "[spik]",
+    "example": "People here speak Australian English."
+  },
+  {
+    "english": "mad",
+    "chinese": "生氣的",
+    "phonetics": "[mæd]",
+    "example": "I was so mad."
+  },
+  {
+    "english": "in fact",
+    "chinese": "事實上",
+    "phonetics": "[ɪn fækt]",
+    "example": "But in fact, he meant \"good day.\""
+  },
+  {
+    "english": "mean",
+    "chinese": "意指",
+    "phonetics": "[min]",
+    "example": "But in fact, he meant \"good day.\""
+  },
+  {
+    "english": "another",
+    "chinese": "另一（的）",
+    "phonetics": "[əˈnʌðɚ]",
+    "example": "Another time, I went to a coffee shop."
+  },
+  {
+    "english": "order",
+    "chinese": "點餐；訂購",
+    "phonetics": "[ˈɔrdɚ]",
+    "example": "I ordered cookies and hot chocolate because the weather was cold."
+  },
+  {
+    "english": "strange",
+    "chinese": "奇怪的；陌生的",
+    "phonetics": "[strendʒ]",
+    "example": "How strange!"
+  },
+  {
+    "english": "soon",
+    "chinese": "很快地",
+    "phonetics": "[sun]",
+    "example": "Anyway, see you at school soon."
+  },
+  {
+    "english": "Rd.",
+    "chinese": "路（Road的縮寫）",
+    "phonetics": "[rod]",
+    "example": "No. 30, Yuren Rd.,"
+  },
+  {
+    "english": "snowboard",
+    "chinese": "滑雪板",
+    "phonetics": "[ˈsnoˌbɔrd]",
+    "example": "You have a snowboard?"
+  },
+  {
+    "english": "anyway",
+    "chinese": "無論如何",
+    "phonetics": "[ˈɛniˌwe]",
+    "example": "Anyway, see you at school soon."
   }
 ]
