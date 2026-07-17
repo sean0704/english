@@ -104,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '七年級 下 Unit 6', path: 'g7_2_unit6.json', type: 'spelling', disabled: true },
         { name: '七年級 下 動詞三態', path: 'g7_2_verbs.json', type: 'spelling', disabled: true },
         // 開放練習的學期選單
-        { name: '八年級 上 Unit 1_1', path: 'g8_1_unit1_1.json', type: 'spelling' },
-        { name: '八年級 上 Unit 1_2', path: 'g8_1_unit1_2.json', type: 'spelling' },
+        { name: '八年級 上 Unit 1 (1)', path: 'g8_1_unit1_1.json', type: 'spelling' },
+        { name: '八年級 上 Unit 1 (2)', path: 'g8_1_unit1_2.json', type: 'spelling' },
     ];
 
     // --- 生命值設定 ---
