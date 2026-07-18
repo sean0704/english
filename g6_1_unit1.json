@@ -1,0 +1,104 @@
+[
+  {
+    "english": "the USA",
+    "chinese": "美國",
+    "phonetics": "[ðə ˌju ˌɛs ˈe]",
+    "example": "Is he from the USA?"
+  },
+  {
+    "english": "the UK",
+    "chinese": "英國",
+    "phonetics": "[ðə ˌju ˈke]",
+    "example": "No, she isn't. She's from the UK."
+  },
+  {
+    "english": "France",
+    "chinese": "法國",
+    "phonetics": "[fræns]",
+    "example": "Is she from France?"
+  },
+  {
+    "english": "Vietnam",
+    "chinese": "越南",
+    "phonetics": "[ˌviɛtˈnɑm]",
+    "example": "He is from Vietnam."
+  },
+  {
+    "english": "Korea",
+    "chinese": "韓國",
+    "phonetics": "[kəˈriə]",
+    "example": "They are from Korea."
+  },
+  {
+    "english": "Japan",
+    "chinese": "日本",
+    "phonetics": "[dʒəˈpæn]",
+    "example": "Are you from Japan?"
+  },
+  {
+    "english": "Taiwan",
+    "chinese": "臺灣",
+    "phonetics": "[ˈtaɪˈwɑn]",
+    "example": "I'm from Taiwan."
+  },
+  {
+    "english": "Australia",
+    "chinese": "澳洲",
+    "phonetics": "[ɔˈstreljə]",
+    "example": "She is from Australia."
+  },
+  {
+    "english": "from",
+    "chinese": "來自",
+    "phonetics": "[frʌm]",
+    "example": "Where are you from?"
+  },
+  {
+    "english": "arm",
+    "chinese": "手臂",
+    "phonetics": "[ɑrm]",
+    "example": "This is my arm."
+  },
+  {
+    "english": "car",
+    "chinese": "汽車",
+    "phonetics": "[kɑr]",
+    "example": "My father has a blue car."
+  },
+  {
+    "english": "farm",
+    "chinese": "農場",
+    "phonetics": "[fɑrm]",
+    "example": "There are many animals on the farm."
+  },
+  {
+    "english": "party",
+    "chinese": "派對",
+    "phonetics": "[ˈpɑrti]",
+    "example": "Welcome to my birthday party."
+  },
+  {
+    "english": "corn",
+    "chinese": "玉米",
+    "phonetics": "[kɔrn]",
+    "example": "I like to eat sweet corn."
+  },
+  {
+    "english": "fork",
+    "chinese": "叉子",
+    "phonetics": "[fɔrk]",
+    "example": "May I have a fork, please?"
+  },
+  {
+    "english": "forty",
+    "chinese": "四十",
+    "phonetics": "[ˈfɔrti]",
+    "example": "My uncle is forty years old."
+  },
+  {
+    "english": "horse",
+    "chinese": "馬",
+    "phonetics": "[hɔrs]",
+    "example": "She can ride a horse."
+  }
+]
