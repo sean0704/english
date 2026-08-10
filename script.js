@@ -461,21 +461,19 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWord = wordsToPractice.shift();
         playAudioBtnEl.style.display = synth ? 'block' : 'none';
         phoneticsEl.textContent = currentWord.phonetics;
-        const dialogueInfo = parseExampleDialogue(currentWord.example);
         const targetWordRegex = new RegExp(escapeRegExp(currentWord.english), 'gi');
-        const exampleWithBlank = dialogueInfo.formattedText.replace(targetWordRegex, '_______');
 
         if (gameMode === 'practice' && roundCount === 1) {
             translationEl.textContent = currentWord.chinese;
-            exampleEl.textContent = exampleWithBlank;
+            renderExampleBubbles(currentWord, targetWordRegex);
             wordDisplayEl.textContent = currentWord.english.split(' ').map(w => w.length > 0 ? w[0] + '_'.repeat(w.length - 1) : '').join(' ');
         } else if (gameMode === 'practice' && roundCount === 2) {
             translationEl.textContent = currentWord.chinese;
-            exampleEl.textContent = exampleWithBlank;
+            renderExampleBubbles(currentWord, targetWordRegex);
             wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
         } else {
             translationEl.textContent = '';
-            exampleEl.textContent = exampleWithBlank;
+            renderExampleBubbles(currentWord, targetWordRegex);
             wordDisplayEl.textContent = '';
         }
         spellingInputEl.value = '';
@@ -484,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(playWordAudio, 100);
     }
 
-    // --- 輔助函式 (對話前綴過濾與正規表達式轉義) ---
+    // --- 輔助函式 (對話解析、氣泡渲染與高亮控制) ---
     function parseExampleDialogue(example) {
         if (!example) return { lines: [], isDialogue: false, formattedText: '' };
         const isDialogue = /(?:^|\s+)[A-Za-z]:\s*/i.test(example);
@@ -510,6 +508,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function escapeRegExp(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function setSpeechHighlight(activeBubbleIndex) {
+        if (!exampleEl) return;
+        const allBubbles = exampleEl.querySelectorAll('.chat-bubble');
+        allBubbles.forEach(b => b.classList.remove('speaking-highlight'));
+
+        if (activeBubbleIndex !== null && activeBubbleIndex !== undefined && activeBubbleIndex >= 0) {
+            const activeBubble = document.getElementById(`example-bubble-${activeBubbleIndex}`);
+            if (activeBubble) {
+                activeBubble.classList.add('speaking-highlight');
+            }
+        }
+    }
+
+    function renderExampleBubbles(currentWord, targetWordRegex) {
+        exampleEl.innerHTML = '';
+        setSpeechHighlight(null);
+        if (!currentWord || !currentWord.example) return;
+
+        const dialogueInfo = parseExampleDialogue(currentWord.example);
+        const container = document.createElement('div');
+        container.className = 'dialogue-container';
+
+        if (dialogueInfo.isDialogue) {
+            dialogueInfo.lines.forEach((lineText, idx) => {
+                const speaker = idx === 0 ? 'a' : 'b';
+                const speakerLabel = idx === 0 ? 'A' : 'B';
+                
+                const bubble = document.createElement('div');
+                bubble.className = `chat-bubble speaker-${speaker}`;
+                bubble.id = `example-bubble-${idx}`;
+
+                const avatar = document.createElement('span');
+                avatar.className = 'avatar-badge';
+                avatar.textContent = speakerLabel;
+
+                const textSpan = document.createElement('span');
+                textSpan.className = 'bubble-text';
+                textSpan.textContent = lineText.replace(targetWordRegex, '_______');
+
+                bubble.appendChild(avatar);
+                bubble.appendChild(textSpan);
+                container.appendChild(bubble);
+            });
+        } else {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble single-sentence';
+            bubble.id = 'example-bubble-0';
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'bubble-text';
+            textSpan.textContent = dialogueInfo.formattedText.replace(targetWordRegex, '_______');
+
+            bubble.appendChild(textSpan);
+            container.appendChild(bubble);
+        }
+
+        exampleEl.appendChild(container);
     }
 
     // --- 語音輔助函式 ---
@@ -730,17 +787,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (gameMode === 'practice') {
                 if (roundCount === 1) {
-                    itemsToSpeak = [word, ...dialogueInfo.lines];
+                    itemsToSpeak = [
+                        { text: word, bubbleIdx: null },
+                        ...dialogueInfo.lines.map((line, idx) => ({ text: line, bubbleIdx: idx }))
+                    ];
                 } else if (roundCount === 2) {
-                    itemsToSpeak = [word];
+                    itemsToSpeak = [{ text: word, bubbleIdx: null }];
                 } else {
-                    itemsToSpeak = [...dialogueInfo.lines];
+                    itemsToSpeak = dialogueInfo.lines.map((line, idx) => ({ text: line, bubbleIdx: idx }));
                 }
             } else { // review mode
-                itemsToSpeak = [word];
+                itemsToSpeak = [{ text: word, bubbleIdx: null }];
             }
         } else if (activeGameMode === 'translation') {
-            itemsToSpeak = [currentWord.english];
+            itemsToSpeak = [{ text: currentWord.english, bubbleIdx: null }];
         }
 
         if (itemsToSpeak.length === 0) return;
@@ -754,10 +814,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (index >= itemsToSpeak.length) {
                 isPlaying = false;
                 playAudioBtnEl.disabled = false;
+                setSpeechHighlight(null);
                 return;
             }
 
-            const text = itemsToSpeak[index];
+            const item = itemsToSpeak[index];
+            const text = typeof item === 'string' ? item : item.text;
+            const bubbleIdx = typeof item === 'object' ? item.bubbleIdx : null;
+
             if (!text || !text.trim()) {
                 speakSequenceIndex(index + 1);
                 return;
@@ -773,9 +837,11 @@ document.addEventListener('DOMContentLoaded', () => {
             utterance.onstart = () => {
                 isPlaying = true;
                 playAudioBtnEl.disabled = true;
+                setSpeechHighlight(bubbleIdx);
             };
 
             utterance.onend = () => {
+                setSpeechHighlight(null);
                 if (index < itemsToSpeak.length - 1) {
                     currentSpeechTimeout = setTimeout(() => {
                         speakSequenceIndex(index + 1);
@@ -790,6 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('語音合成發生錯誤:', event);
                 isPlaying = false;
                 playAudioBtnEl.disabled = false;
+                setSpeechHighlight(null);
             };
 
             synth.speak(utterance);
