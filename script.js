@@ -106,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 開放練習的學期選單
         { name: '八年級 上 Unit 1 (1)', path: 'g8_1_unit1_1.json', type: 'spelling' },
         { name: '八年級 上 Unit 1 (2)', path: 'g8_1_unit1_2.json', type: 'spelling' },
+        { name: '八年級 上 Unit 2 (1)', path: 'g8_1_unit2_1.json', type: 'spelling' },
+        { name: '八年級 上 Unit 2 (2)', path: 'g8_1_unit2_2.json', type: 'spelling' },
         { name: '六年級 上 Unit 1', path: 'g6_1_unit1.json', type: 'spelling' },
     ];
 
