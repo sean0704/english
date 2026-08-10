@@ -3,180 +3,144 @@
     "english": "hold on",
     "chinese": "稍候",
     "phonetics": "[ˌhold `ɑn]",
-    "example": "Please hold on for a second."
+    "example": "A: This is Karen. May I speak to Danny, please? B: Sure. Hold on, please."
   },
   {
     "english": "math",
     "chinese": "數學",
     "phonetics": "[mæθ]",
-    "example": "I'm nervous about the math test tomorrow."
+    "example": "Ken doesn't like math because he hates numbers."
   },
   {
     "english": "soccer",
     "chinese": "足球",
     "phonetics": "[ˈsɑkɚ]",
-    "example": "My friend signed up for the soccer club."
+    "example": "A: Which do you like, soccer or baseball? B: I like baseball because I'm very bad at soccer."
   },
   {
     "english": "Chinese",
     "chinese": "中國的；中國人；中文",
     "phonetics": "[tʃaɪˈniz]",
-    "example": "He can speak Chinese fluently."
+    "example": "We always have a big dinner on Chinese New Year's Eve."
   },
   {
     "english": "history",
     "chinese": "歷史",
     "phonetics": "[ˈhɪst(ə)ri]",
-    "example": "We learned a lot about ancient times in history class."
+    "example": "India has a long and interesting history."
   },
   {
     "english": "violin",
     "chinese": "小提琴",
     "phonetics": "[ˌvaɪəˈlɪn]",
-    "example": "She practiced the violin before her parents came home."
+    "example": "A: Can you play the violin? B: Yes, and I can play the piano, too."
   },
   {
     "english": "robot",
     "chinese": "機器人",
     "phonetics": "[ˈrobət]",
-    "example": "The robot can clean the room by itself."
+    "example": "Willy has a robot dog; he plays with it every day."
   },
   {
     "english": "health",
     "chinese": "健康",
     "phonetics": "[hɛlθ]",
-    "example": "Eating fruits and vegetables is good for your health."
+    "example": "Apples are good for your health."
   },
   {
     "english": "PE",
     "chinese": "體育",
     "phonetics": "[ˈpi `i]",
-    "example": "We played basketball together during PE class."
+    "example": "Leo likes PE class because he is good at sports."
   },
   {
     "english": "look for",
     "chinese": "尋找",
     "phonetics": "[ˈlʊk fɚ]",
-    "example": "What are you looking for?"
+    "example": "A: What are you looking for? B: My notebook. It was on the desk this morning."
   },
   {
     "english": "Ms.",
     "chinese": "女士",
     "phonetics": "[mɪz]",
-    "example": "Our teacher, Ms. Jobs, is a four-time winner of the Taiwan Video Game Contest."
+    "example": "Ms. Yang is a kind person. She sends food to the poor."
   },
   {
     "english": "engineer",
     "chinese": "工程師",
     "phonetics": "[ˌɛndʒəˈnɪr]",
-    "example": "They're game engineers from a famous video game company."
+    "example": "My brother is an engineer at a computer company."
   },
   {
     "english": "lesson",
     "chinese": "課；課程",
     "phonetics": "[ˈlɛsṇ]",
-    "example": "We have easy lessons on video game design."
+    "example": "I have an English lesson every Monday and Thursday."
   },
   {
     "english": "difficult",
     "chinese": "困難的",
     "phonetics": "[ˈdɪfəˌkəlt]",
-    "example": "Our lessons are not difficult at all."
+    "example": "I cannot do my math homework; it is too difficult for me."
   },
   {
     "english": "teach",
     "chinese": "教導",
     "phonetics": "[titʃ]",
-    "example": "Our teachers teach in a fun way."
+    "example": "Mr. Bill is a teacher. He teaches science at my school."
   },
   {
     "english": "own",
     "chinese": "自己的；擁有",
     "phonetics": "[on]",
-    "example": "You can design your own video games after you finish the lessons."
+    "example": "Joe owns a really nice car."
   },
   {
     "english": "finish",
     "chinese": "完成；結束",
     "phonetics": "[ˈfɪnɪʃ]",
-    "example": "You can design your own video games after you finish the lessons."
+    "example": "A: What time does the basketball game finish? B: At 7 p.m."
   },
   {
     "english": "festival",
     "chinese": "節慶",
     "phonetics": "[ˈfɛstəvḷ]",
-    "example": "Every year, we take two students on a trip to the London Game Festival for free."
+    "example": "There is a K-pop festival in spring."
   },
   {
     "english": "start",
     "chinese": "開始",
     "phonetics": "[stɑrt]",
-    "example": "Our lessons start on September 10."
+    "example": "Our summer vacation starts in late June."
   },
   {
     "english": "choice",
     "chinese": "選擇",
     "phonetics": "[tʃɔɪs]",
-    "example": "Join now or miss out. The choice is yours!"
+    "example": "Which color is your choice for the car?"
   },
   {
     "english": "not... at all",
     "chinese": "一點也不…",
     "phonetics": "[ˌnɑt ət `ɔl]",
-    "example": "Our lessons are not difficult at all."
+    "example": "That movie was not interesting at all. Don't go see it."
   },
   {
     "english": "free",
     "chinese": "免費的",
     "phonetics": "[fri]",
-    "example": "Every year, we take two students on a trip to the London Game Festival for free."
+    "example": "I bought a computer, and the man gave me a free computer case."
   },
   {
     "english": "show",
     "chinese": "表演；節目",
     "phonetics": "[ʃo]",
-    "example": "There, you can see many shows and play a lot of games."
+    "example": "My brother watches game shows in his free time."
   },
   {
     "english": "miss out",
     "chinese": "錯過機會",
     "phonetics": "[ˌmɪs `aʊt]",
-    "example": "Join now or miss out."
-  },
-  {
-    "english": "design",
-    "chinese": "設計",
-    "phonetics": "[dɪˈzaɪn]",
-    "example": "You can design your own video games after you finish the lessons."
-  },
-  {
-    "english": "swimmer",
-    "chinese": "泳者",
-    "phonetics": "[ˈswɪmɚ]",
-    "example": "Shin was a poor swimmer before he joined the club last year."
-  },
-  {
-    "english": "underwater",
-    "chinese": "水下的",
-    "phonetics": "[ˌʌndɚˈwɔtɚ]",
-    "example": "It's an underwater camera for my water sports club."
-  },
-  {
-    "english": "winner",
-    "chinese": "獲勝者",
-    "phonetics": "[ˈwɪnɚ]",
-    "example": "Our teacher, Ms. Jobs, is a four-time winner of the Taiwan Video Game Contest."
-  },
-  {
-    "english": "contest",
-    "chinese": "競賽",
-    "phonetics": "[ˈkɑntɛst]",
-    "example": "Our teacher, Ms. Jobs, is a four-time winner of the Taiwan Video Game Contest."
-  },
-  {
-    "english": "guest",
-    "chinese": "客座的；賓客",
-    "phonetics": "[ɡɛst]",
-    "example": "Also, we have two guest teachers."
+    "example": "Join our club. Don't miss out on the fun!"
   }
 ]

@@ -461,23 +461,55 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWord = wordsToPractice.shift();
         playAudioBtnEl.style.display = synth ? 'block' : 'none';
         phoneticsEl.textContent = currentWord.phonetics;
+        const dialogueInfo = parseExampleDialogue(currentWord.example);
+        const targetWordRegex = new RegExp(escapeRegExp(currentWord.english), 'gi');
+        const exampleWithBlank = dialogueInfo.formattedText.replace(targetWordRegex, '_______');
+
         if (gameMode === 'practice' && roundCount === 1) {
             translationEl.textContent = currentWord.chinese;
-            exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
+            exampleEl.textContent = exampleWithBlank;
             wordDisplayEl.textContent = currentWord.english.split(' ').map(w => w.length > 0 ? w[0] + '_'.repeat(w.length - 1) : '').join(' ');
         } else if (gameMode === 'practice' && roundCount === 2) {
             translationEl.textContent = currentWord.chinese;
-            exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
+            exampleEl.textContent = exampleWithBlank;
             wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
         } else {
             translationEl.textContent = '';
-            exampleEl.textContent = currentWord.example.replace(new RegExp(currentWord.english, 'gi'), '_______');
+            exampleEl.textContent = exampleWithBlank;
             wordDisplayEl.textContent = '';
         }
         spellingInputEl.value = '';
         spellingInputEl.disabled = false;
         spellingInputEl.focus();
         setTimeout(playWordAudio, 100);
+    }
+
+    // --- 輔助函式 (對話前綴過濾與正規表達式轉義) ---
+    function parseExampleDialogue(example) {
+        if (!example) return { lines: [], isDialogue: false, formattedText: '' };
+        const isDialogue = /(?:^|\s+)[A-Za-z]:\s*/i.test(example);
+        if (!isDialogue) {
+            const cleanText = example.trim();
+            return {
+                lines: [cleanText],
+                isDialogue: false,
+                formattedText: cleanText
+            };
+        }
+        const parts = example.split(/(?:^|\s+)[A-Za-z]:\s*/i).map(p => p.trim()).filter(Boolean);
+        return {
+            lines: parts,
+            isDialogue: true,
+            formattedText: parts.join('\n')
+        };
+    }
+
+    function getCleanExample(example) {
+        return parseExampleDialogue(example).formattedText;
+    }
+
+    function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     // --- 語音輔助函式 ---
@@ -680,37 +712,90 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    let currentSpeechTimeout = null;
+
     function playWordAudio() {
         if (isPlaying || !currentWord || !synth) return;
         synth.cancel();
-        let textToSpeak = '';
-        
-        if (activeGameMode === 'spelling') {
-            const word = currentWord.english.split('(')[0].trim();
-            const example = currentWord.example;
-            if (gameMode === 'practice') {
-                if (roundCount === 1) textToSpeak = `${word}. ${example}`;
-                else if (roundCount === 2) textToSpeak = word;
-                else textToSpeak = example;
-            } else { // review mode
-                textToSpeak = word;
-            }
-        } else if (activeGameMode === 'translation') {
-            textToSpeak = currentWord.english;
+        if (currentSpeechTimeout) {
+            clearTimeout(currentSpeechTimeout);
+            currentSpeechTimeout = null;
         }
 
-        if (!textToSpeak) return;
-        const utterance = new SpeechSynthesisUtterance(textToSpeak);
-        const preferredVoice = getPreferredVoice();
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
+        let itemsToSpeak = [];
+
+        if (activeGameMode === 'spelling') {
+            const word = currentWord.english.split('(')[0].trim();
+            const dialogueInfo = parseExampleDialogue(currentWord.example);
+
+            if (gameMode === 'practice') {
+                if (roundCount === 1) {
+                    itemsToSpeak = [word, ...dialogueInfo.lines];
+                } else if (roundCount === 2) {
+                    itemsToSpeak = [word];
+                } else {
+                    itemsToSpeak = [...dialogueInfo.lines];
+                }
+            } else { // review mode
+                itemsToSpeak = [word];
+            }
+        } else if (activeGameMode === 'translation') {
+            itemsToSpeak = [currentWord.english];
         }
-        utterance.lang = 'en-US';
-        utterance.rate = 0.9;
-        utterance.onstart = () => { isPlaying = true; playAudioBtnEl.disabled = true; };
-        utterance.onend = () => { isPlaying = false; playAudioBtnEl.disabled = false; };
-        utterance.onerror = (event) => { console.error('語音合成發生錯誤:', event); isPlaying = false; playAudioBtnEl.disabled = false; };
-        synth.speak(utterance);
+
+        if (itemsToSpeak.length === 0) return;
+
+        isPlaying = true;
+        playAudioBtnEl.disabled = true;
+
+        const preferredVoice = getPreferredVoice();
+
+        function speakSequenceIndex(index) {
+            if (index >= itemsToSpeak.length) {
+                isPlaying = false;
+                playAudioBtnEl.disabled = false;
+                return;
+            }
+
+            const text = itemsToSpeak[index];
+            if (!text || !text.trim()) {
+                speakSequenceIndex(index + 1);
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+
+            utterance.onstart = () => {
+                isPlaying = true;
+                playAudioBtnEl.disabled = true;
+            };
+
+            utterance.onend = () => {
+                if (index < itemsToSpeak.length - 1) {
+                    currentSpeechTimeout = setTimeout(() => {
+                        speakSequenceIndex(index + 1);
+                    }, 500);
+                } else {
+                    isPlaying = false;
+                    playAudioBtnEl.disabled = false;
+                }
+            };
+
+            utterance.onerror = (event) => {
+                console.error('語音合成發生錯誤:', event);
+                isPlaying = false;
+                playAudioBtnEl.disabled = false;
+            };
+
+            synth.speak(utterance);
+        }
+
+        speakSequenceIndex(0);
     }
 
     function handleSpellingSubmission(e) {
