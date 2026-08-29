@@ -109,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '八年級 上 Unit 2 (1)', path: 'g8_1_unit2_1.json', type: 'spelling' },
         { name: '八年級 上 Unit 2 (2)', path: 'g8_1_unit2_2.json', type: 'spelling' },
         { name: '六年級 上 Unit 1', path: 'g6_1_unit1.json', type: 'spelling' },
+        { name: '六年級 上 Unit 2', path: 'g6_1_unit2.json', type: 'spelling' },
+        { name: '六年級 上 Phonics 3~5', path: 'g6_1_phonics3_5.json', type: 'spelling' },
     ];
 
     // --- 生命值設定 ---
