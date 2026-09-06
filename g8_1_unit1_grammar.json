@@ -1,0 +1,182 @@
+[
+  {
+    "id": "weather-question-1",
+    "topic": "weather_question",
+    "topicLabel": "天氣問句",
+    "type": "choice",
+    "instruction": "選出正確的天氣問句。",
+    "question": "___ the weather like in Taipei in summer?",
+    "options": ["How is", "What's", "How are", "What are"],
+    "answer": "What's",
+    "hint": "What's the weather like...? 和 How is the weather...? 都可以用來詢問天氣。",
+    "explanation": "正確句型是 What's the weather like...?；like 在這裡是介系詞。"
+  },
+  {
+    "id": "weather-question-2",
+    "topic": "weather_question",
+    "topicLabel": "天氣問句",
+    "type": "fill",
+    "instruction": "填入適當的字，完成句子。",
+    "question": "How ___ the weather in Kaohsiung today?",
+    "answer": "is",
+    "hint": "weather 是不可數名詞，搭配 be 動詞 is。",
+    "explanation": "weather 是不可數名詞，所以使用 How is the weather...?。"
+  },
+  {
+    "id": "weather-question-3",
+    "topic": "weather_question",
+    "topicLabel": "天氣問句",
+    "type": "transform",
+    "instruction": "改寫成另一種天氣問句。",
+    "question": "How is the weather in New York today?",
+    "answer": "What's the weather like in New York today?",
+    "acceptedAnswers": ["What is the weather like in New York today?"],
+    "hint": "將 How is the weather...? 改成 What's the weather like...?。",
+    "explanation": "How is the weather...? 和 What's the weather like...? 意思相同。"
+  },
+  {
+    "id": "weather-question-4",
+    "topic": "weather_question",
+    "topicLabel": "天氣問句",
+    "type": "choice",
+    "instruction": "選出正確的問句。",
+    "question": "___ the weather like yesterday?",
+    "options": ["How was", "What was", "What's", "How were"],
+    "answer": "What was",
+    "hint": "yesterday 表示過去，be 動詞要使用 was。",
+    "explanation": "過去式的天氣問句是 What was the weather like...?。"
+  },
+  {
+    "id": "weather-forms-1",
+    "topic": "weather_forms",
+    "topicLabel": "天氣描述",
+    "type": "choice",
+    "instruction": "依照句型選出正確答案。",
+    "question": "It is ___ in Taiwan in summer.",
+    "options": ["rain", "rains", "rainy", "raining"],
+    "answer": "rainy",
+    "hint": "It is 後面要接形容詞。",
+    "explanation": "rainy 是形容詞，可以放在 It is 後面描述天氣。"
+  },
+  {
+    "id": "weather-forms-2",
+    "topic": "weather_forms",
+    "topicLabel": "天氣描述",
+    "type": "fill",
+    "instruction": "填入正確的動詞形式。",
+    "question": "It ___ a lot in Keelung in winter.",
+    "answer": "rains",
+    "hint": "主詞 It 是第三人稱單數，rain 要加 s。",
+    "explanation": "rain 在這裡是動詞，主詞是 It，所以使用 rains。"
+  },
+  {
+    "id": "weather-forms-3",
+    "topic": "weather_forms",
+    "topicLabel": "天氣描述",
+    "type": "choice",
+    "instruction": "選出正確的名詞句型。",
+    "question": "There is a lot of ___ in Taiwan in summer.",
+    "options": ["rain", "rainy", "rains", "raining"],
+    "answer": "rain",
+    "hint": "There is 後面要接名詞；rain 在這裡是不可數名詞。",
+    "explanation": "There is a lot of rain... 中的 rain 是不可數名詞。"
+  },
+  {
+    "id": "weather-forms-4",
+    "topic": "weather_forms",
+    "topicLabel": "天氣描述",
+    "type": "choice",
+    "instruction": "選出最適合的句子。哪一句意思最接近？",
+    "question": "Spring is a rainy season.",
+    "options": [
+      "It rains a lot in spring.",
+      "It is rain in spring.",
+      "There are rainy in spring.",
+      "Spring has raining."
+    ],
+    "answer": "It rains a lot in spring.",
+    "hint": "rain 作動詞時，可以用 It rains...。",
+    "explanation": "Spring is a rainy season. 可以改寫成 It rains a lot in spring.。"
+  },
+  {
+    "id": "weather-forms-5",
+    "topic": "weather_forms",
+    "topicLabel": "天氣描述",
+    "type": "fill",
+    "instruction": "填入適當的介系詞。",
+    "question": "It is snowy ___ the USA ___ winter.",
+    "answer": "in; in",
+    "acceptedAnswers": ["in in"],
+    "hint": "地點和季節前面都使用 in。",
+    "explanation": "描述某地某季節的天氣時，使用 in + 地點、in + 季節。"
+  },
+  {
+    "id": "ditransitive-1",
+    "topic": "ditransitive",
+    "topicLabel": "授與動詞",
+    "type": "choice",
+    "instruction": "選出正確的介系詞。",
+    "question": "I sent a postcard ___ my aunt.",
+    "options": ["to", "for", "at", "of"],
+    "answer": "to",
+    "hint": "send 通常和 to 連用，表示送給某人。",
+    "explanation": "send/give/lend/show/write 等授與動詞，常用 to + 人。"
+  },
+  {
+    "id": "ditransitive-2",
+    "topic": "ditransitive",
+    "topicLabel": "授與動詞",
+    "type": "choice",
+    "instruction": "選出正確的介系詞。",
+    "question": "John made a birthday gift ___ his brother.",
+    "options": ["to", "for", "with", "of"],
+    "answer": "for",
+    "hint": "make、buy、get 表示替某人做或買東西時，通常用 for。",
+    "explanation": "make/buy/get + 物 + for + 人，表示替某人做或買某物。"
+  },
+  {
+    "id": "ditransitive-3",
+    "topic": "ditransitive",
+    "topicLabel": "授與動詞",
+    "type": "transform",
+    "instruction": "改寫句子，保留原意。",
+    "question": "I sent the kid a card.",
+    "answer": "I sent a card to the kid.",
+    "hint": "將人放到物後面，中間加上 to。",
+    "explanation": "主詞 + 動詞 + 人 + 物 = 主詞 + 動詞 + 物 + to + 人。"
+  },
+  {
+    "id": "ditransitive-4",
+    "topic": "ditransitive",
+    "topicLabel": "授與動詞",
+    "type": "transform",
+    "instruction": "改寫句子，保留原意。",
+    "question": "I bought my parents a new house.",
+    "answer": "I bought a new house for my parents.",
+    "hint": "buy 使用 for；將物移到人前面。",
+    "explanation": "buy + 人 + 物 = buy + 物 + for + 人。"
+  },
+  {
+    "id": "ditransitive-5",
+    "topic": "ditransitive",
+    "topicLabel": "授與動詞",
+    "type": "choice",
+    "instruction": "選出正確的代名詞位置。",
+    "question": "Tom showed ___ to ___.",
+    "options": ["it; them", "them; it", "it; they", "them; they"],
+    "answer": "it; them",
+    "hint": "物的代名詞放在 to 前面；人的代名詞放在 to 後面。",
+    "explanation": "showed it to them 才是正確語序，不能說 showed them it。"
+  },
+  {
+    "id": "ditransitive-6",
+    "topic": "ditransitive",
+    "topicLabel": "授與動詞",
+    "type": "fill",
+    "instruction": "填入適當的介系詞。",
+    "question": "She lent her gloves ___ me.",
+    "answer": "to",
+    "hint": "lend 表示借出，和 send、give 一樣常用 to。",
+    "explanation": "lend + 物 + to + 人，表示把某物借給某人。"
+  }
+]

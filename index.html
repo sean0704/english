@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>單字拼寫 v2</title>
+    <title>英語練習</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +27,7 @@
                 <h2>步驟一：選擇練習模式</h2>
                 <div class="mode-selection">
                     <button id="mode-btn-spelling" class="start-button secondary" data-mode="spelling">單字拼寫</button>
-                    <button id="mode-btn-sentence" class="start-button secondary" data-mode="sentence">句型重組</button>
-                    <button id="mode-btn-translation" class="start-button secondary" data-mode="translation">引導式翻譯</button>
-                    <button id="mode-btn-passage-translation" class="start-button secondary" data-mode="passage-translation">文章填空</button>
+                    <button id="mode-btn-grammar" class="start-button secondary" data-mode="grammar">文法練習</button>
                 </div>
             </div>
 
@@ -47,9 +45,8 @@
             <div class="points-info-container">
                 <h3>如何獲得點數？🪙</h3>
                 <ul>
-                    <li>完成「單字拼寫」達成各項成就可獲得對應點數。</li>
-                    <li>完成「句型重組 / 引導式翻譯 / 文章填空」每次可獲 10 點。</li>
-                    <li>期間限定: 通過「單字拼寫」第1、2回合可獲得5點，第3回合可獲得10點。</li>
+                    <li>完成「單字拼寫」或「文法練習」達成各項成就可獲得對應點數。</li>
+                    <li>期間限定：通過任一模式第 1、2 回合可獲得 5 點，第 3 回合可獲得 10 點。</li>
                 </ul>
             </div>
         </main>
@@ -81,11 +78,6 @@
 
         <audio id="word-audio" style="display: none;"></audio>
 
-        <div id="translation-controls" class="sentence-controls" style="display: none;">
-            <button id="check-translation-btn" class="sentence-button">檢查答案</button>
-            <button id="next-translation-btn" class="sentence-button" style="display: none;">下一題</button>
-        </div>
-
         <form id="spelling-form" class="spelling-input-area" style="display: none;">
             <input type="text" id="spelling-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="請在此拼寫單字並按 Enter">
         </form>
@@ -97,44 +89,36 @@
         </div>
     </div>
 
+    <div id="grammar-container" class="game-container grammar-container" style="display: none;">
+        <div class="progress-wrapper">
+            <div class="progress-container">
+                <div id="grammar-progress-bar"></div>
+            </div>
+            <div id="grammar-progress-display"></div>
+        </div>
+
+        <div class="grammar-meta">
+            <span id="grammar-topic-badge" class="grammar-topic-badge"></span>
+            <span id="grammar-health-display" class="health-display" aria-label="文法練習剩餘愛心"></span>
+        </div>
+        <p id="grammar-instruction" class="grammar-instruction"></p>
+        <button id="grammar-play-audio-btn" class="grammar-audio-btn" type="button" title="播放英文題目" aria-label="播放英文題目">🔊</button>
+        <div id="grammar-question" class="grammar-question"></div>
+        <div id="grammar-answer-area" class="grammar-answer-area"></div>
+        <div id="grammar-hint" class="grammar-hint" style="display: none;"></div>
+        <div id="grammar-feedback" class="feedback-message grammar-feedback"></div>
+        <div class="grammar-controls">
+            <button id="grammar-hint-btn" class="grammar-button secondary">提示</button>
+            <button id="grammar-check-btn" class="grammar-button">檢查答案</button>
+            <button id="grammar-next-btn" class="grammar-button" style="display: none;">下一題</button>
+        </div>
+    </div>
+
     <div id="completion-container" class="start-container" style="display: none;">
         <h1 class="start-title">恭喜通關！</h1>
         <p style="color: var(--text-secondary); margin-bottom: 2rem;">你已完成本單元的所有練習。</p>
         <button id="restart-btn" class="start-button">再次練習</button>
         <button id="back-to-menu-btn" class="start-button secondary" style="background-color: #a0aec0; margin-top: 10px;">返回主選單</button>
-    </div>
-
-    <div id="sentence-container" class="game-container" style="display: none;">
-        <h1 class="sentence-title">句型重組</h1>
-        <div class="pronunciation-area">
-            <div id="sentence-hint-display" class="sentence-hint"></div>
-            <button id="play-sentence-audio-btn" class="play-audio-btn" title="播放發音">🔊</button>
-        </div>
-        
-        <div id="sentence-answer-area" class="sentence-build-area"></div>
-        <div id="sentence-word-bank" class="sentence-build-area"></div>
-
-        <div id="sentence-feedback-display" class="feedback-message"></div>
-
-        <div class="sentence-controls">
-            <button id="check-sentence-btn" class="sentence-button">檢查答案</button>
-            <button id="next-sentence-btn" class="sentence-button" style="display: none;">下一題</button>
-        </div>
-        <div class="health-display"></div>
-    </div>
-
-    <div id="passage-translation-container" class="game-container" style="display: none;">
-        <div class="pronunciation-area">
-            <h1 class="sentence-title" style="margin-bottom: 0;">文章填空</h1>
-            <button id="play-passage-audio-btn" class="play-audio-btn" title="播放發音">🔊</button>
-        </div>
-        <div id="passage-english-display" class="passage-english"></div>
-        <div id="passage-feedback-display" class="feedback-message" style="margin-top: 1rem;"></div>
-        <div class="sentence-controls" style="margin-top: 1rem;">
-            <button id="check-passage-btn" class="sentence-button">檢查答案</button>
-            <button id="next-passage-btn" class="sentence-button" style="display: none;">下一題</button>
-        </div>
-        <div class="health-display"></div>
     </div>
 
     <script src="script.js"></script>

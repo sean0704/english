@@ -396,6 +396,188 @@ body {
     transition: width 0.4s ease-in-out;
 }
 
+/* --- Grammar Practice --- */
+.grammar-container {
+    max-width: 760px;
+}
+
+#grammar-progress-bar {
+    width: 0%;
+    height: 1rem;
+    background-image: linear-gradient(45deg, #63b3ed, #9f7aea);
+    border-radius: 0.5rem;
+    transition: width 0.4s ease-in-out;
+}
+
+#grammar-progress-display {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--header-color);
+    white-space: nowrap;
+}
+
+.grammar-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.grammar-meta .health-display {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.grammar-topic-badge {
+    color: #e9d8fd;
+    background: rgba(128, 90, 213, 0.35);
+    border: 1px solid rgba(183, 148, 244, 0.65);
+    border-radius: 999px;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.95rem;
+}
+
+.grammar-title {
+    color: var(--header-color);
+    margin: 0 0 0.5rem;
+}
+
+.grammar-instruction {
+    color: var(--text-secondary);
+    margin: 0 0 1.25rem;
+}
+
+.grammar-audio-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 2px solid var(--border-color);
+    border-radius: 50%;
+    background: rgba(66, 153, 225, 0.2);
+    color: var(--header-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.grammar-audio-btn:hover {
+    background: rgba(66, 153, 225, 0.45);
+    transform: scale(1.05);
+}
+
+.grammar-audio-btn:disabled {
+    opacity: 0.55;
+    cursor: wait;
+}
+
+.grammar-question {
+    min-height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    font-size: 1.45rem;
+    line-height: 1.6;
+    white-space: pre-line;
+    margin: 0 auto;
+    max-width: 680px;
+}
+
+.grammar-answer-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    min-height: 5rem;
+    margin: 1rem 0 1.25rem;
+}
+
+.grammar-option,
+.grammar-button {
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    font-size: 1.05rem;
+    color: var(--text-color);
+    background: #2d3748;
+    border: 2px solid var(--border-color);
+    border-radius: 0.6rem;
+    padding: 0.75rem 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.grammar-option:hover,
+.grammar-button:hover {
+    background: #4a5568;
+    border-color: var(--header-color);
+    transform: translateY(-1px);
+}
+
+.grammar-option.selected {
+    background: rgba(66, 153, 225, 0.35);
+    border-color: #63b3ed;
+}
+
+.grammar-option.input-incorrect {
+    border-color: var(--incorrect-color);
+}
+
+.grammar-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Inter', 'Noto Sans TC', sans-serif;
+    font-size: 1.2rem;
+    text-align: center;
+    color: var(--text-color);
+    background: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 0.6rem;
+    padding: 0.9rem 1rem;
+}
+
+.grammar-input:focus {
+    outline: none;
+    border-color: var(--notice-color);
+}
+
+.grammar-hint {
+    color: var(--notice-color);
+    background: rgba(236, 201, 75, 0.1);
+    border: 1px dashed rgba(236, 201, 75, 0.55);
+    border-radius: 0.5rem;
+    line-height: 1.5;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.grammar-feedback {
+    white-space: pre-line;
+}
+
+.grammar-controls {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.grammar-button {
+    color: var(--bg-color);
+    background: var(--notice-color);
+    border-color: transparent;
+    font-weight: bold;
+}
+
+.grammar-button.secondary {
+    color: var(--text-color);
+    background: #718096;
+}
+
 /* --- Health Display --- */
 .health-display {
     margin-top: 1rem;
@@ -926,6 +1108,23 @@ body {
         font-size: 1rem;
     }
 
+    .grammar-question {
+        font-size: 1.2rem;
+        min-height: 6rem;
+    }
+
+    .grammar-meta {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .grammar-option,
+    .grammar-button {
+        font-size: 0.95rem;
+        padding: 0.7rem 0.85rem;
+    }
+
     /* --- Modal adjustments --- */
     #achievement-modal,
     #redemption-modal {
@@ -1069,7 +1268,7 @@ body {
 }
 
 
-/* --- Sentence Mode Styles --- */
+/* --- Practice Mode Selection --- */
 .mode-selection {
     display: flex;
     gap: 1rem;
@@ -1084,73 +1283,6 @@ body {
     background-color: #a0aec0;
 }
 
-.sentence-title {
-    font-size: 1.8rem;
-    color: var(--header-color);
-    margin-bottom: 1rem;
-}
-
-.sentence-hint {
-    font-size: 1.2rem;
-    color: var(--header-color);
-    margin-bottom: 1.5rem;
-    min-height: 1.5rem;
-}
-
-.sentence-build-area {
-    background-color: var(--bg-color);
-    border: 2px dashed var(--border-color);
-    border-radius: 0.5rem;
-    min-height: 80px;
-    width: 100%;
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-content: flex-start;
-}
-
-.word-block {
-    font-family: 'Inter', 'Noto Sans TC', sans-serif;
-    background-color: var(--container-bg-color);
-    border: 1px solid var(--border-color);
-    color: var(--text-color);
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 1.2rem;
-}
-
-.word-block:hover {
-    background-color: var(--bg-color);
-    border-color: var(--notice-color);
-}
-
-.sentence-controls {
-    display: inline-flex; /* Make the container itself centerable */
-    gap: 1rem;
-    justify-content: center;
-}
-
-.sentence-button {
-    font-family: 'Inter', 'Noto Sans TC', sans-serif;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--bg-color);
-    background-color: var(--notice-color);
-    border: none;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.sentence-button:hover {
-    background-color: #fbd38d;
-}
-
 @media (max-width: 768px) {
     .mode-selection {
         flex-direction: column;
@@ -1162,178 +1294,6 @@ body {
         width: 100%;
     }
 
-    .sentence-title {
-        font-size: 1.5rem;
-    }
-
-    .sentence-hint {
-        font-size: 1rem;
-    }
-
-    .word-block {
-        font-size: 1rem;
-        padding: 0.5rem 0.75rem;
-    }
-
-    .sentence-button {
-        font-size: 1rem;
-    }
-}
-
-/* --- Translation Mode Styles --- */
-.word-display {
-    flex-wrap: wrap; /* Allow words to wrap to the next line */
-}
-
-.translation-text {
-    font-size: 2.5rem; /* Match the word-display font size for consistency */
-    line-height: 3.5rem; /* Ensure proper vertical alignment with inputs */
-    margin: 0 0.2em; /* Increase space between elements */
-    letter-spacing: normal; /* Reset letter spacing for readability */
-}
-
-.translation-input {
-    font-family: 'Consolas', 'Courier New', monospace;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    width: 150px; /* Provide a default width */
-    padding: 0.5rem;
-    font-size: 2rem;
-    text-align: center;
-    transition: border-color 0.3s ease;
-    margin: 0 0.2em;
-    vertical-align: middle; /* Align with text */
-}
-
-.translation-input:focus {
-    outline: none;
-    border-color: var(--notice-color);
-}
-
-/* Ensure correct/incorrect styles apply to translation inputs */
-.translation-input.input-correct {
-    border-color: var(--correct-color) !important;
-    background-color: #2f4436;
-}
-
-.translation-input.input-incorrect {
-    border-color: var(--incorrect-color) !important;
-    animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-.translation-input.input-revealed {
-    border-color: var(--notice-color) !important;
-    background-color: #4a4a3b;
-}
-
-@media (max-width: 768px) {
-    .translation-text {
-        font-size: 1.5rem;
-        line-height: 2.5rem;
-    }
-    .translation-input {
-        font-size: 1.2rem;
-        width: 100px;
-        padding: 0.4rem;
-    }
-}
-
-/* --- Passage Translation Mode Styles --- */
-.passage-english {
-    background-color: var(--bg-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    text-align: left;
-    color: var(--header-color);
-    margin-bottom: 1rem;
-    height: 500px;
-    overflow-y: auto;
-}
-
-.passage-sentence {
-    margin-bottom: 1rem;
-}
-
-.passage-sentence.blank {
-    background-color: #3c4a60;
-    padding: 1rem;
-    border-radius: 0.5rem;
-}
-
-.passage-hint {
-    font-style: italic;
-    color: var(--notice-color);
-    margin: 0 0 0.5rem 0;
-    font-size: 1rem;
-}
-
-.passage-fill-input {
-    font-family: 'Inter', 'Noto Sans TC', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1.1rem;
-}
-
-.passage-fill-input:focus {
-    outline: none;
-    border-color: var(--notice-color);
-}
-
-.passage-textarea {
-    font-family: 'Inter', 'Noto Sans TC', sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    border: 2px solid var(--border-color);
-    border-radius: 0.5rem;
-    width: 100%;
-    height: 150px;
-    padding: 1rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-    resize: vertical;
-}
-
-.passage-textarea:focus {
-    outline: none;
-    border-color: var(--notice-color);
-}
-
-.passage-feedback {
-    background-color: var(--bg-color);
-    border-radius: 0.5rem;
-    padding: 1rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    text-align: left;
-    color: var(--text-color);
-    margin-bottom: 1rem;
-    min-height: 50px;
-}
-
-.passage-line-container {
-    display: inline; /* Allows text and input to flow together */
-}
-
-.passage-line-container .passage-fill-input {
-    display: inline-block; /* Make input behave like a text element */
-    vertical-align: baseline;
-    margin: 0 0.2em;
-}
-
-.enter-hint {
-    font-size: 0.9rem;
-    color: var(--header-color);
-    font-style: italic;
-    margin-left: 0.5rem;
 }
 /* --- Points Info Container --- */
 .points-info-container {
