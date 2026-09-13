@@ -114,19 +114,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return new Set(getActiveWordLists().map(list => list.path));
     }
 
+    function getLocalDateString(date = new Date()) {
+        const d = date instanceof Date ? date : new Date(date);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function getLocalYearMonthString(date = new Date()) {
+        const d = date instanceof Date ? date : new Date(date);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+
     // --- 成就系統定義 ---
     const GLOBAL_ACHIEVEMENTS = {
-        PLATINUM: { name: '白金獎盃 🏆 ($150)', description: '在 3 個不同單元中，同時獲得「金牌」與「日積月累」成就', points: 150, progress: (stats) => { const platinumUnitCount = [...getActiveUnitPaths()].filter(unitPath => { const goldProgress = UNIT_ACHIEVEMENTS.GOLD.progress(stats, unitPath); const streakProgress = UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.progress(stats, unitPath); return (goldProgress.current >= goldProgress.target) && (streakProgress.current >= streakProgress.target); }).length; return { current: platinumUnitCount, target: 3 }; } },
-        CULTIVATION_DEMON: { name: '修練狂魔 😈 ($150)', description: '累計在 15 個不同的日子裡完成過練習', points: 150, progress: (stats) => { const allTimestamps = [...getActiveUnitPaths()].flatMap(unitPath => stats.unitData[unitPath]?.completionHistory || []); const uniqueDays = new Set(allTimestamps.map(ts => new Date(ts).toISOString().slice(0, 10))); return { current: uniqueDays.size, target: 15 }; } },
+        PLATINUM: {
+            name: '白金獎盃 🏆 ($150)',
+            description: '在 3 個不同單元中，同時獲得「金牌」與「日積月累」成就',
+            points: 150,
+            progress: (stats) => {
+                const allKnownUnitPaths = new Set([...getActiveUnitPaths(), ...Object.keys(stats.unitData || {})]);
+                const platinumUnitCount = [...allKnownUnitPaths].filter(unitPath => {
+                    const goldProgress = UNIT_ACHIEVEMENTS.GOLD.progress(stats, unitPath);
+                    const streakProgress = UNIT_ACHIEVEMENTS.THREE_DAY_STREAK.progress(stats, unitPath);
+                    return (goldProgress.current >= goldProgress.target) && (streakProgress.current >= streakProgress.target);
+                }).length;
+                return { current: platinumUnitCount, target: 3 };
+            }
+        },
+        CULTIVATION_DEMON: {
+            name: '修練狂魔 😈 ($150)',
+            description: '累計在 15 個不同的日子裡完成過練習',
+            points: 150,
+            progress: (stats) => {
+                const allTimestamps = Object.values(stats.unitData || {}).flatMap(unit => unit?.completionHistory || []);
+                const uniqueDays = new Set(allTimestamps.map(ts => getLocalDateString(ts)));
+                return { current: uniqueDays.size, target: 15 };
+            }
+        },
     };
     const UNIT_ACHIEVEMENTS = {
         FIRST_CLEAR: { name: '初試身手 🔰 ($50)', description: '首次完成本單元練習', points: 50, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.FIRST_CLEAR ? 1 : 0, target: 1 }) },
         BRONZE: { name: '銅牌 🥉 ($5)', description: '通關時扣心在 2 顆以內 完成本單元練習', points: 5, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.BRONZE ? 1 : 0, target: 1 }) },
         SILVER: { name: '銀牌 🥈 ($10)', description: '通關時扣心在 1 顆以內 完成本單元練習', points: 10, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.SILVER ? 1 : 0, target: 1 }) },
         GOLD: { name: '金牌 🥇 ($15)', description: '通關時未扣心 完成本單元練習', points: 15, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.GOLD ? 1 : 0, target: 1 }) },
-        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => new Date(ts).toISOString().slice(0, 10))).size, target: 3 }; } },
+        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => getLocalDateString(ts))).size, target: 3 }; } },
         THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '累計 3 週完成本單元練習', points: 50, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => { const [year, week] = getWeekNumber(new Date(ts)); return `${year}-${String(week).padStart(2, '0')}`; })).size, target: 3 }; } },
-        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => new Date(ts).toISOString().slice(0, 7))).size, target: 3 }; } },
+        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => getLocalYearMonthString(ts))).size, target: 3 }; } },
     };
 
     // --- 遊戲 & 玩家狀態 ---
@@ -146,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let stageTotal = 0;
     let currentWord = null;
     let isCorrecting = false;
+    let correctionCount = 0;
     const REQUIRED_CORRECTIONS = 2;
     const synth = window.speechSynthesis;
     let isPlaying = false;
@@ -380,6 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
         wordsWrongInSession.clear();
         currentStreak = 0;
         currentHealth = MAX_HEALTH;
+        isCorrecting = false;
+        correctionCount = 0;
         wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
         stageTotal = wordsToPractice.length;
         if (!synth) playAudioBtnEl.style.display = 'none';
@@ -407,8 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         playerStats.unitData[unitPath].spellingRoundRewardsClaimed = {};
                     }
 
-                    const d = new Date();
-                    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const today = getLocalDateString();
                     const hasClaimed = playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] === today;
 
                     if (roundCount === 1 || roundCount === 2) {
@@ -461,7 +495,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWord = wordsToPractice.shift();
         playAudioBtnEl.style.display = synth ? 'block' : 'none';
         phoneticsEl.textContent = currentWord.phonetics;
-        const targetWordRegex = new RegExp(escapeRegExp(currentWord.english), 'gi');
+        const hasExample = Boolean(currentWord.example && currentWord.example.trim());
+        const targetWordRegex = getTargetWordRegex(currentWord.english);
 
         if (gameMode === 'practice' && roundCount === 1) {
             translationEl.textContent = currentWord.chinese;
@@ -472,7 +507,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderExampleBubbles(currentWord, targetWordRegex);
             wordDisplayEl.textContent = currentWord.english.replace(/\S/g, '_');
         } else {
-            translationEl.textContent = '';
+            // 第 3 回合或訂正：若無例句則降級顯示中文作為提示，避免畫面空白卡死
+            translationEl.textContent = hasExample ? '' : currentWord.chinese;
             renderExampleBubbles(currentWord, targetWordRegex);
             wordDisplayEl.textContent = '';
         }
@@ -508,6 +544,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function escapeRegExp(string) {
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function getTargetWordRegex(english) {
+        if (!english) return null;
+        const cleanWord = english.replace(/[.,?!;:]+$/, "").trim();
+        let escaped = escapeRegExp(cleanWord);
+        // 若包含省略號 ... 允許中間穿插任意單字 (如 not... at all)
+        escaped = escaped.replace(/\\\.\\\.\\\./g, "\\s+(?:\\S+\\s+)*?");
+        try {
+            return new RegExp(`\\b${escaped}(?:s|es|ed|d|ing)?\\b`, 'gi');
+        } catch (e) {
+            return new RegExp(escapeRegExp(cleanWord), 'gi');
+        }
     }
 
     function setSpeechHighlight(activeBubbleIndex) {
@@ -631,7 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (roundCount === 2) {
                     itemsToSpeak = [{ text: word, bubbleIdx: null }];
                 } else {
-                    itemsToSpeak = dialogueInfo.lines.map((line, idx) => ({ text: line, bubbleIdx: idx }));
+                    itemsToSpeak = dialogueInfo.lines.length > 0
+                        ? dialogueInfo.lines.map((line, idx) => ({ text: line, bubbleIdx: idx }))
+                        : [{ text: word, bubbleIdx: null }];
                 }
             } else { // review mode
                 itemsToSpeak = [{ text: word, bubbleIdx: null }];
@@ -986,8 +1037,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const unitData = playerStats.unitData[unitPath];
         if (!unitData.grammarRoundRewardsClaimed) unitData.grammarRoundRewardsClaimed = {};
 
-        const today = new Date();
-        const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const todayKey = getLocalDateString();
         const hasClaimed = unitData.grammarRoundRewardsClaimed[grammarRoundCount] === todayKey;
         const pointsAwarded = grammarRoundCount === 3 ? 10 : 5;
 
@@ -1034,6 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
+                grammarIsReview = false;
                 grammarRoundCount++;
                 grammarQuestions = createGrammarRoundQuestions();
                 grammarStageTotal = grammarQuestions.length;
@@ -1418,8 +1469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             playerStats.unitData[unitPath][rewardKey] = {};
         }
 
-        const d = new Date();
-        const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const today = getLocalDateString();
         const claimedInfo = playerStats.unitData[unitPath][rewardKey];
 
         badgeContainer.innerHTML = '';
@@ -1526,8 +1576,21 @@ document.addEventListener('DOMContentLoaded', () => {
         grammarCheckBtn.addEventListener('click', checkGrammarAnswer);
         grammarNextBtn.addEventListener('click', setupNextGrammarQuestion);
 
+        function isAnyModalOpen() {
+            return Boolean(
+                (adminModalContainer && adminModalContainer.style.display !== 'none') ||
+                (achievementContainer && achievementContainer.style.display !== 'none') ||
+                (redemptionContainer && redemptionContainer.style.display !== 'none')
+            );
+        }
+
         document.addEventListener('keydown', event => {
-            if (event.key !== 'Enter' || activeGameMode !== 'grammar' || startContainer.style.display !== 'none') return;
+            if (
+                event.key !== 'Enter' ||
+                activeGameMode !== 'grammar' ||
+                startContainer.style.display !== 'none' ||
+                isAnyModalOpen()
+            ) return;
             event.preventDefault();
             if (grammarQuestionAnswered) {
                 setupNextGrammarQuestion();
