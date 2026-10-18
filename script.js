@@ -127,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 成就系統定義 ---
     const GLOBAL_ACHIEVEMENTS = {
         PLATINUM: {
-            name: '白金獎盃 🏆 ($150)',
+            icon: '🏆',
+            name: '白金獎盃',
             description: '在 3 個不同單元中，同時獲得「金牌」與「日積月累」成就',
             points: 150,
             progress: (stats) => {
@@ -141,7 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         CULTIVATION_DEMON: {
-            name: '修練狂魔 😈 ($150)',
+            icon: '😈',
+            name: '修練狂魔',
             description: '累計在 15 個不同的日子裡完成過練習',
             points: 150,
             progress: (stats) => {
@@ -152,14 +154,20 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
     const UNIT_ACHIEVEMENTS = {
-        FIRST_CLEAR: { name: '初試身手 🔰 ($50)', description: '首次完成本單元練習', points: 50, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.FIRST_CLEAR ? 1 : 0, target: 1 }) },
-        BRONZE: { name: '銅牌 🥉 ($5)', description: '通關時扣心在 2 顆以內 完成本單元練習', points: 5, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.BRONZE ? 1 : 0, target: 1 }) },
-        SILVER: { name: '銀牌 🥈 ($10)', description: '通關時扣心在 1 顆以內 完成本單元練習', points: 10, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.SILVER ? 1 : 0, target: 1 }) },
-        GOLD: { name: '金牌 🥇 ($15)', description: '通關時未扣心 完成本單元練習', points: 15, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.GOLD ? 1 : 0, target: 1 }) },
-        THREE_DAY_STREAK: { name: '日積月累 🏃 ($25)', description: '累計 3 天完成本單元練習', points: 25, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => getLocalDateString(ts))).size, target: 3 }; } },
-        THREE_WEEK_STREAK: { name: '週而復始 📅 ($50)', description: '累計 3 週完成本單元練習', points: 50, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => { const [year, week] = getWeekNumber(new Date(ts)); return `${year}-${String(week).padStart(2, '0')}`; })).size, target: 3 }; } },
-        THREE_MONTH_STREAK: { name: '持之以恆 🗓️ ($75)', description: '累計 3 個月完成本單元練習', points: 75, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => getLocalYearMonthString(ts))).size, target: 3 }; } },
+        FIRST_CLEAR: { icon: '🔰', name: '初試身手', description: '首次完成本單元練習', points: 50, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.FIRST_CLEAR ? 1 : 0, target: 1 }) },
+        BRONZE: { icon: '🥉', name: '銅牌', description: '通關時扣心在 2 顆以內 完成本單元練習', points: 5, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.BRONZE ? 1 : 0, target: 1 }) },
+        SILVER: { icon: '🥈', name: '銀牌', description: '通關時扣心在 1 顆以內 完成本單元練習', points: 10, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.SILVER ? 1 : 0, target: 1 }) },
+        GOLD: { icon: '🥇', name: '金牌', description: '通關時未扣心 完成本單元練習', points: 15, progress: (stats, unitPath) => ({ current: stats.unitData[unitPath]?.achievements?.GOLD ? 1 : 0, target: 1 }) },
+        THREE_DAY_STREAK: { icon: '🏃', name: '日積月累', description: '累計 3 天完成本單元練習', points: 25, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => getLocalDateString(ts))).size, target: 3 }; } },
+        THREE_WEEK_STREAK: { icon: '📅', name: '週而復始', description: '累計 3 週完成本單元練習', points: 50, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => { const [year, week] = getWeekNumber(new Date(ts)); return `${year}-${String(week).padStart(2, '0')}`; })).size, target: 3 }; } },
+        THREE_MONTH_STREAK: { icon: '🗓️', name: '持之以恆', description: '累計 3 個月完成本單元練習', points: 75, progress: (stats, unitPath) => { const history = stats.unitData[unitPath]?.completionHistory || []; return { current: new Set(history.map(ts => getLocalYearMonthString(ts))).size, target: 3 }; } },
     };
+    const MEDAL_IDS = ['BRONZE', 'SILVER', 'GOLD'];
+    const STREAK_IDS = ['THREE_DAY_STREAK', 'THREE_WEEK_STREAK', 'THREE_MONTH_STREAK'];
+
+    function formatAchievementLabel(ach) {
+        return `${ach.icon} ${ach.name} (+${ach.points})`;
+    }
 
     // --- 遊戲 & 玩家狀態 ---
     let playerStats;
@@ -201,7 +209,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let grammarSelectedAnswer = '';
     let grammarRewardClaimed = false;
 
+    // 每回合通關的每日點數（拼寫與文法共用）
+    const ROUND_REWARDS = { 1: 5, 2: 5, 3: 10 };
+    const ROUND_REWARD_KEYS = { spelling: 'spellingRoundRewardsClaimed', grammar: 'grammarRoundRewardsClaimed' };
+
     // --- 存儲 & 數據管理 ---
+    function ensureUnitData(unitPath) {
+        if (!playerStats.unitData[unitPath]) playerStats.unitData[unitPath] = {};
+        const unitData = playerStats.unitData[unitPath];
+        if (!unitData.achievements) unitData.achievements = {};
+        if (!unitData.completionHistory) unitData.completionHistory = [];
+        return unitData;
+    }
+
     function saveProgress() {
         localStorage.setItem('playerStats_v2', JSON.stringify(playerStats));
     }
@@ -258,97 +278,161 @@ document.addEventListener('DOMContentLoaded', () => {
             if (progress.current >= progress.target) {
                 stats.totalPoints += ach.points;
                 stats.unlockedGlobalAchievements[id] = true;
-                showToast(ach.name);
+                showToast(formatAchievementLabel(ach));
             }
         }
     }
 
+    function createEl(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+    }
+
+    function buildProgressStatus(progress) {
+        const status = createEl('div', 'ach-row-status');
+        const percent = progress.target > 0 ? Math.min((progress.current / progress.target) * 100, 100) : 0;
+        const barContainer = createEl('div', 'ach-progress-bar-container');
+        const bar = createEl('div', 'ach-progress-bar');
+        bar.style.width = `${percent}%`;
+        barContainer.appendChild(bar);
+        status.appendChild(barContainer);
+        status.appendChild(createEl('span', 'ach-progress-text', `${Math.min(progress.current, progress.target)} / ${progress.target}`));
+        return status;
+    }
+
+    // 單一成就列：圖示、名稱與說明、點數、狀態（✓ / 進度條 / 未達成）
+    function buildAchievementRow({ icon, name, description, pointsText, unlocked, progress, statusEl }) {
+        const row = createEl('li', `ach-row${unlocked ? ' unlocked' : ''}`);
+        row.appendChild(createEl('span', 'ach-row-icon', icon));
+        const text = createEl('div', 'ach-row-text');
+        text.appendChild(createEl('span', 'ach-row-name', name));
+        text.appendChild(createEl('span', 'ach-row-desc', description));
+        row.appendChild(text);
+        row.appendChild(createEl('span', 'ach-chip', pointsText));
+        if (statusEl) {
+            row.appendChild(statusEl);
+        } else if (unlocked) {
+            row.appendChild(createEl('div', 'ach-row-status ach-done', '✓ 已解鎖'));
+        } else if (progress) {
+            row.appendChild(buildProgressStatus(progress));
+        } else {
+            row.appendChild(createEl('div', 'ach-row-status ach-locked', '未達成'));
+        }
+        return row;
+    }
+
+    function getHighestMedalId(unitData) {
+        return [...MEDAL_IDS].reverse().find(id => unitData.achievements?.[id]) || null;
+    }
+
+    function buildUnitDetails(listInfo, unitData, isOpen) {
+        const unitPath = listInfo.path;
+        const achievements = unitData.achievements || {};
+        const details = createEl('details', 'ach-unit');
+        details.open = isOpen;
+
+        // 收合列：模式標籤、單元名、最高獎牌、其他成就圖示、解鎖數
+        const summary = createEl('summary', 'ach-unit-summary');
+        summary.appendChild(createEl('span', `ach-mode-tag ${listInfo.type}`, listInfo.type === 'grammar' ? '文法' : '拼寫'));
+        summary.appendChild(createEl('span', 'ach-unit-name', listInfo.name));
+        const badges = createEl('span', 'ach-unit-badges');
+        const highestMedal = getHighestMedalId(unitData);
+        badges.appendChild(createEl('span', `ach-mini-icon${highestMedal ? ' unlocked' : ''}`, highestMedal ? UNIT_ACHIEVEMENTS[highestMedal].icon : '🏅'));
+        ['FIRST_CLEAR', ...STREAK_IDS].forEach(id => {
+            badges.appendChild(createEl('span', `ach-mini-icon${achievements[id] ? ' unlocked' : ''}`, UNIT_ACHIEVEMENTS[id].icon));
+        });
+        summary.appendChild(badges);
+        const unlockedCount = Object.keys(UNIT_ACHIEVEMENTS).filter(id => achievements[id]).length;
+        summary.appendChild(createEl('span', 'ach-unit-count', `${unlockedCount} / ${Object.keys(UNIT_ACHIEVEMENTS).length}`));
+        details.appendChild(summary);
+
+        const rows = createEl('ul', 'ach-rows');
+        const firstClear = UNIT_ACHIEVEMENTS.FIRST_CLEAR;
+        rows.appendChild(buildAchievementRow({
+            icon: firstClear.icon, name: firstClear.name, description: firstClear.description,
+            pointsText: `+${firstClear.points}`, unlocked: achievements.FIRST_CLEAR,
+        }));
+
+        // 銅、銀、金是同一件事的三個等級，合併成一列階梯顯示
+        const ladder = createEl('div', 'ach-row-status ach-medal-ladder');
+        MEDAL_IDS.forEach(id => {
+            const step = createEl('span', `ach-medal-step${achievements[id] ? ' unlocked' : ''}`, UNIT_ACHIEVEMENTS[id].icon);
+            step.title = `${UNIT_ACHIEVEMENTS[id].name}：${UNIT_ACHIEVEMENTS[id].description}${achievements[id] ? '（已解鎖）' : ''}`;
+            ladder.appendChild(step);
+        });
+        rows.appendChild(buildAchievementRow({
+            icon: highestMedal ? UNIT_ACHIEVEMENTS[highestMedal].icon : '🏅',
+            name: '獎牌',
+            description: '通關時扣心 2 顆內銅牌、1 顆內銀牌、未扣心金牌',
+            pointsText: MEDAL_IDS.map(id => `+${UNIT_ACHIEVEMENTS[id].points}`).join(' / '),
+            unlocked: Boolean(highestMedal),
+            statusEl: ladder,
+        }));
+
+        STREAK_IDS.forEach(id => {
+            const ach = UNIT_ACHIEVEMENTS[id];
+            rows.appendChild(buildAchievementRow({
+                icon: ach.icon, name: ach.name, description: ach.description,
+                pointsText: `+${ach.points}`, unlocked: achievements[id],
+                progress: ach.progress(playerStats, unitPath),
+            }));
+        });
+        details.appendChild(rows);
+        return details;
+    }
+
     function updateAchievementDisplay() {
         achievementListEl.innerHTML = '';
-        const achievementModalTitle = document.querySelector('#achievement-modal h2');
-        achievementModalTitle.textContent = `我的成就 (總點數: ${playerStats.totalPoints || 0})`;
+        document.querySelector('#achievement-modal h2').textContent = '我的成就';
 
-        // Helper to sort achievements: Unlocked > In progress > Locked
-        const sortAchievements = (a, b) => {
-            if (a.isUnlocked !== b.isUnlocked) return a.isUnlocked ? -1 : 1;
-            return b.percent - a.percent;
-        };
+        const emptyUnitData = { achievements: {}, completionHistory: [] };
+        const activeLists = getActiveWordLists();
+        // 已結束的單元只列出曾經通關過的
+        const endedLists = wordLists.filter(list => list.disabled && playerStats.unitData[list.path]?.completionHistory?.length > 0);
+        const unitIds = Object.keys(UNIT_ACHIEVEMENTS);
+        const globalIds = Object.keys(GLOBAL_ACHIEVEMENTS);
+        const unlockedTotal = globalIds.filter(id => playerStats.unlockedGlobalAchievements[id]).length
+            + [...activeLists, ...endedLists].reduce((sum, list) => {
+                const achievements = playerStats.unitData[list.path]?.achievements || {};
+                return sum + unitIds.filter(id => achievements[id]).length;
+            }, 0);
+        const achievementTotal = globalIds.length + unitIds.length * (activeLists.length + endedLists.length);
+
+        const summary = createEl('div', 'ach-summary');
+        summary.appendChild(createEl('span', 'ach-summary-item', `🪙 總點數 ${playerStats.totalPoints || 0}`));
+        summary.appendChild(createEl('span', 'ach-summary-item', `🏅 已解鎖 ${unlockedTotal} / ${achievementTotal}`));
+        achievementListEl.appendChild(summary);
 
         // --- 全域成就 ---
-        const globalSection = document.createElement('div');
-        globalSection.className = 'ach-section';
-        const globalHeader = document.createElement('h3');
-        globalHeader.className = 'ach-section-header';
-        globalHeader.textContent = '全域成就';
-        globalSection.appendChild(globalHeader);
-        
-        const globalList = document.createElement('ul');
-        globalList.className = 'ach-list';
-
-        let globalAchItems = [];
-        for (const id in GLOBAL_ACHIEVEMENTS) {
+        achievementListEl.appendChild(createEl('h3', 'ach-section-header', '全域成就'));
+        const globalRows = createEl('ul', 'ach-rows');
+        globalIds.forEach(id => {
             const ach = GLOBAL_ACHIEVEMENTS[id];
-            const isUnlocked = playerStats.unlockedGlobalAchievements[id];
-            let percent = 0;
-            let progressHTML = '';
-            if (!isUnlocked && ach.progress) {
-                const p = ach.progress(playerStats);
-                percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
-                progressHTML = `<div class="ach-progress-text">(${p.current} / ${p.target})</div><div class="ach-progress-bar-container"><div class="ach-progress-bar" style="width: ${percent}%;"></div></div>`;
-            } else if (isUnlocked) {
-                percent = 100;
-            }
-            
-            const li = document.createElement('li');
-            li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
-            li.innerHTML = `<div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div><div class="ach-text"><h3>${ach.name}</h3><p>${ach.description}</p></div>${progressHTML}`;
-            
-            globalAchItems.push({ li, isUnlocked, percent });
-        }
-        globalAchItems.sort(sortAchievements).forEach(item => globalList.appendChild(item.li));
-        globalSection.appendChild(globalList);
-        achievementListEl.appendChild(globalSection);
-
-        // --- 目前有效單元成就 ---
-        // 顯示清單以目前可選的 wordLists 為準，不再以 localStorage 已有紀錄的單元為準。
-        getActiveWordLists().forEach(listInfo => {
-            const unitPath = listInfo.path;
-            const unitName = listInfo.name;
-            const unitSection = document.createElement('div');
-            unitSection.className = 'ach-section';
-            
-            const unitHeader = document.createElement('h3');
-            unitHeader.className = 'ach-section-header';
-            unitHeader.textContent = unitName;
-            unitSection.appendChild(unitHeader);
-
-            const unitList = document.createElement('ul');
-            unitList.className = 'ach-list';
-
-            const unitData = playerStats.unitData[unitPath] || { achievements: {}, completionHistory: [] };
-            let unitAchItems = [];
-            for (const id in UNIT_ACHIEVEMENTS) {
-                const ach = UNIT_ACHIEVEMENTS[id];
-                const isUnlocked = unitData.achievements?.[id];
-                let percent = 0;
-                let progressHTML = '';
-                if (!isUnlocked && ach.progress) {
-                    const p = ach.progress(playerStats, unitPath);
-                    percent = p.target > 0 ? Math.min((p.current / p.target) * 100, 100) : 0;
-                    progressHTML = `<div class="ach-progress-text">(${p.current} / ${p.target})</div><div class="ach-progress-bar-container"><div class="ach-progress-bar" style="width: ${percent}%;"></div></div>`;
-                } else if (isUnlocked) {
-                    percent = 100;
-                }
-                const li = document.createElement('li');
-                li.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
-                li.innerHTML = `<div class="ach-icon">${isUnlocked ? '🏆' : '🔒'}</div><div class="ach-text"><h3>${ach.name}</h3><p>${ach.description}</p></div>${progressHTML}`;
-                unitAchItems.push({ li, isUnlocked, percent });
-            }
-            
-            unitAchItems.sort(sortAchievements).forEach(item => unitList.appendChild(item.li));
-            unitSection.appendChild(unitList);
-            achievementListEl.appendChild(unitSection);
+            globalRows.appendChild(buildAchievementRow({
+                icon: ach.icon, name: ach.name, description: ach.description,
+                pointsText: `+${ach.points}`, unlocked: playerStats.unlockedGlobalAchievements[id],
+                progress: ach.progress(playerStats),
+            }));
         });
+        achievementListEl.appendChild(globalRows);
+
+        // --- 單元成就：從首頁開啟時，自動展開目前選取的單元 ---
+        achievementListEl.appendChild(createEl('h3', 'ach-section-header', '單元成就'));
+        const selectedPath = startContainer.style.display !== 'none' ? wordListSelectEl.value : currentWordListPath;
+        activeLists.forEach(list => {
+            achievementListEl.appendChild(buildUnitDetails(list, playerStats.unitData[list.path] || emptyUnitData, list.path === selectedPath));
+        });
+
+        if (endedLists.length > 0) {
+            const endedGroup = createEl('details', 'ach-ended-group');
+            endedGroup.appendChild(createEl('summary', 'ach-ended-summary', `已結束的單元（${endedLists.length}）`));
+            endedLists.forEach(list => {
+                endedGroup.appendChild(buildUnitDetails(list, playerStats.unitData[list.path], false));
+            });
+            achievementListEl.appendChild(endedGroup);
+        }
     }
 
     // --- 兌換系統 UI & 邏輯 ---
@@ -367,7 +451,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const sign = isReward ? '+' : '-';
             const pointsClass = isReward ? 'history-points reward' : 'history-points';
             
-            li.innerHTML = `<div class="history-item"><span class="history-date">${date}</span><span class="history-desc">${record.description}</span><span class="${pointsClass}">${sign} ${displayPoints} 點</span></div>`;
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            [
+                ['history-date', date],
+                ['history-desc', record.description],
+                [pointsClass, `${sign} ${displayPoints} 點`],
+            ].forEach(([className, text]) => {
+                const span = document.createElement('span');
+                span.className = className;
+                span.textContent = text;
+                item.appendChild(span);
+            });
+            li.appendChild(item);
             redemptionHistoryList.appendChild(li);
         });
     }
@@ -398,10 +494,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(`無法讀取 ${filePath}: ${response.statusText}`);
             wordList = await response.json();
             if (!Array.isArray(wordList) || wordList.length === 0) throw new Error("單字列表為空或格式錯誤。");
+            return true;
         } catch (error) {
             alert(`載入單字失敗...\n${error.message}`);
             showStartScreen();
+            return false;
         }
+    }
+
+    // Fisher–Yates 洗牌，回傳新陣列
+    function shuffle(items) {
+        const result = [...items];
+        for (let i = result.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [result[i], result[j]] = [result[j], result[i]];
+        }
+        return result;
     }
 
     // --- 拼寫遊戲邏輯 ---
@@ -415,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentHealth = MAX_HEALTH;
         isCorrecting = false;
         correctionCount = 0;
-        wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
+        wordsToPractice = shuffle(wordList);
         stageTotal = wordsToPractice.length;
         if (!synth) playAudioBtnEl.style.display = 'none';
         updateHealthDisplay();
@@ -426,47 +534,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (wordsToPractice.length === 0) {
             if (wordsToReview.length > 0) {
                 gameMode = 'review';
-                wordsToPractice = [...wordsToReview].sort(() => Math.random() - 0.5);
+                wordsToPractice = shuffle(wordsToReview);
                 stageTotal = wordsToPractice.length;
                 wordsToReview = [];
                 feedbackEl.textContent = `第 ${roundCount} 回合結束！現在開始訂正錯題...`;
                 feedbackEl.className = 'feedback-message notice';
             } else {
                 // Successfully completed a round. Award points before moving to the next round or ending the game.
-                if (activeGameMode === 'spelling') {
-                    const unitPath = currentWordListPath;
-                    if (!playerStats.unitData[unitPath]) {
-                        playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
-                    }
-                    if (!playerStats.unitData[unitPath].spellingRoundRewardsClaimed) {
-                        playerStats.unitData[unitPath].spellingRoundRewardsClaimed = {};
-                    }
-
-                    const today = getLocalDateString();
-                    const hasClaimed = playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] === today;
-
-                    if (roundCount === 1 || roundCount === 2) {
-                        const pointsAwarded = 5;
-                        if (!hasClaimed) {
-                            playerStats.totalPoints += pointsAwarded;
-                            playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] = today;
-                            showToast(`完成第 ${roundCount} 回合，獲得 ${pointsAwarded} 點！`);
-                        } else {
-                            showToast(`完成第 ${roundCount} 回合！（今日點數已領取）`);
-                        }
-                        saveProgress();
-                        updateTotalPointsDisplay();
-                    } else if (roundCount === 3) {
-                        const pointsAwarded = 10;
-                        if (!hasClaimed) {
-                            playerStats.totalPoints += pointsAwarded;
-                            playerStats.unitData[unitPath].spellingRoundRewardsClaimed[roundCount] = today;
-                            showToast(`完成第 3 回合，獲得 ${pointsAwarded} 點！`);
-                        } else {
-                            showToast('完成第 3 回合！（今日點數已領取）');
-                        }
-                    }
-                }
+                if (activeGameMode === 'spelling') awardRoundReward('spelling', roundCount);
 
                 if (roundCount >= 3) {
                     gameOver(true);
@@ -476,7 +551,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Start next round
                 gameMode = 'practice';
                 roundCount++;
-                wordsToPractice = [...wordList].sort(() => Math.random() - 0.5);
+                wordsToPractice = shuffle(wordList);
                 stageTotal = wordsToPractice.length;
                 feedbackEl.textContent = `太棒了！第 ${roundCount} 回合開始！`;
                 feedbackEl.className = 'feedback-message notice';
@@ -515,7 +590,12 @@ document.addEventListener('DOMContentLoaded', () => {
         spellingInputEl.value = '';
         spellingInputEl.disabled = false;
         spellingInputEl.focus();
-        setTimeout(playWordAudio, 100);
+        // 上一題的語音可能還在唸（答題太快時），先停掉再播新題
+        stopWordAudio();
+        wordAutoPlayTimeout = setTimeout(() => {
+            wordAutoPlayTimeout = null;
+            playWordAudio();
+        }, 100);
     }
 
     // --- 輔助函式 (對話解析、氣泡渲染與高亮控制) ---
@@ -619,7 +699,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 語音輔助函式 ---
+    // Chrome 首次呼叫 getVoices() 常回傳空陣列，待 voiceschanged 後再挑選並快取
+    let cachedPreferredVoice = null;
+    if (synth && 'onvoiceschanged' in synth) {
+        synth.addEventListener('voiceschanged', () => { cachedPreferredVoice = null; });
+    }
+
     function getPreferredVoice() {
+        if (!cachedPreferredVoice) cachedPreferredVoice = findPreferredVoice();
+        return cachedPreferredVoice;
+    }
+
+    function findPreferredVoice() {
         const voices = synth.getVoices();
         if (voices.length === 0) return null;
 
@@ -656,14 +747,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let grammarBeepResolve = null;
     let grammarBeepOscillator = null;
     let grammarAudioContext = null;
+    let wordAudioRequestId = 0;
+    let wordAutoPlayTimeout = null;
 
-    function playWordAudio() {
-        if (isPlaying || !currentWord || !synth) return;
-        synth.cancel();
+    // 停止目前單字的語音序列；舊序列的回呼會因 requestId 不符而失效
+    function stopWordAudio() {
+        wordAudioRequestId++;
+        if (synth) synth.cancel();
+        if (wordAutoPlayTimeout) {
+            clearTimeout(wordAutoPlayTimeout);
+            wordAutoPlayTimeout = null;
+        }
         if (currentSpeechTimeout) {
             clearTimeout(currentSpeechTimeout);
             currentSpeechTimeout = null;
         }
+        isPlaying = false;
+        playAudioBtnEl.disabled = false;
+        setSpeechHighlight(null);
+    }
+
+    function playWordAudio() {
+        if (isPlaying || !currentWord || !synth) return;
+        stopWordAudio();
+        const requestId = wordAudioRequestId;
 
         let itemsToSpeak = [];
 
@@ -697,6 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const preferredVoice = getPreferredVoice();
 
         function speakSequenceIndex(index) {
+            if (requestId !== wordAudioRequestId) return;
             if (index >= itemsToSpeak.length) {
                 isPlaying = false;
                 playAudioBtnEl.disabled = false;
@@ -721,12 +829,14 @@ document.addEventListener('DOMContentLoaded', () => {
             utterance.rate = 0.9;
 
             utterance.onstart = () => {
+                if (requestId !== wordAudioRequestId) return;
                 isPlaying = true;
                 playAudioBtnEl.disabled = true;
                 setSpeechHighlight(bubbleIdx);
             };
 
             utterance.onend = () => {
+                if (requestId !== wordAudioRequestId) return;
                 setSpeechHighlight(null);
                 if (index < itemsToSpeak.length - 1) {
                     currentSpeechTimeout = setTimeout(() => {
@@ -739,6 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             utterance.onerror = (event) => {
+                // 被 cancel() 中斷的舊語音不算錯誤，也不能影響新的序列
+                if (requestId !== wordAudioRequestId) return;
                 console.error('語音合成發生錯誤:', event);
                 isPlaying = false;
                 playAudioBtnEl.disabled = false;
@@ -802,7 +914,15 @@ document.addEventListener('DOMContentLoaded', () => {
             
             setTimeout(nextWordSetupFn, 500);
         } else {
-            feedbackEl.innerHTML = `<div style="text-align: left; width: 50%; margin: 0 auto;">你輸入的是: ${answer} <br>正確答案是: ${cleanCorrectAnswer} <br>請照著輸入 ${REQUIRED_CORRECTIONS} 次</div>`;
+            feedbackEl.innerHTML = '';
+            const feedbackBox = document.createElement('div');
+            feedbackBox.className = 'spelling-mistake-box';
+            [`你輸入的是: ${answer}`, `正確答案是: ${cleanCorrectAnswer}`, `請照著輸入 ${REQUIRED_CORRECTIONS} 次`].forEach(lineText => {
+                const line = document.createElement('div');
+                line.textContent = lineText;
+                feedbackBox.appendChild(line);
+            });
+            feedbackEl.appendChild(feedbackBox);
             feedbackEl.className = 'feedback-message incorrect';
             wordDisplayEl.textContent = currentWord.english;
             spellingInputEl.classList.add('input-incorrect');
@@ -856,14 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateGrammarHealthDisplay() {
-        grammarHealthDisplayEl.innerHTML = '';
-        for (let i = 0; i < MAX_HEALTH; i++) {
-            const heartSpan = document.createElement('span');
-            heartSpan.classList.add('heart');
-            heartSpan.textContent = '❤️';
-            if (i < grammarHealth) heartSpan.classList.add('full');
-            grammarHealthDisplayEl.appendChild(heartSpan);
-        }
+        renderHearts(grammarHealthDisplayEl, grammarHealth);
     }
 
     function setGrammarAnswerDisabled(disabled) {
@@ -1029,27 +1142,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function awardGrammarRoundReward() {
-        const unitPath = currentWordListPath;
-        if (!playerStats.unitData[unitPath]) {
-            playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
-        }
-        const unitData = playerStats.unitData[unitPath];
-        if (!unitData.grammarRoundRewardsClaimed) unitData.grammarRoundRewardsClaimed = {};
+    function awardRoundReward(mode, round) {
+        const pointsAwarded = ROUND_REWARDS[round];
+        if (!pointsAwarded) return;
+        const unitData = ensureUnitData(currentWordListPath);
+        const rewardKey = ROUND_REWARD_KEYS[mode];
+        if (!unitData[rewardKey]) unitData[rewardKey] = {};
 
+        const roundLabel = mode === 'grammar' ? `文法第 ${round} 回合` : `第 ${round} 回合`;
         const todayKey = getLocalDateString();
-        const hasClaimed = unitData.grammarRoundRewardsClaimed[grammarRoundCount] === todayKey;
-        const pointsAwarded = grammarRoundCount === 3 ? 10 : 5;
-
-        if (!hasClaimed) {
+        if (unitData[rewardKey][round] !== todayKey) {
             playerStats.totalPoints += pointsAwarded;
-            unitData.grammarRoundRewardsClaimed[grammarRoundCount] = todayKey;
-            showToast(`完成文法第 ${grammarRoundCount} 回合，獲得 ${pointsAwarded} 點！`);
+            unitData[rewardKey][round] = todayKey;
+            showToast(`完成${roundLabel}，獲得 ${pointsAwarded} 點！`);
         } else {
-            showToast(`完成文法第 ${grammarRoundCount} 回合！（今日點數已領取）`);
+            showToast(`完成${roundLabel}！（今日點數已領取）`);
         }
         saveProgress();
         updateTotalPointsDisplay();
+    }
+
+    // 單元通關結算：記錄完成時間並發放首次通關、獎牌、累計成就點數
+    function awardUnitCompletion(unitPath, unitName, remainingHealth) {
+        const unitData = ensureUnitData(unitPath);
+        unitData.completionHistory.push(Date.now());
+
+        const medalRules = [
+            ['FIRST_CLEAR', true],
+            ['GOLD', remainingHealth === MAX_HEALTH],
+            ['SILVER', remainingHealth >= MAX_HEALTH - 1],
+            ['BRONZE', remainingHealth >= MAX_HEALTH - 2],
+        ];
+        const unlockedInSession = [];
+        medalRules.forEach(([id, qualified]) => {
+            if (!qualified || unitData.achievements[id]) return;
+            playerStats.totalPoints += UNIT_ACHIEVEMENTS[id].points;
+            unitData.achievements[id] = true;
+            unlockedInSession.push(formatAchievementLabel(UNIT_ACHIEVEMENTS[id]));
+        });
+        checkStreakAchievements(unitPath, unlockedInSession);
+        if (unlockedInSession.length > 0) {
+            showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
+        }
+        checkGlobalAchievements();
     }
 
     function createGrammarRoundQuestions() {
@@ -1060,8 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
 
         // 只隨機主題順序；同一主題的題目會連續完整出完。
-        return Object.values(questionsByTopic)
-            .sort(() => Math.random() - 0.5)
+        return shuffle(Object.values(questionsByTopic))
             .flatMap(questions => questions);
     }
 
@@ -1078,7 +1212,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 grammarFeedbackEl.textContent = '本輪練習完成，現在開始訂正錯題。';
                 grammarFeedbackEl.className = 'feedback-message notice';
             } else {
-                awardGrammarRoundReward();
+                awardRoundReward('grammar', grammarRoundCount);
                 if (grammarRoundCount >= 3) {
                     grammarGameOver();
                     return;
@@ -1231,42 +1365,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const unitPath = currentWordListPath;
-        const unitName = currentWordListName;
-        if (!playerStats.unitData[unitPath]) {
-            playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
-        }
-        const unitData = playerStats.unitData[unitPath];
-        if (!unitData.achievements) unitData.achievements = {};
-        if (!unitData.completionHistory) unitData.completionHistory = [];
-        unitData.completionHistory.push(Date.now());
-
-        const unlockedInSession = [];
-        if (!unitData.achievements.FIRST_CLEAR) {
-            playerStats.totalPoints += UNIT_ACHIEVEMENTS.FIRST_CLEAR.points;
-            unitData.achievements.FIRST_CLEAR = true;
-            unlockedInSession.push(UNIT_ACHIEVEMENTS.FIRST_CLEAR.name);
-        }
-        if (grammarHealth === MAX_HEALTH && !unitData.achievements.GOLD) {
-            playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points;
-            unitData.achievements.GOLD = true;
-            unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name);
-        }
-        if (grammarHealth >= (MAX_HEALTH - 1) && !unitData.achievements.SILVER) {
-            playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points;
-            unitData.achievements.SILVER = true;
-            unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name);
-        }
-        if (grammarHealth >= (MAX_HEALTH - 2) && !unitData.achievements.BRONZE) {
-            playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points;
-            unitData.achievements.BRONZE = true;
-            unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name);
-        }
-        checkStreakAchievements(unitPath, unlockedInSession);
-        if (unlockedInSession.length > 0) {
-            showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
-        }
-        checkGlobalAchievements();
+        awardUnitCompletion(currentWordListPath, currentWordListName, grammarHealth);
         saveProgress();
         updateTotalPointsDisplay();
 
@@ -1281,38 +1380,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 通用遊戲邏輯 ---
     function gameOver(isSuccess) {
-        const unitPath = currentWordListPath;
-        const unitName = currentWordListName;
-        
         if (isSuccess) {
             // Achievement tracking and history for spelling mode only
             if (activeGameMode === 'spelling') {
-                if (!playerStats.unitData[unitPath]) {
-                    playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
-                } else if (!playerStats.unitData[unitPath].completionHistory) {
-                    playerStats.unitData[unitPath].completionHistory = [];
-                }
-                playerStats.unitData[unitPath].completionHistory.push(Date.now());
-
-                const unlockedInSession = [];
-                if (!playerStats.unitData[unitPath].achievements.FIRST_CLEAR) {
-                    playerStats.totalPoints += UNIT_ACHIEVEMENTS.FIRST_CLEAR.points;
-                    unlockedInSession.push(UNIT_ACHIEVEMENTS.FIRST_CLEAR.name);
-                    playerStats.unitData[unitPath].achievements.FIRST_CLEAR = true;
-                }
-                if (currentHealth === MAX_HEALTH) {
-                    if (!playerStats.unitData[unitPath].achievements.GOLD) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.GOLD.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.GOLD.name); playerStats.unitData[unitPath].achievements.GOLD = true; }
-                }
-                if (currentHealth >= (MAX_HEALTH - 1)) {
-                    if (!playerStats.unitData[unitPath].achievements.SILVER) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.SILVER.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.SILVER.name); playerStats.unitData[unitPath].achievements.SILVER = true; }
-                }
-                if (currentHealth >= (MAX_HEALTH - 2)) {
-                    if (!playerStats.unitData[unitPath].achievements.BRONZE) { playerStats.totalPoints += UNIT_ACHIEVEMENTS.BRONZE.points; unlockedInSession.push(UNIT_ACHIEVEMENTS.BRONZE.name); playerStats.unitData[unitPath].achievements.BRONZE = true; }
-                }
-                checkStreakAchievements(unitPath, unlockedInSession);
-                if(unlockedInSession.length > 0) showToast(`在 ${unitName} 中解鎖: ${unlockedInSession.join(', ')}`);
-                
-                checkGlobalAchievements(); // Global achievements are still checked for spelling mode completions
+                awardUnitCompletion(currentWordListPath, currentWordListName, currentHealth);
                 completionContainer.querySelector('.start-title').textContent = '恭喜通關！';
                 completionContainer.querySelector('p').textContent = '你已完成本單元的所有練習。';
             }
@@ -1357,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (progress.current >= progress.target) {
                         playerStats.totalPoints += ach.points;
                         unitData.achievements[id] = true;
-                        unlockedInSession.push(ach.name);
+                        unlockedInSession.push(formatAchievementLabel(ach));
                     }
                 }
             }
@@ -1388,20 +1459,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pointsDisplay) pointsDisplay.textContent = playerStats.totalPoints || 0;
     }
 
+    function renderHearts(displayEl, health) {
+        displayEl.innerHTML = '';
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            const heartSpan = document.createElement('span');
+            heartSpan.classList.add('heart');
+            heartSpan.textContent = '❤️';
+            if (i < health) heartSpan.classList.add('full');
+            displayEl.appendChild(heartSpan);
+        }
+    }
+
     function updateHealthDisplay() {
-        const healthDisplays = document.querySelectorAll('.health-display');
-        healthDisplays.forEach(displayEl => {
-            displayEl.innerHTML = '';
-            for (let i = 0; i < MAX_HEALTH; i++) {
-                const heartSpan = document.createElement('span');
-                heartSpan.classList.add('heart');
-                heartSpan.textContent = '❤️';
-                if (i < currentHealth) {
-                    heartSpan.classList.add('full');
-                }
-                displayEl.appendChild(heartSpan);
-            }
-        });
+        renderHearts(healthDisplayEl, currentHealth);
     }
 
     // --- 新的啟動流程 ---
@@ -1456,32 +1526,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const unitPath = wordListSelectEl.value;
-        const rewardKey = activeGameMode === 'grammar'
-            ? 'grammarRoundRewardsClaimed'
-            : 'spellingRoundRewardsClaimed';
+        const rewardKey = ROUND_REWARD_KEYS[activeGameMode];
         const practiceName = activeGameMode === 'grammar' ? '文法' : '拼寫';
         
-        // 初始化或讀取該單元的今日獎勵進度
-        if (!playerStats.unitData[unitPath]) {
-            playerStats.unitData[unitPath] = { achievements: {}, completionHistory: [] };
-        }
-        if (!playerStats.unitData[unitPath][rewardKey]) {
-            playerStats.unitData[unitPath][rewardKey] = {};
-        }
-
+        // 唯讀取得該單元的今日獎勵進度，避免只是瀏覽選單就寫入空資料
         const today = getLocalDateString();
-        const claimedInfo = playerStats.unitData[unitPath][rewardKey];
+        const claimedInfo = playerStats.unitData[unitPath]?.[rewardKey] || {};
 
         badgeContainer.innerHTML = '';
         badgeContainer.style.display = 'flex';
         hintEl.style.display = 'block';
 
         let completedRounds = 0;
-        const rounds = [
-            { round: 1, points: 5, label: '第1回合' },
-            { round: 2, points: 5, label: '第2回合' },
-            { round: 3, points: 10, label: '第3回合' }
-        ];
+        const rounds = Object.entries(ROUND_REWARDS).map(([round, points]) => ({ round: Number(round), points, label: `第${round}回合` }));
+        const maxDailyPoints = rounds.reduce((sum, r) => sum + r.points, 0);
 
         rounds.forEach(r => {
             const hasClaimed = claimedInfo[r.round] === today;
@@ -1508,11 +1566,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 更新引導文案
         if (completedRounds === 0) {
-            hintEl.textContent = `💡 完成今日${practiceName}挑戰，最高可獲得 20 點！`;
+            hintEl.textContent = `💡 完成今日${practiceName}挑戰，最高可獲得 ${maxDailyPoints} 點！`;
             hintEl.style.color = '#e2e8f0'; // 灰色偏白
-        } else if (completedRounds < 3) {
+        } else if (completedRounds < rounds.length) {
             const nextRound = completedRounds + 1;
-            const nextPoints = nextRound === 3 ? 10 : 5;
+            const nextPoints = ROUND_REWARDS[nextRound];
             hintEl.textContent = `🔥 再接再厲！今日${practiceName}通過第 ${nextRound} 回合可再獲得 ${nextPoints} 點！`;
             hintEl.style.color = '#ffd700'; // 金色
         } else {
@@ -1526,11 +1584,11 @@ document.addEventListener('DOMContentLoaded', () => {
         currentWordListName = wordListSelectEl.options[wordListSelectEl.selectedIndex].text;
 
         if (!playerStats.unitData[currentWordListPath]) {
-            playerStats.unitData[currentWordListPath] = { achievements: {}, completionHistory: [] };
+            ensureUnitData(currentWordListPath);
             saveProgress();
         }
 
-        await loadWords(currentWordListPath);
+        if (!(await loadWords(currentWordListPath))) return;
 
         startContainer.style.display = 'none';
         if (activeGameMode === 'grammar') {

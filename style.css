@@ -362,6 +362,13 @@ body {
     color: var(--notice-color);
 }
 
+.spelling-mistake-box {
+    text-align: left;
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
 /* --- Progress Bar --- */
 .progress-wrapper {
     display: flex;
@@ -630,86 +637,220 @@ body {
     margin: 0;
 }
 
-.ach-list {
+.ach-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    font-weight: bold;
+}
+
+.ach-rows {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 1rem 0;
+}
+
+.ach-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-}
-
-.ach-section {
-    margin-bottom: 2rem;
-}
-
-.achievement-item {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 2rem 1fr auto;
+    grid-template-areas:
+        "icon text chip"
+        "icon status status";
     align-items: center;
-    text-align: center;
-    padding: 1.5rem 1rem;
-    background-color: var(--bg-color);
-    border: 2px solid var(--border-color);
-    border-radius: 0.75rem;
-    position: relative;
-    box-sizing: border-box;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    gap: 0.25rem 0.75rem;
+    padding: 0.6rem 0.25rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.achievement-item:not(.unlocked) {
-    opacity: 0.6;
+.ach-row:last-child {
+    border-bottom: none;
 }
 
-.achievement-item.unlocked {
-    border-color: var(--notice-color);
-    background-color: rgba(246, 173, 85, 0.05); /* very light notice color tone */
-}
-
-.achievement-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-.ach-icon {
-    font-size: 3rem;
-    margin: 0 0 0.5rem 0;
+.ach-row-icon {
+    grid-area: icon;
+    font-size: 1.5rem;
     line-height: 1;
-}
-
-.achievement-item:not(.unlocked) .ach-icon {
+    text-align: center;
     filter: grayscale(100%);
+    opacity: 0.5;
 }
 
-.ach-text {
-    flex-grow: 1;
+.ach-row.unlocked .ach-row-icon {
+    filter: none;
+    opacity: 1;
+}
+
+.ach-row-text {
+    grid-area: text;
     display: flex;
-    flex-direction: column;
-    width: 100%;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5rem;
+    min-width: 0;
 }
 
-.ach-text h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1rem;
+.ach-row-name {
+    font-weight: bold;
     color: var(--header-color);
-    line-height: 1.3;
 }
 
-.achievement-item.unlocked .ach-text h3 {
+.ach-row.unlocked .ach-row-name {
     color: var(--text-color);
 }
 
-.ach-text p {
-    margin: 0;
+.ach-row-desc {
     font-size: 0.8rem;
     color: var(--header-color);
-    line-height: 1.4;
 }
 
-/* Ensure progress bar takes full width at bottom of card */
-.achievement-item .ach-progress-bar-container, 
-.achievement-item .ach-progress-text {
-    width: 100%;
+.ach-chip {
+    grid-area: chip;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: var(--notice-color);
+    border: 1px solid var(--notice-color);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+    white-space: nowrap;
+}
+
+.ach-row-status {
+    grid-area: status;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--header-color);
+}
+
+.ach-row-status.ach-done {
+    color: var(--correct-color);
+    font-weight: bold;
+}
+
+.ach-row-status .ach-progress-bar-container {
+    flex: 1;
+    margin-top: 0;
+}
+
+.ach-medal-step {
+    font-size: 1.2rem;
+    filter: grayscale(100%);
+    opacity: 0.4;
+}
+
+.ach-medal-step.unlocked {
+    filter: none;
+    opacity: 1;
+}
+
+.ach-medal-step + .ach-medal-step::before {
+    content: '→';
+    font-size: 0.8rem;
+    color: var(--border-color);
+    margin-right: 0.5rem;
+    filter: none;
+}
+
+/* --- 單元收合列 --- */
+.ach-unit,
+.ach-ended-group {
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--bg-color);
+}
+
+.ach-unit[open] {
+    border-color: var(--notice-color);
+}
+
+.ach-unit > .ach-rows {
+    margin: 0;
+    padding: 0 0.75rem 0.25rem;
+}
+
+.ach-unit-summary,
+.ach-ended-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+    padding: 0.7rem 0.75rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.ach-unit-summary::-webkit-details-marker,
+.ach-ended-summary::-webkit-details-marker {
+    display: none;
+}
+
+.ach-unit-summary::before,
+.ach-ended-summary::before {
+    content: '▸';
+    color: var(--header-color);
+    transition: transform 0.2s ease;
+}
+
+.ach-unit[open] > .ach-unit-summary::before,
+.ach-ended-group[open] > .ach-ended-summary::before {
+    transform: rotate(90deg);
+}
+
+.ach-ended-summary {
+    color: var(--header-color);
+    font-weight: bold;
+}
+
+.ach-ended-group > .ach-unit {
+    margin: 0 0.5rem 0.5rem;
+}
+
+.ach-mode-tag {
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.1rem 0.4rem;
+    border-radius: 0.3rem;
+    background-color: var(--correct-color);
+    color: var(--bg-color);
+}
+
+.ach-mode-tag.grammar {
+    background-color: var(--notice-color);
+}
+
+.ach-unit-name {
+    flex: 1;
+    min-width: 8rem;
+    font-weight: bold;
+}
+
+.ach-unit-badges {
+    display: flex;
+    gap: 0.15rem;
+}
+
+.ach-mini-icon {
+    filter: grayscale(100%);
+    opacity: 0.35;
+}
+
+.ach-mini-icon.unlocked {
+    filter: none;
+    opacity: 1;
+}
+
+.ach-unit-count {
+    font-size: 0.8rem;
+    color: var(--header-color);
+    min-width: 2.5rem;
+    text-align: right;
 }
 
 #close-achievements-btn, #close-redemptions-btn {
@@ -854,8 +995,7 @@ body {
 .ach-progress-text {
     font-size: 0.8rem;
     color: var(--header-color);
-    text-align: right;
-    margin-top: 0.25rem;
+    white-space: nowrap;
 }
 
 .ach-progress-bar-container {
@@ -890,29 +1030,11 @@ body {
     margin-top: 0;
 }
 
-/* Added for top-right close button on achievement modal */
-#achievement-modal {
-    position: relative;
-}
-
+/* 成就視窗關閉按鈕：較大的點擊範圍 */
 #close-achievements-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    margin: 0; /* Override existing margin */
-    padding: 0.5rem; /* Add some padding for easier clicking */
-    width: auto; /* Override existing width */
-    background: none; /* Override existing background */
-    color: var(--header-color);
-    border: none;
-    font-size: 2.5rem;
-    line-height: 1;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-#close-achievements-btn:hover {
-    color: var(--text-color);
+    margin: 0;
+    padding: 0.5rem;
+    width: auto;
 }
 
 /* --- Visual Feedback Animations (Added) --- */
