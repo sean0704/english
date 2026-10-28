@@ -4,11 +4,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameContainer = document.getElementById('game-container');
     const grammarContainer = document.getElementById('grammar-container');
     const completionContainer = document.getElementById('completion-container');
+    const challengeContainer = document.getElementById('challenge-container');
     const achievementContainer = document.getElementById('achievement-container');
 
     // 新的啟動流程元素
     const modeBtnSpelling = document.getElementById('mode-btn-spelling');
     const modeBtnGrammar = document.getElementById('mode-btn-grammar');
+    const modeBtnChallenge = document.getElementById('mode-btn-challenge');
     const wordListSelectEl = document.getElementById('word-list-select');
     const startGameBtn = document.getElementById('start-game-btn');
 
@@ -40,6 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const grammarHintBtn = document.getElementById('grammar-hint-btn');
     const grammarCheckBtn = document.getElementById('grammar-check-btn');
     const grammarNextBtn = document.getElementById('grammar-next-btn');
+    const grammarQuitBtn = document.getElementById('grammar-quit-btn');
+
+    // 文法闖關專用
+    const challengeTitleEl = document.getElementById('challenge-title');
+    const challengeHubContentEl = document.getElementById('challenge-hub-content');
+    const challengeBackBtn = document.getElementById('challenge-back-btn');
 
     const restartBtn = document.getElementById('restart-btn');
     const backToMenuBtn = document.getElementById('back-to-menu-btn');
@@ -99,6 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '八年級 上 Unit 2 (2)', path: 'g8_1_unit2_2.json', type: 'spelling' },
         { name: '八年級 上 Unit 3 (1)', path: 'g8_1_unit3_1.json', type: 'spelling' },
         { name: '八年級 上 Unit 3 (2)', path: 'g8_1_unit3_2.json', type: 'spelling' },
+        { name: '八年級 上 Unit 3 文法練習', path: 'g8_1_unit3_grammar.json', type: 'grammar' },
+        { name: '八年級 上 Unit 3 文法闖關', path: 'g8_1_unit3_challenge.json', type: 'challenge' },
         { name: '六年級 上 Unit 1', path: 'g6_1_unit1.json', type: 'spelling' },
         { name: '六年級 上 Unit 2', path: 'g6_1_unit2.json', type: 'spelling' },
         { name: '六年級 上 Phonics 3~5', path: 'g6_1_phonics3_5.json', type: 'spelling' },
@@ -390,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#achievement-modal h2').textContent = '我的成就';
 
         const emptyUnitData = { achievements: {}, completionHistory: [] };
-        const activeLists = getActiveWordLists();
+        const activeLists = getActiveWordLists().filter(list => list.type !== 'challenge');
         // 已結束的單元只列出曾經通關過的
         const endedLists = wordLists.filter(list => list.disabled && playerStats.unitData[list.path]?.completionHistory?.length > 0);
         const unitIds = Object.keys(UNIT_ACHIEVEMENTS);
@@ -1009,6 +1019,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (question.type === 'order') {
+            renderGrammarOrderTiles(question);
+            return;
+        }
+
         const answerInput = document.createElement('input');
         answerInput.type = 'text';
         answerInput.className = 'grammar-input';
@@ -1019,6 +1034,50 @@ document.addEventListener('DOMContentLoaded', () => {
         grammarAnswerAreaEl.appendChild(answerInput);
         answerInput.addEventListener('input', () => answerInput.classList.remove('input-incorrect'));
         answerInput.focus();
+    }
+
+    // 重組題：依序點選單字方塊組成句子，可退回或清除
+    function renderGrammarOrderTiles(question) {
+        const picked = [];
+        const builtEl = createEl('div', 'grammar-order-built');
+        const poolEl = createEl('div', 'grammar-order-pool');
+        const toolsEl = createEl('div', 'grammar-order-tools');
+
+        const updateBuilt = () => {
+            grammarSelectedAnswer = picked.map(item => item.text).join(' ');
+            builtEl.textContent = grammarSelectedAnswer || '依序點選下方的單字';
+            builtEl.classList.toggle('empty', picked.length === 0);
+            builtEl.classList.remove('input-incorrect');
+        };
+
+        shuffle(question.tiles).forEach(text => {
+            const tile = createEl('button', 'grammar-option grammar-tile', text);
+            tile.type = 'button';
+            tile.addEventListener('click', () => {
+                picked.push({ text, tile });
+                tile.disabled = true;
+                updateBuilt();
+            });
+            poolEl.appendChild(tile);
+        });
+
+        const undoBtn = createEl('button', 'grammar-button secondary', '退回一個');
+        undoBtn.type = 'button';
+        undoBtn.addEventListener('click', () => {
+            const last = picked.pop();
+            if (last) last.tile.disabled = false;
+            updateBuilt();
+        });
+        const clearBtn = createEl('button', 'grammar-button secondary', '全部清除');
+        clearBtn.type = 'button';
+        clearBtn.addEventListener('click', () => {
+            picked.splice(0).forEach(item => { item.tile.disabled = false; });
+            updateBuilt();
+        });
+        toolsEl.append(undoBtn, clearBtn);
+
+        grammarAnswerAreaEl.append(builtEl, poolEl, toolsEl);
+        updateBuilt();
     }
 
     function stopGrammarAudio() {
@@ -1203,6 +1262,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupNextGrammarQuestion() {
         stopGrammarAudio();
+        if (activeGameMode === 'challenge') {
+            setupNextChallengeQuestion();
+            return;
+        }
         if (grammarQuestions.length === 0) {
             if (grammarReviewQuestions.length > 0 && !grammarIsReview) {
                 grammarIsReview = true;
@@ -1264,10 +1327,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showGrammarHint() {
         if (!currentGrammarQuestion || grammarQuestionAnswered) return;
+        if (activeGameMode === 'challenge') challengeHintUsed = true;
         grammarHintEl.style.display = 'block';
     }
 
     function checkGrammarAnswer() {
+        if (activeGameMode === 'challenge') {
+            checkChallengeAnswer();
+            return;
+        }
         if (!currentGrammarQuestion || grammarQuestionAnswered) return;
 
         const input = grammarAnswerAreaEl.querySelector('input');
@@ -1327,6 +1395,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeGrammarGame() {
         if (!Array.isArray(wordList) || wordList.length === 0) return;
         grammarPlayAudioBtn.style.display = synth ? 'inline-flex' : 'none';
+        // 還原文法闖關可能改過的共用畫面
+        grammarHealthDisplayEl.style.display = '';
+        grammarHintBtn.style.display = '';
+        grammarHintBtn.textContent = '提示';
+        grammarQuitBtn.style.display = 'none';
 
         // 將題庫中的所有題目加入練習，並在每回合重新隨機排列。
         const questionsByTopic = wordList.reduce((groups, question) => {
@@ -1378,6 +1451,536 @@ document.addEventListener('DOMContentLoaded', () => {
         backToMenuBtn.style.display = 'block';
         grammarContainer.style.display = 'none';
         completionContainer.style.display = 'flex';
+    }
+
+    // --- 文法闖關邏輯 ---
+    // 星星依正確率發放，每顆星的點數只在第一次拿到時給
+    const CHALLENGE_STAR_RULES = [
+        { stars: 1, accuracy: 0.6, points: 10 },
+        { stars: 2, accuracy: 0.8, points: 15 },
+        { stars: 3, accuracy: 1, points: 20 },
+    ];
+    const CHALLENGE_RECYCLE_POINTS = 3;
+    const CHALLENGE_RECYCLE_MAX_QUESTIONS = 15;
+    const CHALLENGE_CLEAR_BANK_BONUS = 20;
+    const CHALLENGE_EXAM_PER_TOPIC = 4;
+    const CHALLENGE_EXAM_UNLOCK_STARS = 2;
+    const CHALLENGE_EXAM_PASS_SCORE = 60;
+    const CHALLENGE_EXAM_PASS_POINTS = 20;
+    const CHALLENGE_EXAM_PERFECT_POINTS = 50;
+    // 錯題回收與模擬小考的每日點數上限；星星與滿分獎勵為一次性，不受此限
+    const CHALLENGE_DAILY_CAP = 60;
+    const CHALLENGE_KIND_LABELS = { level: '關卡挑戰', recycle: '錯題回收', exam: '模擬小考' };
+
+    let challengeSession = null;
+    let challengeLastResult = null;
+    let challengeHintUsed = false;
+
+    function hasChinese(text) {
+        return /[㐀-鿿]/.test(String(text || ''));
+    }
+
+    function ensureChallengeData(unitPath) {
+        const unitData = ensureUnitData(unitPath);
+        if (!unitData.challenge) unitData.challenge = {};
+        const data = unitData.challenge;
+        if (!data.stars) data.stars = {};
+        if (!data.bestAccuracy) data.bestAccuracy = {};
+        if (!data.wrongBank) data.wrongBank = {}; // 題目 id → 放入錯題區的日期
+        if (!data.topicStats) data.topicStats = {};
+        if (!data.exams) data.exams = [];
+        if (!data.daily) data.daily = { date: '', points: 0 };
+        return data;
+    }
+
+    function getChallengePool() {
+        return wordList.filter(question => question && question.id && question.answer && question.topic);
+    }
+
+    function getChallengeTopics() {
+        const topics = [];
+        getChallengePool().forEach(question => {
+            if (!topics.some(topic => topic.id === question.topic)) {
+                topics.push({ id: question.topic, label: question.topicLabel || question.topic });
+            }
+        });
+        return topics;
+    }
+
+    function getWrongBankIds(data) {
+        const poolIds = new Set(getChallengePool().map(question => question.id));
+        return Object.keys(data.wrongBank).filter(id => poolIds.has(id));
+    }
+
+    // 錯題要隔天以後才能回收，避免看完解答馬上重答
+    function getRecyclableIds(data) {
+        const today = getLocalDateString();
+        return getWrongBankIds(data).filter(id => data.wrongBank[id] < today);
+    }
+
+    function getChallengeExamTotal() {
+        const pool = getChallengePool();
+        return getChallengeTopics().reduce((sum, topic) =>
+            sum + Math.min(CHALLENGE_EXAM_PER_TOPIC, pool.filter(question => question.topic === topic.id).length), 0);
+    }
+
+    function isChallengeExamUnlocked(data) {
+        return getChallengeTopics().every(topic => (data.stars[topic.id] || 0) >= CHALLENGE_EXAM_UNLOCK_STARS);
+    }
+
+    function getTodayChallengePoints(data) {
+        return data.daily.date === getLocalDateString() ? data.daily.points : 0;
+    }
+
+    function grantCappedChallengePoints(data, points) {
+        const today = getLocalDateString();
+        if (data.daily.date !== today) data.daily = { date: today, points: 0 };
+        const granted = Math.max(0, Math.min(points, CHALLENGE_DAILY_CAP - data.daily.points));
+        data.daily.points += granted;
+        playerStats.totalPoints += granted;
+        return granted;
+    }
+
+    function formatGrantedPoints(points) {
+        return points > 0 ? `+${points} 點` : '今日點數已達上限';
+    }
+
+    function formatStars(count) {
+        return '★'.repeat(count) + '☆'.repeat(CHALLENGE_STAR_RULES.length - count);
+    }
+
+    function formatPercent(value) {
+        return `${Math.round(value * 100)}%`;
+    }
+
+    function showChallengeHub() {
+        stopGrammarAudio();
+        challengeSession = null;
+        currentGrammarQuestion = null;
+        grammarContainer.style.display = 'none';
+        startContainer.style.display = 'none';
+        challengeContainer.style.display = 'flex';
+        renderChallengeHub();
+        window.scrollTo(0, 0);
+    }
+
+    function buildChallengeCard(title, meta, buttonText, onClick, options = {}) {
+        const card = createEl('div', 'challenge-card');
+        const info = createEl('div', 'challenge-card-info');
+        info.appendChild(createEl('div', 'challenge-card-title', title));
+        info.appendChild(createEl('div', 'challenge-card-meta', meta));
+        if (options.note) info.appendChild(createEl('div', 'challenge-card-note', options.note));
+        card.appendChild(info);
+        if (options.stars !== undefined) card.appendChild(createEl('div', 'challenge-stars', formatStars(options.stars)));
+        const button = createEl('button', 'grammar-button', buttonText);
+        button.type = 'button';
+        button.disabled = Boolean(options.disabled);
+        button.addEventListener('click', onClick);
+        card.appendChild(button);
+        return card;
+    }
+
+    function buildChallengeSection(title) {
+        const section = createEl('section', 'challenge-section');
+        section.appendChild(createEl('h2', 'challenge-section-title', title));
+        return section;
+    }
+
+    function renderChallengeHub() {
+        const data = ensureChallengeData(currentWordListPath);
+        const pool = getChallengePool();
+        const topics = getChallengeTopics();
+        challengeTitleEl.textContent = currentWordListName;
+        challengeHubContentEl.innerHTML = '';
+
+        challengeHubContentEl.appendChild(createEl('p', 'challenge-today',
+            `今日錯題回收與模擬小考點數：${getTodayChallengePoints(data)} / ${CHALLENGE_DAILY_CAP}`));
+
+        if (challengeLastResult) challengeHubContentEl.appendChild(buildChallengeResultCard(challengeLastResult));
+
+        // ① 文法關卡
+        const levelSection = buildChallengeSection('① 文法關卡');
+        topics.forEach(topic => {
+            const stars = data.stars[topic.id] || 0;
+            const best = data.bestAccuracy[topic.id];
+            const count = pool.filter(question => question.topic === topic.id).length;
+            levelSection.appendChild(buildChallengeCard(
+                topic.label,
+                `${count} 題・最佳正確率 ${best === undefined ? '—' : formatPercent(best)}`,
+                stars > 0 ? '再挑戰' : '挑戰',
+                () => startChallengeSession('level', topic.id),
+                { stars }
+            ));
+        });
+        challengeHubContentEl.appendChild(levelSection);
+
+        // ② 錯題回收站
+        const bankCount = getWrongBankIds(data).length;
+        const recyclableCount = Math.min(getRecyclableIds(data).length, CHALLENGE_RECYCLE_MAX_QUESTIONS);
+        const recycleSection = buildChallengeSection('② 錯題回收站');
+        recycleSection.appendChild(buildChallengeCard(
+            bankCount === 0 ? '目前沒有錯題 🎉' : `錯題 ${bankCount} 題`,
+            bankCount === 0 ? '答錯的題目會自動收進這裡。' : `今天可以回收 ${recyclableCount} 題（答錯的題目隔天才能回收）`,
+            recyclableCount > 0 ? `開始回收（${recyclableCount} 題）` : '明天再來',
+            () => startChallengeSession('recycle'),
+            {
+                disabled: recyclableCount === 0,
+                note: `每回收一題 +${CHALLENGE_RECYCLE_POINTS} 點，錯題全部清空再 +${CHALLENGE_CLEAR_BANK_BONUS} 點`,
+            }
+        ));
+        challengeHubContentEl.appendChild(recycleSection);
+
+        // ③ 模擬小考
+        const examUnlocked = isChallengeExamUnlocked(data);
+        const readyCount = topics.filter(topic => (data.stars[topic.id] || 0) >= CHALLENGE_EXAM_UNLOCK_STARS).length;
+        const examSection = buildChallengeSection('③ 模擬小考');
+        examSection.appendChild(buildChallengeCard(
+            examUnlocked ? `共 ${getChallengeExamTotal()} 題・${CHALLENGE_EXAM_PASS_SCORE} 分及格` : '🔒 尚未解鎖',
+            examUnlocked
+                ? `最高分：${typeof data.bestExam === 'number' ? `${data.bestExam} 分` : '還沒考過'}`
+                : `每一關都拿到 ${formatStars(CHALLENGE_EXAM_UNLOCK_STARS)} 以上才能解鎖（目前 ${readyCount} / ${topics.length} 關）`,
+            '開始考試',
+            () => startChallengeSession('exam'),
+            { disabled: !examUnlocked, note: '考試中不能看提示，也不會顯示對錯，寫完才公布成績。' }
+        ));
+        challengeHubContentEl.appendChild(examSection);
+
+        challengeHubContentEl.appendChild(buildChallengeRules());
+        challengeHubContentEl.appendChild(buildChallengeParentView(data, topics));
+    }
+
+    function buildChallengeRules() {
+        const details = createEl('details', 'challenge-details');
+        details.appendChild(createEl('summary', '', '🪙 怎麼得點數？'));
+        const list = createEl('ul', 'challenge-rule-list');
+        [
+            `關卡正確率達 60% / 80% / 100% 可拿到 1～3 顆星，第一次拿到各顆星分別 +${CHALLENGE_STAR_RULES.map(rule => rule.points).join(' / +')} 點。`,
+            '看了提示才答對只算半題；答錯的題目會收進錯題回收站。',
+            `錯題隔天以後答對才算回收，每題 +${CHALLENGE_RECYCLE_POINTS} 點；錯題全部清空再 +${CHALLENGE_CLEAR_BANK_BONUS} 點（每天一次）。`,
+            `模擬小考 ${CHALLENGE_EXAM_PASS_SCORE} 分及格 +${CHALLENGE_EXAM_PASS_POINTS} 點（每天一次）；比自己的最高分進步幾分就再加幾點；第一次考滿分 +${CHALLENGE_EXAM_PERFECT_POINTS} 點。`,
+            `錯題回收和模擬小考每天最多可得 ${CHALLENGE_DAILY_CAP} 點。`,
+        ].forEach(text => list.appendChild(createEl('li', '', text)));
+        details.appendChild(list);
+        return details;
+    }
+
+    function buildChallengeParentView(data, topics) {
+        const details = createEl('details', 'challenge-details');
+        details.appendChild(createEl('summary', '', '👨‍👩‍👧 家長檢視'));
+
+        const bankIds = getWrongBankIds(data);
+        const pool = getChallengePool();
+        const table = createEl('table', 'challenge-table');
+        const headRow = createEl('tr');
+        ['文法重點', '作答', '答對', '正確率', '錯題'].forEach(text => headRow.appendChild(createEl('th', '', text)));
+        table.appendChild(headRow);
+        topics.forEach(topic => {
+            const stats = data.topicStats[topic.id] || { attempts: 0, correct: 0 };
+            const wrongCount = bankIds.filter(id => pool.find(question => question.id === id)?.topic === topic.id).length;
+            const row = createEl('tr');
+            [
+                topic.label,
+                String(stats.attempts),
+                String(stats.correct),
+                stats.attempts > 0 ? formatPercent(stats.correct / stats.attempts) : '—',
+                String(wrongCount),
+            ].forEach(text => row.appendChild(createEl('td', '', text)));
+            table.appendChild(row);
+        });
+        details.appendChild(table);
+        details.appendChild(createEl('p', 'challenge-card-note', '「答對」只計算沒看提示就答對的題目。'));
+
+        details.appendChild(createEl('h3', 'challenge-subtitle', '模擬小考紀錄'));
+        if (data.exams.length === 0) {
+            details.appendChild(createEl('p', 'challenge-card-note', '還沒有考試紀錄。'));
+        } else {
+            const list = createEl('ul', 'challenge-exam-list');
+            data.exams.slice(-10).reverse().forEach(exam => {
+                const passed = exam.score >= CHALLENGE_EXAM_PASS_SCORE;
+                const item = createEl('li', passed ? 'pass' : 'fail',
+                    `${new Date(exam.timestamp).toLocaleString()}　${exam.score} 分${passed ? '' : '（未及格）'}`);
+                list.appendChild(item);
+            });
+            details.appendChild(list);
+        }
+        return details;
+    }
+
+    function buildChallengeResultCard(result) {
+        const card = createEl('div', `challenge-result ${result.tone || ''}`);
+        card.appendChild(createEl('h2', 'challenge-result-title', result.title));
+        result.lines.forEach(line => card.appendChild(createEl('p', 'challenge-result-line', line)));
+
+        if (result.wrong.length > 0) {
+            const details = createEl('details', 'challenge-details');
+            details.open = true;
+            details.appendChild(createEl('summary', '', `錯題解析（${result.wrong.length} 題）`));
+            const list = createEl('ol', 'challenge-wrong-list');
+            result.wrong.forEach(item => {
+                const li = createEl('li');
+                li.appendChild(createEl('div', 'challenge-wrong-question', item.question.question));
+                li.appendChild(createEl('div', 'challenge-wrong-yours', `你的答案：${item.answer}`));
+                li.appendChild(createEl('div', 'challenge-wrong-answer', `正確答案：${item.question.answer}`));
+                li.appendChild(createEl('div', 'challenge-wrong-explain', item.question.explanation));
+                list.appendChild(li);
+            });
+            details.appendChild(list);
+            card.appendChild(details);
+        }
+        return card;
+    }
+
+    function startChallengeSession(kind, topicId) {
+        const data = ensureChallengeData(currentWordListPath);
+        const pool = getChallengePool();
+        let questions;
+        if (kind === 'level') {
+            questions = shuffle(pool.filter(question => question.topic === topicId));
+        } else if (kind === 'recycle') {
+            const recyclableIds = new Set(getRecyclableIds(data));
+            questions = shuffle(pool.filter(question => recyclableIds.has(question.id))).slice(0, CHALLENGE_RECYCLE_MAX_QUESTIONS);
+        } else {
+            // 模擬小考：每個文法重點各抽幾題，再整體打亂
+            questions = shuffle(getChallengeTopics().flatMap(topic =>
+                shuffle(pool.filter(question => question.topic === topic.id)).slice(0, CHALLENGE_EXAM_PER_TOPIC)));
+        }
+        if (questions.length === 0) return;
+
+        challengeSession = { kind, topicId, questions, index: 0, results: [] };
+        challengeLastResult = null;
+        challengeContainer.style.display = 'none';
+        grammarContainer.style.display = 'block';
+        grammarHealthDisplayEl.style.display = 'none';
+        grammarQuitBtn.style.display = 'inline-block';
+        grammarHintBtn.style.display = kind === 'exam' ? 'none' : '';
+        grammarHintBtn.textContent = kind === 'recycle' ? '提示（看了就不算回收）' : '提示（看了只算半題）';
+        setupNextChallengeQuestion();
+    }
+
+    function updateChallengeProgress(answeredCount) {
+        const session = challengeSession;
+        grammarProgressBarEl.style.width = `${(answeredCount / session.questions.length) * 100}%`;
+        grammarProgressDisplayEl.textContent =
+            `${CHALLENGE_KIND_LABELS[session.kind]}・第 ${session.index} / ${session.questions.length} 題`;
+    }
+
+    function setupNextChallengeQuestion() {
+        stopGrammarAudio();
+        const session = challengeSession;
+        if (!session) return;
+        if (session.index >= session.questions.length) {
+            finishChallengeSession();
+            return;
+        }
+
+        const question = session.questions[session.index];
+        session.index++;
+        currentGrammarQuestion = question;
+        grammarQuestionAnswered = false;
+        grammarSelectedAnswer = '';
+        challengeHintUsed = false;
+
+        grammarTopicEl.textContent = question.topicLabel;
+        grammarInstructionEl.textContent = question.instruction;
+        grammarQuestionEl.textContent = question.question;
+        grammarHintEl.textContent = `提示：${question.hint}`;
+        grammarHintEl.style.display = 'none';
+        if (session.kind === 'exam' && session.index === 1) {
+            grammarFeedbackEl.textContent = '模擬小考開始！作答時不會顯示對錯，全部寫完才公布成績。';
+            grammarFeedbackEl.className = 'feedback-message notice';
+        } else {
+            grammarFeedbackEl.textContent = '';
+            grammarFeedbackEl.className = 'feedback-message';
+        }
+        grammarCheckBtn.style.display = 'inline-block';
+        grammarNextBtn.style.display = 'none';
+        updateChallengeProgress(session.index - 1);
+        renderGrammarAnswerArea(question);
+
+        // 中文題目（重組題）不自動朗讀
+        const canSpeak = Boolean(synth) && !hasChinese(question.question);
+        grammarPlayAudioBtn.style.display = canSpeak ? 'inline-flex' : 'none';
+        if (canSpeak) {
+            grammarAutoPlayTimeout = setTimeout(() => {
+                grammarAutoPlayTimeout = null;
+                playGrammarAudio();
+            }, 150);
+        }
+    }
+
+    function checkChallengeAnswer() {
+        const session = challengeSession;
+        const question = currentGrammarQuestion;
+        if (!session || !question || grammarQuestionAnswered) return;
+
+        const input = grammarAnswerAreaEl.querySelector('input');
+        const answer = input ? input.value.trim() : grammarSelectedAnswer;
+        if (!answer) {
+            grammarFeedbackEl.textContent = '請先作答，再按「檢查答案」。';
+            grammarFeedbackEl.className = 'feedback-message notice';
+            return;
+        }
+
+        const isCorrect = getGrammarAcceptedAnswers(question).includes(normalizeGrammarAnswer(answer));
+        const cleanCorrect = isCorrect && !challengeHintUsed;
+        const data = ensureChallengeData(currentWordListPath);
+
+        if (!data.topicStats[question.topic]) data.topicStats[question.topic] = { attempts: 0, correct: 0 };
+        data.topicStats[question.topic].attempts++;
+        if (cleanCorrect) data.topicStats[question.topic].correct++;
+
+        let points = 0;
+        if (!isCorrect || (session.kind === 'recycle' && !cleanCorrect)) {
+            // 答錯，或回收時看了提示才答對：放回錯題區，隔天再回收
+            data.wrongBank[question.id] = getLocalDateString();
+        } else if (session.kind === 'recycle') {
+            delete data.wrongBank[question.id];
+            points = grantCappedChallengePoints(data, CHALLENGE_RECYCLE_POINTS);
+        }
+
+        session.results.push({ question, answer, isCorrect, hintUsed: challengeHintUsed, points });
+        saveProgress();
+        updateTotalPointsDisplay();
+
+        grammarQuestionAnswered = true;
+        setGrammarAnswerDisabled(true);
+        grammarCheckBtn.style.display = 'none';
+
+        if (session.kind === 'exam') {
+            setupNextChallengeQuestion();
+            return;
+        }
+
+        if (isCorrect) {
+            let message = `正確！${question.explanation}`;
+            if (session.kind === 'recycle') {
+                message = cleanCorrect
+                    ? `回收成功！${formatGrantedPoints(points)}\n${question.explanation}`
+                    : `答對了，但看過提示，這題明天再回收一次。\n${question.explanation}`;
+            } else if (challengeHintUsed) {
+                message = `正確！（看過提示，本題算半題）\n${question.explanation}`;
+            }
+            grammarFeedbackEl.textContent = message;
+            grammarFeedbackEl.className = 'feedback-message correct';
+        } else {
+            grammarFeedbackEl.textContent =
+                `正確答案：${question.answer}\n${question.explanation}\n這題已收進錯題回收站，明天起可以回收。`;
+            grammarFeedbackEl.className = 'feedback-message incorrect';
+            grammarAnswerAreaEl.querySelectorAll('.grammar-input, .grammar-order-built, .grammar-option.selected')
+                .forEach(element => element.classList.add('input-incorrect'));
+        }
+        grammarNextBtn.style.display = 'inline-block';
+        updateChallengeProgress(session.index);
+    }
+
+    function finishLevelSession(session, data) {
+        const total = session.results.length;
+        const score = session.results.reduce((sum, result) => sum + (result.isCorrect ? (result.hintUsed ? 0.5 : 1) : 0), 0);
+        const accuracy = total > 0 ? score / total : 0;
+        const previousStars = data.stars[session.topicId] || 0;
+        const earnedRules = CHALLENGE_STAR_RULES.filter(rule => accuracy >= rule.accuracy);
+        const newRules = earnedRules.filter(rule => rule.stars > previousStars);
+        const starPoints = newRules.reduce((sum, rule) => sum + rule.points, 0);
+
+        playerStats.totalPoints += starPoints;
+        data.stars[session.topicId] = Math.max(previousStars, earnedRules.length);
+        data.bestAccuracy[session.topicId] = Math.max(data.bestAccuracy[session.topicId] || 0, accuracy);
+
+        const topicLabel = session.questions[0].topicLabel;
+        const lines = [`正確率 ${formatPercent(accuracy)}（得分 ${score} / ${total} 題）`];
+        if (starPoints > 0) {
+            lines.push(`新拿到 ${newRules.length} 顆星，+${starPoints} 點！`);
+        } else if (earnedRules.length < previousStars) {
+            lines.push(`這次 ${earnedRules.length} 顆星，你的最佳紀錄是 ${previousStars} 顆星。`);
+        }
+        const nextRule = CHALLENGE_STAR_RULES[data.stars[session.topicId]];
+        if (nextRule) lines.push(`下一顆星：正確率達 ${formatPercent(nextRule.accuracy)}，可得 +${nextRule.points} 點。`);
+        return {
+            title: `${topicLabel}　${formatStars(earnedRules.length)}`,
+            tone: earnedRules.length > 0 ? 'pass' : 'fail',
+            lines,
+        };
+    }
+
+    function finishRecycleSession(session, data) {
+        const total = session.results.length;
+        const recycledCount = session.results.filter(result => result.isCorrect && !result.hintUsed).length;
+        const earned = session.results.reduce((sum, result) => sum + result.points, 0);
+        const remaining = getWrongBankIds(data).length;
+        const lines = [`回收成功 ${recycledCount} / ${total} 題，共 +${earned} 點`];
+        const today = getLocalDateString();
+        if (recycledCount > 0 && remaining === 0) {
+            if (data.clearBonusDate !== today) {
+                data.clearBonusDate = today;
+                lines.push(`錯題全部清空！額外獎勵 ${formatGrantedPoints(grantCappedChallengePoints(data, CHALLENGE_CLEAR_BANK_BONUS))} 🎉`);
+            } else {
+                lines.push('錯題全部清空！🎉');
+            }
+        } else if (remaining > 0) {
+            lines.push(`錯題區還有 ${remaining} 題，明天再來回收。`);
+        }
+        return { title: '錯題回收結果', tone: recycledCount === total ? 'pass' : '', lines };
+    }
+
+    function finishExamSession(session, data) {
+        const total = session.results.length;
+        const correctCount = session.results.filter(result => result.isCorrect).length;
+        const score = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+        const previousBest = data.bestExam;
+        const passed = score >= CHALLENGE_EXAM_PASS_SCORE;
+        const today = getLocalDateString();
+        data.exams.push({ timestamp: Date.now(), score });
+
+        const lines = [passed
+            ? `及格！答對 ${correctCount} / ${total} 題。`
+            : `答對 ${correctCount} / ${total} 題，${CHALLENGE_EXAM_PASS_SCORE} 分及格，再加油！`];
+        if (passed) {
+            if (data.examPassDate !== today) {
+                data.examPassDate = today;
+                lines.push(`及格獎勵：${formatGrantedPoints(grantCappedChallengePoints(data, CHALLENGE_EXAM_PASS_POINTS))}`);
+            } else {
+                lines.push('今日及格獎勵已領取。');
+            }
+        }
+        if (typeof previousBest === 'number' && score > previousBest) {
+            const gain = score - previousBest;
+            lines.push(`比最高分進步 ${gain} 分！${formatGrantedPoints(grantCappedChallengePoints(data, gain))}`);
+        }
+        if (typeof previousBest !== 'number' || score > previousBest) data.bestExam = score;
+        if (score === 100 && !data.perfectExamAwarded) {
+            data.perfectExamAwarded = true;
+            playerStats.totalPoints += CHALLENGE_EXAM_PERFECT_POINTS;
+            lines.push(`第一次考滿分！+${CHALLENGE_EXAM_PERFECT_POINTS} 點 🏆`);
+        }
+        if (!passed || correctCount < total) lines.push('答錯的題目已收進錯題回收站。');
+        return { title: `模擬小考：${score} 分`, tone: passed ? 'pass' : 'fail', lines };
+    }
+
+    function finishChallengeSession() {
+        const session = challengeSession;
+        const data = ensureChallengeData(currentWordListPath);
+        const finishers = { level: finishLevelSession, recycle: finishRecycleSession, exam: finishExamSession };
+        const result = finishers[session.kind](session, data);
+
+        // 計入練習天數（全域成就「修練狂魔」）
+        ensureUnitData(currentWordListPath).completionHistory.push(Date.now());
+        checkGlobalAchievements();
+        saveProgress();
+        updateTotalPointsDisplay();
+
+        challengeLastResult = { ...result, wrong: session.results.filter(item => !item.isCorrect) };
+        showChallengeHub();
+    }
+
+    function quitChallengeSession() {
+        if (!challengeSession) return;
+        challengeLastResult = {
+            title: '已離開本次練習',
+            tone: '',
+            lines: ['已作答的題目都有記錄，答錯的也已收進錯題回收站；這次不計星星與成績。'],
+            wrong: [],
+        };
+        showChallengeHub();
     }
 
     // --- 通用遊戲邏輯 ---
@@ -1440,17 +2043,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function showStartScreen() {
         gameContainer.style.display = 'none';
         grammarContainer.style.display = 'none';
+        challengeContainer.style.display = 'none';
         completionContainer.style.display = 'none';
         achievementContainer.style.display = 'none';
         startContainer.style.display = 'flex';
+        stopGrammarAudio();
+        challengeSession = null;
         
         spellingFormEl.style.display = 'none';
 
         wordListSelectEl.disabled = true;
         wordListSelectEl.innerHTML = '<option value="">請先選擇模式</option>';
         startGameBtn.disabled = true;
-        modeBtnSpelling.classList.remove('mode-selected');
-        modeBtnGrammar.classList.remove('mode-selected');
+        Object.values(modeButtons).forEach(button => button.classList.remove('mode-selected'));
         activeGameMode = '';
         updateTotalPointsDisplay();
         updateUnitRewardsBadge();
@@ -1477,6 +2082,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 新的啟動流程 ---
+    const modeButtons = { spelling: modeBtnSpelling, grammar: modeBtnGrammar, challenge: modeBtnChallenge };
+
+    function selectGameMode(mode) {
+        activeGameMode = mode;
+        Object.entries(modeButtons).forEach(([buttonMode, button]) => {
+            button.classList.toggle('mode-selected', buttonMode === mode);
+        });
+        updateWordListDropdown(mode);
+    }
+
     function updateWordListDropdown(selectedMode) {
         wordListSelectEl.innerHTML = '';
         const selectedType = typeof selectedMode === 'string' ? selectedMode : activeGameMode;
@@ -1518,6 +2133,14 @@ document.addEventListener('DOMContentLoaded', () => {
             hintEl.style.color = '#ffd700'; // 漂亮的金色
             hintEl.style.textShadow = '0 0 5px rgba(255, 215, 0, 0.2)';
             badgeContainer.parentNode.insertBefore(hintEl, badgeContainer.nextSibling);
+        }
+
+        if (activeGameMode === 'challenge' && wordListSelectEl.value) {
+            badgeContainer.style.display = 'none';
+            hintEl.style.display = 'block';
+            hintEl.style.color = '#e2e8f0';
+            hintEl.textContent = '🏅 闖關拿星星、隔天回收錯題、模擬小考及格或進步，都能得到點數！';
+            return;
         }
 
         // 只有拼寫與文法模式顯示每日回合獎勵
@@ -1593,7 +2216,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!(await loadWords(currentWordListPath))) return;
 
         startContainer.style.display = 'none';
-        if (activeGameMode === 'grammar') {
+        if (activeGameMode === 'challenge') {
+            spellingFormEl.style.display = 'none';
+            gameContainer.style.display = 'none';
+            challengeLastResult = null;
+            showChallengeHub();
+        } else if (activeGameMode === 'grammar') {
             spellingFormEl.style.display = 'none';
             gameContainer.style.display = 'none';
             grammarContainer.style.display = 'block';
@@ -1612,18 +2240,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showStartScreen();
 
         // Event Listeners
-        modeBtnSpelling.addEventListener('click', () => {
-            activeGameMode = 'spelling';
-            modeBtnSpelling.classList.add('mode-selected');
-            modeBtnGrammar.classList.remove('mode-selected');
-            updateWordListDropdown('spelling');
-        });
-
-        modeBtnGrammar.addEventListener('click', () => {
-            activeGameMode = 'grammar';
-            modeBtnGrammar.classList.add('mode-selected');
-            modeBtnSpelling.classList.remove('mode-selected');
-            updateWordListDropdown('grammar');
+        Object.entries(modeButtons).forEach(([mode, button]) => {
+            button.addEventListener('click', () => selectGameMode(mode));
         });
 
         startGameBtn.addEventListener('click', startGame);
@@ -1635,6 +2253,8 @@ document.addEventListener('DOMContentLoaded', () => {
         grammarPlayAudioBtn.addEventListener('click', playGrammarAudio);
         grammarCheckBtn.addEventListener('click', checkGrammarAnswer);
         grammarNextBtn.addEventListener('click', setupNextGrammarQuestion);
+        grammarQuitBtn.addEventListener('click', quitChallengeSession);
+        challengeBackBtn.addEventListener('click', showStartScreen);
 
         function isAnyModalOpen() {
             return Boolean(
@@ -1647,8 +2267,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', event => {
             if (
                 event.key !== 'Enter' ||
-                activeGameMode !== 'grammar' ||
-                startContainer.style.display !== 'none' ||
+                !['grammar', 'challenge'].includes(activeGameMode) ||
+                grammarContainer.style.display === 'none' ||
                 isAnyModalOpen()
             ) return;
             event.preventDefault();

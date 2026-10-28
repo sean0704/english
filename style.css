@@ -1460,3 +1460,259 @@ body {
 .points-info-container li:last-child {
     margin-bottom: 0;
 }
+
+/* --- Grammar Challenge (文法闖關) --- */
+.mode-selection {
+    flex-wrap: wrap;
+}
+
+.grammar-order-built {
+    width: 100%;
+    min-height: 3.2rem;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    color: var(--text-color);
+    background: var(--bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 0.6rem;
+}
+
+.grammar-order-built.empty {
+    color: var(--header-color);
+    font-size: 1rem;
+}
+
+.grammar-order-built.input-incorrect {
+    border-color: var(--incorrect-color);
+}
+
+.grammar-order-pool,
+.grammar-order-tools {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.grammar-tile:disabled {
+    opacity: 0.25;
+    cursor: default;
+    transform: none;
+}
+
+.grammar-order-tools .grammar-button {
+    font-size: 0.9rem;
+    padding: 0.45rem 0.9rem;
+}
+
+.grammar-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.challenge-hub {
+    max-width: 760px;
+    align-items: stretch;
+    box-sizing: border-box;
+    margin: 1.5rem 0;
+}
+
+.challenge-hub-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.challenge-title {
+    font-size: 1.4rem;
+    color: var(--header-color);
+    margin: 0;
+}
+
+.challenge-today {
+    color: var(--notice-color);
+    font-size: 0.95rem;
+    margin: 0 0 1rem;
+}
+
+.challenge-section {
+    margin-bottom: 1.5rem;
+}
+
+.challenge-section-title {
+    font-size: 1.1rem;
+    color: var(--header-color);
+    margin: 0 0 0.75rem;
+}
+
+.challenge-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.6rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+}
+
+.challenge-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.challenge-card-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.challenge-card-meta {
+    color: var(--header-color);
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+}
+
+.challenge-card-note {
+    color: var(--header-color);
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+    opacity: 0.85;
+}
+
+.challenge-stars {
+    color: #ffd700;
+    font-size: 1.3rem;
+    letter-spacing: 0.1rem;
+    white-space: nowrap;
+}
+
+.challenge-card .grammar-button {
+    white-space: nowrap;
+}
+
+.challenge-result {
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    border-radius: 0.75rem;
+    border: 2px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.challenge-result.pass {
+    border-color: var(--correct-color);
+}
+
+.challenge-result.fail {
+    border-color: var(--notice-color);
+}
+
+.challenge-result-title {
+    font-size: 1.3rem;
+    margin: 0 0 0.5rem;
+}
+
+.challenge-result-line {
+    margin: 0.3rem 0;
+    line-height: 1.5;
+}
+
+.challenge-details {
+    margin-top: 0.75rem;
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.6rem;
+}
+
+.challenge-details summary {
+    cursor: pointer;
+    color: var(--header-color);
+    font-weight: bold;
+}
+
+.challenge-rule-list,
+.challenge-wrong-list,
+.challenge-exam-list {
+    margin: 0.75rem 0 0.25rem;
+    padding-left: 1.3rem;
+    line-height: 1.6;
+}
+
+.challenge-wrong-list li {
+    margin-bottom: 0.9rem;
+}
+
+.challenge-wrong-question {
+    font-weight: bold;
+}
+
+.challenge-wrong-yours {
+    color: var(--incorrect-color);
+}
+
+.challenge-wrong-answer {
+    color: var(--correct-color);
+}
+
+.challenge-wrong-explain {
+    color: var(--header-color);
+    font-size: 0.9rem;
+}
+
+.challenge-exam-list li.pass {
+    color: var(--correct-color);
+}
+
+.challenge-exam-list li.fail {
+    color: var(--notice-color);
+}
+
+.challenge-subtitle {
+    font-size: 1rem;
+    color: var(--header-color);
+    margin: 1rem 0 0.25rem;
+}
+
+.challenge-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.challenge-table th,
+.challenge-table td {
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.45rem 0.3rem;
+    text-align: center;
+}
+
+.challenge-table th:first-child,
+.challenge-table td:first-child {
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .challenge-hub {
+        width: calc(100% - 32px);
+        padding: 1.25rem 1rem;
+    }
+
+    .challenge-card {
+        flex-wrap: wrap;
+    }
+
+    .challenge-card .grammar-button {
+        width: 100%;
+    }
+}

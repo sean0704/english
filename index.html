@@ -28,6 +28,7 @@
                 <div class="mode-selection">
                     <button id="mode-btn-spelling" class="start-button secondary" data-mode="spelling">單字拼寫</button>
                     <button id="mode-btn-grammar" class="start-button secondary" data-mode="grammar">文法練習</button>
+                    <button id="mode-btn-challenge" class="start-button secondary" data-mode="challenge">文法闖關</button>
                 </div>
             </div>
 
@@ -47,6 +48,7 @@
                 <ul>
                     <li>完成「單字拼寫」或「文法練習」達成各項成就可獲得對應點數。</li>
                     <li>期間限定：通過任一模式第 1、2 回合可獲得 5 點，第 3 回合可獲得 10 點。</li>
+                    <li>文法闖關：關卡拿星星、隔天回收錯題、模擬小考及格或進步，都能獲得點數。</li>
                 </ul>
             </div>
         </main>
@@ -111,7 +113,16 @@
             <button id="grammar-hint-btn" class="grammar-button secondary">提示</button>
             <button id="grammar-check-btn" class="grammar-button">檢查答案</button>
             <button id="grammar-next-btn" class="grammar-button" style="display: none;">下一題</button>
+            <button id="grammar-quit-btn" class="grammar-button secondary" style="display: none;">離開</button>
         </div>
+    </div>
+
+    <div id="challenge-container" class="start-container challenge-hub" style="display: none;">
+        <div class="challenge-hub-header">
+            <h1 id="challenge-title" class="challenge-title"></h1>
+            <button id="challenge-back-btn" class="grammar-button secondary" type="button">返回主選單</button>
+        </div>
+        <div id="challenge-hub-content" class="challenge-hub-content"></div>
     </div>
 
     <div id="completion-container" class="start-container" style="display: none;">

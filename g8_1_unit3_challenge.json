@@ -1,0 +1,1252 @@
+[
+  {
+    "id": "c-pp-1",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Look! Tom ___ with his new robot over there.",
+    "options": [
+      "plays",
+      "is playing",
+      "play",
+      "playing"
+    ],
+    "answer": "is playing",
+    "hint": "Look! 表示「現在」正在發生。",
+    "explanation": "Look! 提醒對方看眼前正在發生的事，要用現在進行式 is playing；過去進行式要有「過去的時間點」。"
+  },
+  {
+    "id": "c-pp-2",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "John and Megan were ___ a magic show at that time.",
+    "options": [
+      "watching",
+      "watched",
+      "watches",
+      "watch"
+    ],
+    "answer": "watching",
+    "hint": "were 後面要接什麼形式的動詞？",
+    "explanation": "過去進行式：was/were + V-ing，所以是 were watching。"
+  },
+  {
+    "id": "c-pp-3",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "___ they ___ a good time at the party then? Of course.",
+    "options": [
+      "Do; have",
+      "Is; having",
+      "Can; have",
+      "Were; having"
+    ],
+    "answer": "Were; having",
+    "hint": "then 表示「當時」；主詞 they 是複數。",
+    "explanation": "過去進行式的問句：Were + they + V-ing...?"
+  },
+  {
+    "id": "c-pp-4",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Why didn't you answer my call at two yesterday? Sorry. I ___ my student something at that time.",
+    "options": [
+      "am teaching",
+      "was teaching",
+      "can teach",
+      "were teaching"
+    ],
+    "answer": "was teaching",
+    "hint": "at that time 指昨天兩點那時；主詞是 I。",
+    "explanation": "過去某個時間點正在做的事用過去進行式，I 搭配 was：I was teaching。"
+  },
+  {
+    "id": "c-pp-5",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "transform",
+    "instruction": "加入 then，用「過去進行式」改寫。",
+    "question": "I swept the floor.",
+    "answer": "I was sweeping the floor then.",
+    "hint": "swept 的原形是 sweep；I 搭配 was。",
+    "explanation": "主詞 + was/were + V-ing：I was sweeping the floor then."
+  },
+  {
+    "id": "c-pp-6",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "transform",
+    "instruction": "用肯定簡答回答。",
+    "question": "Was he talking to his parents at that time?",
+    "answer": "Yes, he was.",
+    "hint": "問句用 Was，簡答也用 was。",
+    "explanation": "Was + 主詞 + V-ing...? 肯定簡答：Yes, 主詞 + was."
+  },
+  {
+    "id": "c-pp-7",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "transform",
+    "instruction": "用否定詳答回答。",
+    "question": "Were Bob and Daisy writing a postcard at that time?",
+    "answer": "No, they were not writing a postcard at that time.",
+    "acceptedAnswers": [
+      "No, they weren't writing a postcard at that time."
+    ],
+    "hint": "Bob and Daisy 用 they 代替；詳答要把整句寫出來。",
+    "explanation": "否定詳答：No, they were not (weren't) + V-ing + 其餘部分。"
+  },
+  {
+    "id": "c-pp-8",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "transform",
+    "instruction": "依照答句，寫出原本的問句。",
+    "question": "No, she was not practicing the piano at three.",
+    "answer": "Was she practicing the piano at three?",
+    "hint": "把 was 移到句首，去掉 No 和 not。",
+    "explanation": "原問句：Was she practicing the piano at three?"
+  },
+  {
+    "id": "c-pp-9",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 1",
+    "type": "transform",
+    "instruction": "把主詞 I 改成 We，改寫句子。",
+    "question": "I was mopping the floor.",
+    "answer": "We were mopping the floor.",
+    "hint": "主詞變複數，be 動詞也要跟著變。",
+    "explanation": "be 動詞要和主詞一致：We 搭配 were。"
+  },
+  {
+    "id": "c-pp-10",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 2",
+    "type": "transform",
+    "instruction": "依照提示，用「過去進行式」造句。",
+    "question": "they / have history class / then",
+    "answer": "They were having history class then.",
+    "hint": "have 改成 V-ing 要去 e 加 ing。",
+    "explanation": "They + were + having history class + then."
+  },
+  {
+    "id": "c-pp-11",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 2",
+    "type": "transform",
+    "instruction": "依照提示，用「過去進行式」造句。",
+    "question": "Ted / wipe the table / at 6:30 this morning",
+    "answer": "Ted was wiping the table at 6:30 this morning.",
+    "acceptedAnswers": [
+      "Ted was wiping the table at six thirty this morning."
+    ],
+    "hint": "wipe 去 e 加 ing；Ted 是單數。",
+    "explanation": "Ted + was + wiping the table + at 6:30 this morning."
+  },
+  {
+    "id": "c-pp-12",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 2",
+    "type": "transform",
+    "instruction": "依照提示，用「過去進行式」造句。",
+    "question": "my grandmother / hang the clothes / at 8 p.m. last night",
+    "answer": "My grandmother was hanging the clothes at 8 p.m. last night.",
+    "acceptedAnswers": [
+      "My grandmother was hanging the clothes at 8 pm last night.",
+      "My grandmother was hanging the clothes at eight p.m. last night.",
+      "My grandmother was hanging the clothes at eight pm last night."
+    ],
+    "hint": "hang 直接加 ing；my grandmother 是單數。",
+    "explanation": "My grandmother + was + hanging the clothes + at 8 p.m. last night."
+  },
+  {
+    "id": "c-pp-13",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it! 2",
+    "type": "order",
+    "instruction": "依中文意思，點選單字排出英文句子。",
+    "question": "我當時在擦我的書桌。",
+    "tiles": [
+      "I",
+      "was",
+      "wiping",
+      "my",
+      "desk",
+      "then",
+      "wiped",
+      "were"
+    ],
+    "answer": "I was wiping my desk then.",
+    "hint": "「當時正在…」用過去進行式；有兩個字用不到。",
+    "explanation": "I was wiping my desk then. wiped 是過去簡單式，were 不搭配 I。"
+  },
+  {
+    "id": "c-pp-14",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "They ___ having PE class at that time.",
+    "options": [
+      "do",
+      "are",
+      "were",
+      "did"
+    ],
+    "answer": "were",
+    "hint": "having 是 V-ing；at that time 是過去。",
+    "explanation": "過去進行式：They were having PE class at that time."
+  },
+  {
+    "id": "c-pp-15",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "___ you playing computer games then? No, I ___.",
+    "options": [
+      "Was; weren't",
+      "Were; weren't",
+      "Was; wasn't",
+      "Were; wasn't"
+    ],
+    "answer": "Were; wasn't",
+    "hint": "問句的主詞是 you，回答的主詞是 I。",
+    "explanation": "you 搭配 Were；回答用 I，所以是 No, I wasn't."
+  },
+  {
+    "id": "c-pp-16",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "試題演練區 (p.149)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "David ___ the walls from nine to eleven yesterday morning.",
+    "options": [
+      "paints",
+      "paint",
+      "is painting",
+      "was painting"
+    ],
+    "answer": "was painting",
+    "hint": "from nine to eleven yesterday morning 是過去一段持續的時間。",
+    "explanation": "過去某段時間內持續進行的動作，用過去進行式 was painting。"
+  },
+  {
+    "id": "c-pp-17",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "試題演練區 (p.149)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "___ Jane ___ the pets at 5 p.m. yesterday? No, she wasn't.",
+    "options": [
+      "Did; feed",
+      "Does; feed",
+      "Is; feeding",
+      "Was; feeding"
+    ],
+    "answer": "Was; feeding",
+    "hint": "看回答 No, she wasn't. 用的是哪個 be 動詞。",
+    "explanation": "回答用 wasn't，問句就是 Was + 主詞 + V-ing：Was Jane feeding the pets...?"
+  },
+  {
+    "id": "c-pp-18",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "試題演練區 (p.150)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Did you walk the dog at six yesterday? No, because it ___ at that time.",
+    "options": [
+      "was raining",
+      "rain",
+      "is raining",
+      "rains"
+    ],
+    "answer": "was raining",
+    "hint": "at that time 指昨天六點那時。",
+    "explanation": "昨天六點當時正在下雨：it was raining。"
+  },
+  {
+    "id": "c-pp-19",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "試題演練區 (p.150)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "We ___ in the USA last month because we couldn't buy any plane tickets.",
+    "options": [
+      "can't travel",
+      "don't travel",
+      "weren't traveling",
+      "aren't traveling"
+    ],
+    "answer": "weren't traveling",
+    "hint": "last month、couldn't 都是過去。",
+    "explanation": "上個月沒有在美國旅行，用過去進行式否定：weren't traveling。"
+  },
+  {
+    "id": "c-pp-20",
+    "topic": "past_progressive",
+    "topicLabel": "過去進行式",
+    "source": "試題演練區 (p.152)",
+    "type": "transform",
+    "instruction": "用「過去進行式」改寫。",
+    "question": "Betty and her brother moved their sofa at three.",
+    "answer": "Betty and her brother were moving their sofa at three.",
+    "hint": "主詞是兩個人；move 去 e 加 ing。",
+    "explanation": "複數主詞 + were + moving：Betty and her brother were moving their sofa at three."
+  },
+  {
+    "id": "c-wh-1",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it! 1",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "What ___ you doing at eight? I was taking a shower.",
+    "options": [
+      "are",
+      "was",
+      "were",
+      "could"
+    ],
+    "answer": "were",
+    "hint": "回答是過去進行式；問句主詞是 you。",
+    "explanation": "What + were + you + doing...?"
+  },
+  {
+    "id": "c-wh-2",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "What was Dani doing at 5 p.m. yesterday? She ___ the table then.",
+    "options": [
+      "wipe",
+      "wipes",
+      "is wiping",
+      "was wiping"
+    ],
+    "answer": "was wiping",
+    "hint": "問句用 was...doing，回答也要用過去進行式。",
+    "explanation": "答句要和問句時態一致：She was wiping the table then."
+  },
+  {
+    "id": "c-wh-3",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "___ was mopping the floors at that time? Sam ___.",
+    "options": [
+      "Why; was",
+      "Who; was",
+      "Why; were",
+      "Who; were"
+    ],
+    "answer": "Who; was",
+    "hint": "回答是一個人 Sam。",
+    "explanation": "問「誰」用 Who；回答 Sam 是單數，簡答 Sam was."
+  },
+  {
+    "id": "c-wh-4",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Who were you ___ a card to? Dean.",
+    "options": [
+      "writes",
+      "wrote",
+      "writing",
+      "write"
+    ],
+    "answer": "writing",
+    "hint": "were you 後面要接 V-ing。",
+    "explanation": "Who + were + you + writing...? write 去 e 加 ing。"
+  },
+  {
+    "id": "c-wh-5",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.144)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Who ___ with when I saw you?",
+    "options": [
+      "were you studying",
+      "are you studying",
+      "you were studying",
+      "you are studying"
+    ],
+    "answer": "were you studying",
+    "hint": "疑問句要把 be 動詞放在主詞前面；when I saw you 是過去。",
+    "explanation": "wh- 疑問句：疑問詞 + were + you + V-ing...?"
+  },
+  {
+    "id": "c-wh-6",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "試題演練區 (p.150)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "___ you doing at nine this morning? I'm not sure. Maybe I was making breakfast.",
+    "options": [
+      "Where are",
+      "What were",
+      "How was",
+      "Where were"
+    ],
+    "answer": "What were",
+    "hint": "回答說的是「在做什麼」。",
+    "explanation": "問當時在做什麼：What were you doing...?"
+  },
+  {
+    "id": "c-wh-7",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "試題演練區 (p.151)",
+    "type": "choice",
+    "instruction": "選出最適當的回答。",
+    "question": "What was Hank doing in the kitchen at half past twelve?",
+    "options": [
+      "He fell asleep after twelve.",
+      "His eyes weren't open then.",
+      "Maybe he was doing the dishes.",
+      "Maybe he swept the floor yesterday."
+    ],
+    "answer": "Maybe he was doing the dishes.",
+    "hint": "用過去進行式問，就用過去進行式回答「當時在做什麼」。",
+    "explanation": "問句是 What was...doing，答句 he was doing the dishes 回答了當時正在做的事。"
+  },
+  {
+    "id": "c-wh-8",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "試題演練區 (p.151)",
+    "type": "choice",
+    "instruction": "選出最適當的回答。",
+    "question": "Were you fixing the car ten minutes ago?",
+    "options": [
+      "No, we didn't fix the TV.",
+      "Yes, I have a cool new car.",
+      "No. I was feeding the pet then.",
+      "Yes, I wash my car when I have free time."
+    ],
+    "answer": "No. I was feeding the pet then.",
+    "hint": "回答也要用過去進行式。",
+    "explanation": "否定之後說明當時其實在做什麼：I was feeding the pet then."
+  },
+  {
+    "id": "c-wh-9",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.144)",
+    "type": "transform",
+    "instruction": "針對時間 at half past ten 造問句。",
+    "question": "Gina was playing the violin at half past ten.",
+    "answer": "What time was Gina playing the violin?",
+    "acceptedAnswers": [
+      "When was Gina playing the violin?"
+    ],
+    "hint": "問時間用 What time，後面接 was + 主詞 + V-ing。",
+    "explanation": "What time + was + Gina + playing the violin?"
+  },
+  {
+    "id": "c-wh-10",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.144)",
+    "type": "transform",
+    "instruction": "針對 cleaning his drawers 造問句。",
+    "question": "John was cleaning his drawers when Dad called him.",
+    "answer": "What was John doing when Dad called him?",
+    "hint": "問「在做什麼」用 What...doing。",
+    "explanation": "What + was + John + doing + when Dad called him?"
+  },
+  {
+    "id": "c-wh-11",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it again! (p.144)",
+    "type": "transform",
+    "instruction": "針對地點 near the window 造問句。",
+    "question": "When Tina opened the door, Mary and Samuel were talking near the window.",
+    "answer": "Where were Mary and Samuel talking when Tina opened the door?",
+    "acceptedAnswers": [
+      "When Tina opened the door, where were Mary and Samuel talking?"
+    ],
+    "hint": "問地點用 Where；主詞是兩個人，用 were。",
+    "explanation": "Where + were + Mary and Samuel + talking + when Tina opened the door?"
+  },
+  {
+    "id": "c-wh-12",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it! 2",
+    "type": "order",
+    "instruction": "依中文意思，點選單字排出英文句子。",
+    "question": "你昨天下午四點正在哪裡練習足球？",
+    "tiles": [
+      "Where",
+      "were",
+      "you",
+      "practicing",
+      "soccer",
+      "at",
+      "four",
+      "yesterday",
+      "afternoon",
+      "did"
+    ],
+    "answer": "Where were you practicing soccer at four yesterday afternoon?",
+    "hint": "Where + were + you + V-ing...；有一個字用不到。",
+    "explanation": "Where were you practicing soccer at four yesterday afternoon?"
+  },
+  {
+    "id": "c-wh-13",
+    "topic": "past_progressive_wh",
+    "topicLabel": "過去進行式 wh- 問句",
+    "source": "Try it! 2",
+    "type": "order",
+    "instruction": "依中文意思，點選單字排出英文句子。",
+    "question": "爸爸今天早上八點時和誰正在修理窗戶？",
+    "tiles": [
+      "Who",
+      "was",
+      "Dad",
+      "fixing",
+      "the",
+      "window",
+      "with",
+      "at",
+      "eight",
+      "this",
+      "morning",
+      "were"
+    ],
+    "answer": "Who was Dad fixing the window with at eight this morning?",
+    "hint": "「和誰」用 Who...with；Dad 是單數。有一個字用不到。",
+    "explanation": "Who was Dad fixing the window with at eight this morning?"
+  },
+  {
+    "id": "c-when-1",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "When the parents ___ their kid, he was playing at the playground.",
+    "options": [
+      "see",
+      "saw",
+      "was seeing",
+      "sees"
+    ],
+    "answer": "saw",
+    "hint": "when 子句裡是突然、短暫的動作。",
+    "explanation": "when + 過去簡單式（瞬間動作），主要子句用過去進行式。see 的過去式是 saw。"
+  },
+  {
+    "id": "c-when-2",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "When Bob's roommate walked in the room, he ___ his TV.",
+    "options": [
+      "fix",
+      "fixes",
+      "is fixing",
+      "was fixing"
+    ],
+    "answer": "was fixing",
+    "hint": "室友走進來時，他「正在」修電視。",
+    "explanation": "持續的動作用過去進行式：he was fixing his TV."
+  },
+  {
+    "id": "c-when-3",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "試題演練區 (p.150)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "My son was playing on his own in the living room ___ I came home.",
+    "options": [
+      "so",
+      "but",
+      "when",
+      "and"
+    ],
+    "answer": "when",
+    "hint": "「我回家的時候」，兒子正在玩。",
+    "explanation": "過去進行式 + when + 過去簡單式，表示某事發生時另一件事正在進行。"
+  },
+  {
+    "id": "c-when-4",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "試題演練區 (p.150)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "When the window suddenly ___, the girl stood up.",
+    "options": [
+      "open",
+      "to open",
+      "opened",
+      "was opening"
+    ],
+    "answer": "opened",
+    "hint": "suddenly（突然地）表示瞬間發生的動作。",
+    "explanation": "瞬間動作用過去簡單式 opened。"
+  },
+  {
+    "id": "c-when-5",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "試題演練區 (p.151)",
+    "type": "choice",
+    "instruction": "選出最適當的回答。",
+    "question": "What happened when they were hanging their clothes?",
+    "options": [
+      "Cool down.",
+      "Why did it happen?",
+      "Their kid fell down the stairs.",
+      "Because they washed the clothes."
+    ],
+    "answer": "Their kid fell down the stairs.",
+    "hint": "What happened 問「發生了什麼事」，要回答一件事。",
+    "explanation": "他們正在晾衣服時，發生了一件事：孩子跌下樓梯（過去簡單式 fell）。"
+  },
+  {
+    "id": "c-when-6",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "fill",
+    "instruction": "依括號內的動詞（ride），填入兩個字。",
+    "question": "John ___ ___ a bike when their teacher went to the park.",
+    "answer": "was riding",
+    "hint": "老師去公園時，John「正在」騎腳踏車；ride 去 e 加 ing。",
+    "explanation": "John was riding a bike when their teacher went to the park."
+  },
+  {
+    "id": "c-when-7",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "fill",
+    "instruction": "依括號內的動詞（run），填入兩個字。",
+    "question": "Ivy and Tim ___ ___ with a dog when their teacher went to the park.",
+    "answer": "were running",
+    "hint": "主詞是兩個人；run 要重複字尾 n 再加 ing。",
+    "explanation": "Ivy and Tim were running with a dog when their teacher went to the park."
+  },
+  {
+    "id": "c-when-8",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "fill",
+    "instruction": "填入兩個字，完成句子。",
+    "question": "Leo was playing soccer when their teacher ___ ___ the park.",
+    "answer": "went to",
+    "hint": "「去公園」是瞬間的動作，用過去簡單式。",
+    "explanation": "go 的過去式是 went：when their teacher went to the park。"
+  },
+  {
+    "id": "c-when-9",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "transform",
+    "instruction": "用 when 合併兩句，when 放在句子中間。",
+    "question": "Tom was mopping the stairs. Tom's uncle visited him.",
+    "answer": "Tom was mopping the stairs when his uncle visited him.",
+    "acceptedAnswers": [
+      "Tom was mopping the stairs when Tom's uncle visited him.",
+      "When Tom's uncle visited him, Tom was mopping the stairs.",
+      "When his uncle visited him, Tom was mopping the stairs."
+    ],
+    "hint": "過去進行式的句子在前，when 接過去簡單式的句子。",
+    "explanation": "主詞 1 + 過去進行式 + when + 主詞 2 + 過去簡單式。"
+  },
+  {
+    "id": "c-when-10",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "transform",
+    "instruction": "用 When 合併兩句，When 放在句首。",
+    "question": "My sister was playing the violin. I broke the glass.",
+    "answer": "When I broke the glass, my sister was playing the violin.",
+    "acceptedAnswers": [
+      "My sister was playing the violin when I broke the glass."
+    ],
+    "hint": "When + 過去簡單式的句子，加逗號，再接過去進行式的句子。",
+    "explanation": "When + 主詞 2 + 過去簡單式, 主詞 1 + 過去進行式。"
+  },
+  {
+    "id": "c-when-11",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "transform",
+    "instruction": "用 when 合併兩句，when 放在句子中間。",
+    "question": "They left for work. Their daughter was sleeping.",
+    "answer": "Their daughter was sleeping when they left for work.",
+    "acceptedAnswers": [
+      "When they left for work, their daughter was sleeping."
+    ],
+    "hint": "when 要接短暫的動作 left，不是持續的 sleeping。",
+    "explanation": "持續的動作（was sleeping）放主要子句，短暫的動作（left）放 when 後面。"
+  },
+  {
+    "id": "c-when-12",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "Try it! 3",
+    "type": "transform",
+    "instruction": "用 when 合併兩句，when 放在句子中間。",
+    "question": "I was 20 years old. I was an engineer.",
+    "answer": "I was an engineer when I was 20 years old.",
+    "acceptedAnswers": [
+      "I was an engineer when I was twenty years old.",
+      "When I was 20 years old, I was an engineer.",
+      "When I was twenty years old, I was an engineer."
+    ],
+    "hint": "when 也可以表示「在…的時候（某段時期）」。",
+    "explanation": "when 引導一段過去的時期：I was an engineer when I was 20 years old."
+  },
+  {
+    "id": "c-when-13",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "試題演練區 (p.153)",
+    "type": "transform",
+    "instruction": "用 when 合併兩句，when 放在句子中間。",
+    "question": "Someone came into his house. Eddy was sweeping the stairs.",
+    "answer": "Eddy was sweeping the stairs when someone came into his house.",
+    "acceptedAnswers": [
+      "When someone came into his house, Eddy was sweeping the stairs."
+    ],
+    "hint": "when 接短暫的動作 came。",
+    "explanation": "Eddy was sweeping the stairs（持續）when someone came into his house（瞬間）。"
+  },
+  {
+    "id": "c-when-14",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "試題演練區 (p.153)",
+    "type": "transform",
+    "instruction": "用 When 合併兩句，When 放在句首。",
+    "question": "John was watching a video. Vicky came home.",
+    "answer": "When Vicky came home, John was watching a video.",
+    "acceptedAnswers": [
+      "John was watching a video when Vicky came home."
+    ],
+    "hint": "When 接短暫的動作 came home，後面加逗號。",
+    "explanation": "When Vicky came home, John was watching a video."
+  },
+  {
+    "id": "c-when-15",
+    "topic": "when_clause",
+    "topicLabel": "when 子句",
+    "source": "試題演練區 (p.153)",
+    "type": "order",
+    "instruction": "依中文意思，點選單字排出英文句子。",
+    "question": "孩子們在搬他們的東西到新房間時，在床下看見一些舊衣服。",
+    "tiles": [
+      "The kids",
+      "were moving",
+      "their things",
+      "to the new room",
+      "when",
+      "they",
+      "saw",
+      "some old clothes",
+      "under the bed",
+      "moved"
+    ],
+    "answer": "The kids were moving their things to the new room when they saw some old clothes under the bed.",
+    "acceptedAnswers": [
+      "When they saw some old clothes under the bed, the kids were moving their things to the new room."
+    ],
+    "hint": "「正在搬」用過去進行式，「看見」用過去簡單式；有一個字用不到。",
+    "explanation": "The kids were moving their things to the new room when they saw some old clothes under the bed."
+  },
+  {
+    "id": "c-time-1",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it! 4",
+    "type": "transform",
+    "instruction": "用 half 改寫時間。",
+    "question": "It's one thirty.",
+    "answer": "It's half past one.",
+    "acceptedAnswers": [
+      "It is half past one."
+    ],
+    "hint": "30 分用 half，搭配 past。",
+    "explanation": "1:30 = It's one thirty. = It's half past one."
+  },
+  {
+    "id": "c-time-2",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it! 4",
+    "type": "transform",
+    "instruction": "用逆讀法 to 改寫時間。",
+    "question": "It's two fifty.",
+    "answer": "It's ten to three.",
+    "acceptedAnswers": [
+      "It is ten to three.",
+      "It's ten minutes to three.",
+      "It is ten minutes to three."
+    ],
+    "hint": "2:50 還差幾分鐘到 3 點？",
+    "explanation": "分針在 31～59 分：(60 − 50) + to + 下一個點鐘 = ten to three。"
+  },
+  {
+    "id": "c-time-3",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it! 4",
+    "type": "transform",
+    "instruction": "用 a quarter 改寫時間。",
+    "question": "It's six fifteen.",
+    "answer": "It's a quarter after six.",
+    "acceptedAnswers": [
+      "It is a quarter after six.",
+      "It's a quarter past six.",
+      "It is a quarter past six."
+    ],
+    "hint": "15 分鐘 = a quarter。",
+    "explanation": "6:15 = It's a quarter after/past six."
+  },
+  {
+    "id": "c-time-4",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it! 4",
+    "type": "fill",
+    "instruction": "填入適當的字。",
+    "question": "It's 4:10. It's ten ___ four.",
+    "answer": "after",
+    "acceptedAnswers": [
+      "past"
+    ],
+    "hint": "4 點又過了 10 分鐘。",
+    "explanation": "分針在 1～30 分：分鐘 + after/past + 點鐘。"
+  },
+  {
+    "id": "c-time-5",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "I was late for the party. It started at six, but I arrived at ___ six.",
+    "options": [
+      "half past",
+      "ten to",
+      "a quarter to",
+      "five to"
+    ],
+    "answer": "half past",
+    "hint": "遲到了，所以到達的時間是六點「之後」。",
+    "explanation": "只有 half past six（6:30）是在六點之後；ten to / a quarter to / five to 都在六點之前。"
+  },
+  {
+    "id": "c-time-6",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it again! (p.143)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "What were you doing at seven minutes ___ nine last night?",
+    "options": [
+      "at",
+      "before",
+      "past",
+      "behind"
+    ],
+    "answer": "past",
+    "hint": "「九點過七分」。",
+    "explanation": "seven minutes past nine = 9:07。分鐘數不是 5 的倍數時，要寫出 minutes。"
+  },
+  {
+    "id": "c-time-7",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "試題演練區 (p.150)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "What time is it? It's a quarter ___ six. It's time for dinner.",
+    "options": [
+      "of",
+      "to",
+      "before",
+      "from"
+    ],
+    "answer": "to",
+    "hint": "「還差十五分鐘就六點」。",
+    "explanation": "a quarter to six = 5:45。"
+  },
+  {
+    "id": "c-time-8",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "試題演練區 (p.151)",
+    "type": "choice",
+    "instruction": "選出意思相同的說法。",
+    "question": "It's 8:50.",
+    "options": [
+      "It's ten to eight.",
+      "It's ten to nine.",
+      "It's fifty to eight.",
+      "It's ten after eight."
+    ],
+    "answer": "It's ten to nine.",
+    "hint": "8:50 再過 10 分鐘就是幾點？",
+    "explanation": "to 後面接「下一個點鐘」：8:50 = ten to nine。"
+  },
+  {
+    "id": "c-time-9",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "Try it again! (p.122)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "The concert started at half ___ seven last night.",
+    "options": [
+      "from",
+      "of",
+      "for",
+      "past"
+    ],
+    "answer": "past",
+    "hint": "half 只和 past 搭配。",
+    "explanation": "half past seven = 7:30。"
+  },
+  {
+    "id": "c-time-10",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "試題演練區 (p.152)",
+    "type": "transform",
+    "instruction": "時間用「逆讀法」拼出，將句子完整寫出。",
+    "question": "It is 11:45.",
+    "answer": "It is a quarter to twelve.",
+    "acceptedAnswers": [
+      "It's a quarter to twelve.",
+      "It is fifteen to twelve.",
+      "It's fifteen to twelve."
+    ],
+    "hint": "11:45 還差 15 分鐘到 12 點。",
+    "explanation": "11:45 = a quarter to twelve。"
+  },
+  {
+    "id": "c-time-11",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "試題演練區 (p.152)",
+    "type": "transform",
+    "instruction": "時間用「逆讀法」拼出，將句子完整寫出。",
+    "question": "It was 3:15 in the afternoon.",
+    "answer": "It was a quarter after three in the afternoon.",
+    "acceptedAnswers": [
+      "It was a quarter past three in the afternoon.",
+      "It was fifteen after three in the afternoon.",
+      "It was fifteen past three in the afternoon."
+    ],
+    "hint": "15 分鐘 = a quarter；分針在 1～30 分用 after/past。",
+    "explanation": "3:15 = a quarter after/past three。"
+  },
+  {
+    "id": "c-time-12",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "試題演練區 (p.152)",
+    "type": "transform",
+    "instruction": "時間用「逆讀法」拼出，將句子完整寫出。",
+    "question": "Let's meet at 10:30 at the library.",
+    "answer": "Let's meet at half past ten at the library.",
+    "acceptedAnswers": [
+      "Let us meet at half past ten at the library."
+    ],
+    "hint": "30 分 = half，搭配 past。",
+    "explanation": "10:30 = half past ten。"
+  },
+  {
+    "id": "c-time-13",
+    "topic": "telling_time",
+    "topicLabel": "時間的逆讀法",
+    "source": "試題演練區 (p.153)",
+    "type": "order",
+    "instruction": "依中文意思，點選單字排出英文句子。",
+    "question": "前天五點四十五分，媽媽正在做晚餐。",
+    "tiles": [
+      "Mom",
+      "was making",
+      "dinner",
+      "at",
+      "a quarter",
+      "to",
+      "six",
+      "the day before yesterday",
+      "past",
+      "five"
+    ],
+    "answer": "Mom was making dinner at a quarter to six the day before yesterday.",
+    "acceptedAnswers": [
+      "The day before yesterday Mom was making dinner at a quarter to six."
+    ],
+    "hint": "5:45 要用 to 和下一個點鐘來說；有兩個字用不到。",
+    "explanation": "5:45 = a quarter to six；「正在做」用過去進行式 was making。"
+  },
+  {
+    "id": "c-pv-1",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it! 5",
+    "type": "transform",
+    "instruction": "把 Wendy 改成代名詞，改寫句子。",
+    "question": "Peter woke up Wendy at night.",
+    "answer": "Peter woke her up at night.",
+    "hint": "wake up 是可分片語動詞；Wendy 用受格 her。",
+    "explanation": "可分片語動詞的受詞是代名詞時，要放在中間：woke her up。"
+  },
+  {
+    "id": "c-pv-2",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it! 5",
+    "type": "transform",
+    "instruction": "把 these yummy cookies 改成代名詞，改寫句子。",
+    "question": "Look at these yummy cookies. Can I have some?",
+    "answer": "Look at them. Can I have some?",
+    "hint": "look at 是不可分片語動詞；複數的東西用 them。",
+    "explanation": "不可分片語動詞的受詞放在介系詞後面：look at them。"
+  },
+  {
+    "id": "c-pv-3",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it! 5",
+    "type": "transform",
+    "instruction": "把 the trash 改成代名詞，改寫句子。",
+    "question": "Could you please take out the trash?",
+    "answer": "Could you please take it out?",
+    "hint": "take out 是可分片語動詞；the trash 用 it。",
+    "explanation": "代名詞放在動詞和介副詞中間：take it out。"
+  },
+  {
+    "id": "c-pv-4",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it! 5",
+    "type": "order",
+    "instruction": "點選單字，排出正確的英文句子。",
+    "question": "重組句子",
+    "tiles": [
+      "up",
+      "can",
+      "clean",
+      "it",
+      "We"
+    ],
+    "answer": "We can clean it up.",
+    "hint": "代名詞 it 要放在 clean 和 up 中間。",
+    "explanation": "We can clean it up. 不能說 clean up it。"
+  },
+  {
+    "id": "c-pv-5",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it! 5",
+    "type": "order",
+    "instruction": "點選單字，排出正確的英文句子。",
+    "question": "重組句子",
+    "tiles": [
+      "I",
+      "wait",
+      "him",
+      "didn't",
+      "for"
+    ],
+    "answer": "I didn't wait for him.",
+    "hint": "wait for 不可分開，him 放在 for 後面。",
+    "explanation": "I didn't wait for him. 不可分片語動詞的受詞一定在介系詞後面。"
+  },
+  {
+    "id": "c-pv-6",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it! 5",
+    "type": "order",
+    "instruction": "點選單字，排出正確的英文句子。",
+    "question": "重組句子",
+    "tiles": [
+      "turn",
+      "Please",
+      "off",
+      "the computer",
+      "now"
+    ],
+    "answer": "Please turn off the computer now.",
+    "acceptedAnswers": [
+      "Please turn the computer off now."
+    ],
+    "hint": "受詞是名詞時，可以放在 off 前面或後面。",
+    "explanation": "turn off 是可分片語動詞：turn off the computer = turn the computer off。"
+  },
+  {
+    "id": "c-pv-7",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it again! (p.144)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Don't look ___.",
+    "options": [
+      "at them",
+      "them at",
+      "they",
+      "them"
+    ],
+    "answer": "at them",
+    "hint": "look at 不可分開；介系詞後面用受格。",
+    "explanation": "look at + 受詞：Don't look at them."
+  },
+  {
+    "id": "c-pv-8",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "Try it again! (p.144)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "Your room is dirty. Clean ___ now.",
+    "options": [
+      "them up",
+      "it up",
+      "up it",
+      "up them"
+    ],
+    "answer": "it up",
+    "hint": "your room 是單數，用 it；clean up 是可分片語動詞。",
+    "explanation": "代名詞放中間：clean it up。"
+  },
+  {
+    "id": "c-pv-9",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "試題演練區 (p.153)",
+    "type": "transform",
+    "instruction": "把 his room 改成代名詞，改寫句子。",
+    "question": "Jerry was cleaning up his room when his mother called him.",
+    "answer": "Jerry was cleaning it up when his mother called him.",
+    "hint": "clean up 是可分片語動詞；his room 用 it。",
+    "explanation": "cleaning up his room → cleaning it up。"
+  },
+  {
+    "id": "c-pv-10",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "文法下載區 (p.142)",
+    "type": "choice",
+    "instruction": "把 his jacket 改成代名詞，選出正確的語序。",
+    "question": "Eddie put ___.",
+    "options": [
+      "it down",
+      "down it",
+      "them down",
+      "down them"
+    ],
+    "answer": "it down",
+    "hint": "put down 是可分片語動詞；his jacket 用 it。",
+    "explanation": "Eddie put down his jacket. = Eddie put his jacket down. → Eddie put it down."
+  },
+  {
+    "id": "c-pv-11",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "文法下載區 (p.142)",
+    "type": "choice",
+    "instruction": "把 your notebook 改成代名詞，選出正確的語序。",
+    "question": "Are you looking ___?",
+    "options": [
+      "for it",
+      "it for",
+      "for them",
+      "it"
+    ],
+    "answer": "for it",
+    "hint": "look for 是不可分片語動詞。",
+    "explanation": "Are you looking for your notebook? → Are you looking for it?"
+  },
+  {
+    "id": "c-pv-12",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "文法下載區 (p.142)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "I like this jacket. Can I try ___?",
+    "options": [
+      "it on",
+      "on it",
+      "them on",
+      "on them"
+    ],
+    "answer": "it on",
+    "hint": "try on（試穿）是可分片語動詞。",
+    "explanation": "代名詞放中間：try it on。"
+  },
+  {
+    "id": "c-pv-13",
+    "topic": "phrasal_verbs",
+    "topicLabel": "可分與不可分片語動詞",
+    "source": "文法下載區 (p.142)",
+    "type": "choice",
+    "instruction": "選出正確的答案。",
+    "question": "The teacher is talking. Please listen ___.",
+    "options": [
+      "to her",
+      "her to",
+      "to she",
+      "she to"
+    ],
+    "answer": "to her",
+    "hint": "listen to 不可分開；介系詞後面用受格。",
+    "explanation": "listen to + 受詞：listen to her。"
+  }
+]
