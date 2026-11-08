@@ -109,6 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '八年級 上 Unit 3 (2)', path: 'g8_1_unit3_2.json', type: 'spelling' },
         { name: '八年級 上 Unit 3 文法練習', path: 'g8_1_unit3_grammar.json', type: 'grammar' },
         { name: '八年級 上 Unit 3 文法闖關', path: 'g8_1_unit3_challenge.json', type: 'challenge' },
+        { name: '八年級 上 Unit 4 (1)', path: 'g8_1_unit4_1.json', type: 'spelling' },
+        { name: '八年級 上 Unit 4 (2)', path: 'g8_1_unit4_2.json', type: 'spelling' },
+        { name: '八年級 上 Unit 4 文法練習', path: 'g8_1_unit4_grammar.json', type: 'grammar' },
+        { name: '八年級 上 Unit 4 文法闖關', path: 'g8_1_unit4_challenge.json', type: 'challenge' },
         { name: '六年級 上 Unit 1', path: 'g6_1_unit1.json', type: 'spelling' },
         { name: '六年級 上 Unit 2', path: 'g6_1_unit2.json', type: 'spelling' },
         { name: '六年級 上 Phonics 3~5', path: 'g6_1_phonics3_5.json', type: 'spelling' },
@@ -1649,17 +1653,24 @@ document.addEventListener('DOMContentLoaded', () => {
         challengeHubContentEl.appendChild(buildChallengeParentView(data, topics));
     }
 
+    // 闖關得點規則文字，同時用於闖關大廳與首頁說明區塊
+    function getChallengeRuleTexts() {
+        const starText = CHALLENGE_STAR_RULES
+            .map(rule => `${'⭐'.repeat(rule.stars)} +${rule.points}`).join('、');
+        return [
+            `每一關答對越多，星星越多：${starText}。第一次拿到才有點數。`,
+            '看了提示才答對，只算半題。',
+            `答錯的題目，隔天再答對一題 +${CHALLENGE_RECYCLE_POINTS}。全部改完再 +${CHALLENGE_CLEAR_BANK_BONUS}。`,
+            `模擬小考 ${CHALLENGE_EXAM_PASS_SCORE} 分以上 +${CHALLENGE_EXAM_PASS_POINTS}。比自己的最高分多幾分，就多幾點。第一次 100 分 +${CHALLENGE_EXAM_PERFECT_POINTS}。`,
+            `改錯題和小考，每天最多拿 ${CHALLENGE_DAILY_CAP} 點。`,
+        ];
+    }
+
     function buildChallengeRules() {
         const details = createEl('details', 'challenge-details');
         details.appendChild(createEl('summary', '', '🪙 怎麼得點數？'));
         const list = createEl('ul', 'challenge-rule-list');
-        [
-            `關卡正確率達 60% / 80% / 100% 可拿到 1～3 顆星，第一次拿到各顆星分別 +${CHALLENGE_STAR_RULES.map(rule => rule.points).join(' / +')} 點。`,
-            '看了提示才答對只算半題；答錯的題目會收進錯題回收站。',
-            `錯題隔天以後答對才算回收，每題 +${CHALLENGE_RECYCLE_POINTS} 點；錯題全部清空再 +${CHALLENGE_CLEAR_BANK_BONUS} 點（每天一次）。`,
-            `模擬小考 ${CHALLENGE_EXAM_PASS_SCORE} 分及格 +${CHALLENGE_EXAM_PASS_POINTS} 點（每天一次）；比自己的最高分進步幾分就再加幾點；第一次考滿分 +${CHALLENGE_EXAM_PERFECT_POINTS} 點。`,
-            `錯題回收和模擬小考每天最多可得 ${CHALLENGE_DAILY_CAP} 點。`,
-        ].forEach(text => list.appendChild(createEl('li', '', text)));
+        getChallengeRuleTexts().forEach(text => list.appendChild(createEl('li', '', text)));
         details.appendChild(list);
         return details;
     }
@@ -2059,6 +2070,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeGameMode = '';
         updateTotalPointsDisplay();
         updateUnitRewardsBadge();
+        renderPointsInfo('');
     }
 
     function updateTotalPointsDisplay() {
@@ -2090,6 +2102,51 @@ document.addEventListener('DOMContentLoaded', () => {
             button.classList.toggle('mode-selected', buttonMode === mode);
         });
         updateWordListDropdown(mode);
+        renderPointsInfo(mode);
+    }
+
+    // 首頁「如何獲得點數？」區塊：依目前選擇的模式列出對應的得點方式
+    const MODE_LABELS = { spelling: '單字拼寫', grammar: '文法練習', challenge: '文法闖關' };
+
+    function getUnitPointsInfoTexts() {
+        const roundText = Object.entries(ROUND_REWARDS)
+            .map(([round, points]) => `第 ${round} 回合 +${points}`).join('、');
+        const medalText = MEDAL_IDS
+            .map(id => `${UNIT_ACHIEVEMENTS[id].icon} +${UNIT_ACHIEVEMENTS[id].points}`).join('、');
+        const streakText = [
+            ['THREE_DAY_STREAK', '3 天'],
+            ['THREE_WEEK_STREAK', '3 週'],
+            ['THREE_MONTH_STREAK', '3 個月'],
+        ].map(([id, span]) => `${span} ${UNIT_ACHIEVEMENTS[id].icon} +${UNIT_ACHIEVEMENTS[id].points}`).join('、');
+        const globalText = Object.values(GLOBAL_ACHIEVEMENTS)
+            .map(ach => `${ach.icon} ${ach.name} +${ach.points}`).join('、');
+        const firstClear = UNIT_ACHIEVEMENTS.FIRST_CLEAR;
+        return [
+            `每天過關就有點數：${roundText}。`,
+            `第一次完成這個單元：${firstClear.icon} +${firstClear.points}。`,
+            `愛心剩越多，獎牌越好：${medalText}。沒扣心就是金牌！`,
+            `常常回來練同一個單元：練滿 ${streakText}。`,
+            `超級大獎：${globalText}。詳情請看 🏆 我的成就。`,
+        ];
+    }
+
+    function getPointsInfoTexts(mode) {
+        if (mode === 'spelling' || mode === 'grammar') return getUnitPointsInfoTexts();
+        if (mode === 'challenge') return getChallengeRuleTexts();
+        return [
+            '單字拼寫、文法練習：每天過關就有點數，還能拿獎牌和成就。',
+            '文法闖關：拿星星、改錯題、考小考，都有點數。',
+            '👆 點一下上面的練習模式，看看怎麼拿點數！',
+        ];
+    }
+
+    function renderPointsInfo(mode) {
+        const titleEl = document.getElementById('points-info-title');
+        const listEl = document.getElementById('points-info-list');
+        if (!titleEl || !listEl) return;
+        titleEl.textContent = MODE_LABELS[mode] ? `「${MODE_LABELS[mode]}」如何獲得點數？🪙` : '如何獲得點數？🪙';
+        listEl.innerHTML = '';
+        getPointsInfoTexts(mode).forEach(text => listEl.appendChild(createEl('li', '', text)));
     }
 
     function updateWordListDropdown(selectedMode) {
@@ -2139,7 +2196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             badgeContainer.style.display = 'none';
             hintEl.style.display = 'block';
             hintEl.style.color = '#e2e8f0';
-            hintEl.textContent = '🏅 闖關拿星星、隔天回收錯題、模擬小考及格或進步，都能得到點數！';
+            hintEl.textContent = '🏅 拿星星、改錯題、考小考，都有點數！';
             return;
         }
 
@@ -2152,7 +2209,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const unitPath = wordListSelectEl.value;
         const rewardKey = ROUND_REWARD_KEYS[activeGameMode];
-        const practiceName = activeGameMode === 'grammar' ? '文法' : '拼寫';
         
         // 唯讀取得該單元的今日獎勵進度，避免只是瀏覽選單就寫入空資料
         const today = getLocalDateString();
@@ -2191,15 +2247,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 更新引導文案
         if (completedRounds === 0) {
-            hintEl.textContent = `💡 完成今日${practiceName}挑戰，最高可獲得 ${maxDailyPoints} 點！`;
+            hintEl.textContent = `💡 今天過完 3 回合，最多可以拿 ${maxDailyPoints} 點！`;
             hintEl.style.color = '#e2e8f0'; // 灰色偏白
         } else if (completedRounds < rounds.length) {
             const nextRound = completedRounds + 1;
             const nextPoints = ROUND_REWARDS[nextRound];
-            hintEl.textContent = `🔥 再接再厲！今日${practiceName}通過第 ${nextRound} 回合可再獲得 ${nextPoints} 點！`;
+            hintEl.textContent = `🔥 加油！過第 ${nextRound} 回合再拿 ${nextPoints} 點！`;
             hintEl.style.color = '#ffd700'; // 金色
         } else {
-            hintEl.textContent = `🎉 太棒了！今日此單元的所有${practiceName}回合獎勵已全數拿滿！`;
+            hintEl.textContent = `🎉 太棒了！今天這個單元的點數都拿到了！`;
             hintEl.style.color = '#48bb78'; // 綠色
         }
     }
