@@ -2,13 +2,13 @@
   {
     "english": "airport",
     "chinese": "機場",
-    "phonetics": "[`ɛrˌpɔrt]",
+    "phonetics": "[ˈɛrˌpɔrt]",
     "example": "There is an airport near my house."
   },
   {
     "english": "travel",
     "chinese": "旅行；行進",
-    "phonetics": "[`trævl]",
+    "phonetics": "[ˈtrævl]",
     "example": "Eric is traveling the world with his family."
   },
   {
@@ -20,25 +20,25 @@
   {
     "english": "hotel",
     "chinese": "飯店",
-    "phonetics": "[ho`tɛl]",
+    "phonetics": "[hoˈtɛl]",
     "example": "There are three hotels on this street."
   },
   {
     "english": "plane",
-    "chinese": "飛機 (= airplane [`ɛrˌplen])",
+    "chinese": "飛機 (= airplane [ˈɛrˌplen])",
     "phonetics": "[plen]",
-    "example": "The workers are building an airplane."
+    "example": "The workers are building a plane."
   },
   {
     "english": "the sights",
     "chinese": "風景；名勝",
-    "phonetics": "[ðə `saɪts]",
+    "phonetics": "[ðə ˈsaɪts]",
     "example": "Welcome to Indonesia. Let's go see the sights!"
   },
   {
     "english": "bookstore",
     "chinese": "書店",
-    "phonetics": "[`bʊkˌstɔr]",
+    "phonetics": "[ˈbʊkˌstɔr]",
     "example": "Elly often goes to the bookstore after school."
   },
   {
@@ -62,7 +62,7 @@
   {
     "english": "story",
     "chinese": "故事",
-    "phonetics": "[`stɔrɪ]",
+    "phonetics": "[ˈstɔrɪ]",
     "example": "The story about the boy was so sad."
   },
   {
@@ -104,67 +104,67 @@
   {
     "english": "the other day",
     "chinese": "前幾天",
-    "phonetics": "[ðɪ `ʌðɚ de]",
+    "phonetics": "[ðɪ ˈʌðɚ de]",
     "example": "I went to the beach the other day and met my friend."
   },
   {
     "english": "station",
     "chinese": "車站；局",
-    "phonetics": "[`steʃən]",
+    "phonetics": "[ˈsteʃən]",
     "example": "Wendy is on her way to the train station."
   },
   {
     "english": "department store",
     "chinese": "百貨公司",
-    "phonetics": "[dɪ`pɑrtmənt ˌstɔr]",
+    "phonetics": "[dɪˈpɑrtmənt ˌstɔr]",
     "example": "Many people go to the department store on weekends."
   },
   {
     "english": "restaurant",
     "chinese": "餐廳",
-    "phonetics": "[`rɛstərənt]",
+    "phonetics": "[ˈrɛstərənt]",
     "example": "Maggie likes the chicken soup at this restaurant."
   },
   {
     "english": "theater",
     "chinese": "電影院",
-    "phonetics": "[`θiətɚ]",
+    "phonetics": "[ˈθiətɚ]",
     "example": "The movie theater sells great popcorn."
   },
   {
     "english": "market",
     "chinese": "市場",
-    "phonetics": "[`mɑrkɪt]",
+    "phonetics": "[ˈmɑrkɪt]",
     "example": "Ellen goes to the night market every Friday night."
   },
   {
     "english": "temple",
     "chinese": "寺廟",
-    "phonetics": "[`tɛmpl]",
+    "phonetics": "[ˈtɛmpl]",
     "example": "Sam visited many temples last month."
   },
   {
     "english": "famous",
     "chinese": "有名的",
-    "phonetics": "[`feməs]",
+    "phonetics": "[ˈfeməs]",
     "example": "There is a famous ice cream shop next to our school."
   },
   {
     "english": "during",
     "chinese": "在...期間",
-    "phonetics": "[`djʊrɪŋ]",
+    "phonetics": "[ˈdjʊrɪŋ]",
     "example": "Don't use your phone during a movie."
   },
   {
     "english": "besides",
     "chinese": "除...之外",
-    "phonetics": "[bɪ`saɪdz]",
+    "phonetics": "[bɪˈsaɪdz]",
     "example": "Besides a cat, we also got a dog from the farm."
   },
   {
     "english": "fall in love",
     "chinese": "墜入情網",
-    "phonetics": "[ˌfɔl ɪn `lʌv]",
+    "phonetics": "[ˌfɔl ɪn ˈlʌv]",
     "example": "He fell in love at age sixteen."
   },
   {
@@ -206,7 +206,7 @@
   {
     "english": "sadly",
     "chinese": "令人傷心地",
-    "phonetics": "[`sædlɪ]",
+    "phonetics": "[ˈsædlɪ]",
     "example": "Sadly, Mrs. Ko's son lost his life at a young age."
   },
   {

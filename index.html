@@ -3,94 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="英語練習：單字拼寫、文法練習與文法闖關，搭配點數與成就系統，讓每天的英語練習更有動力。">
+    <meta name="theme-color" content="#1a202c">
+    <meta name="color-scheme" content="dark">
     <title>英語練習</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📘</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Noto+Sans+TC:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
+    <noscript>
+        <p class="noscript-message">本網站需要啟用 JavaScript 才能使用，請在瀏覽器設定中開啟後重新整理。</p>
+    </noscript>
+
+    <!-- 首頁 -->
     <div id="start-container" class="start-container">
         <header class="dashboard-header">
-            <div id="total-points-display" class="points-display">
-                <!-- Points will be rendered here by JS -->
+            <div class="dashboard-brand">
+                <h1 class="app-title">英語練習</h1>
+                <div id="total-points-display" class="points-display" title="目前點數">0</div>
             </div>
-            <nav class="dashboard-nav">
-                <button id="admin-add-points-btn" class="icon-button" title="管理員加點" style="opacity: 0.3; filter: grayscale(1);">⚙️</button>
-                <button id="show-achievements-btn" class="icon-button" title="我的成就">🏆</button>
-                <button id="show-redemptions-btn" class="icon-button" title="我的兌換">🎁</button>
+            <nav class="dashboard-nav" aria-label="功能選單">
+                <button id="admin-add-points-btn" class="icon-button icon-button-muted" type="button" title="管理員加點" aria-label="管理員加點">⚙️</button>
+                <button id="show-achievements-btn" class="icon-button" type="button" title="我的成就" aria-label="我的成就">🏆</button>
+                <button id="show-redemptions-btn" class="icon-button" type="button" title="我的兌換" aria-label="我的兌換">🎁</button>
             </nav>
         </header>
         <main class="dashboard-main">
-
             <div class="start-step">
-                <h2>步驟一：選擇練習模式</h2>
-                <div class="mode-selection">
-                    <button id="mode-btn-spelling" class="start-button secondary" data-mode="spelling">單字拼寫</button>
-                    <button id="mode-btn-grammar" class="start-button secondary" data-mode="grammar">文法練習</button>
-                    <button id="mode-btn-challenge" class="start-button secondary" data-mode="challenge">文法闖關</button>
+                <h2 id="mode-step-title">步驟一：選擇練習模式</h2>
+                <div class="mode-selection" role="group" aria-labelledby="mode-step-title">
+                    <button id="mode-btn-spelling" class="start-button secondary" type="button" data-mode="spelling" aria-pressed="false">單字拼寫</button>
+                    <button id="mode-btn-grammar" class="start-button secondary" type="button" data-mode="grammar" aria-pressed="false">文法練習</button>
+                    <button id="mode-btn-challenge" class="start-button secondary" type="button" data-mode="challenge" aria-pressed="false">文法闖關</button>
                 </div>
             </div>
 
             <div class="start-step">
-                <h2>步驟二：選擇練習單元</h2>
-                <select id="word-list-select" class="word-list-select" disabled></select>
+                <h2 id="unit-step-title">步驟二：選擇練習單元</h2>
+                <select id="word-list-select" class="word-list-select" aria-labelledby="unit-step-title" disabled></select>
                 <div id="unit-rewards-badge-container" class="unit-rewards-badge-container" style="display: none;"></div>
+                <p id="unit-rewards-hint" class="unit-rewards-hint" hidden></p>
             </div>
 
-
             <div class="start-step">
-                <button id="start-game-btn" class="start-button" disabled>開始練習</button>
+                <button id="start-game-btn" class="start-button" type="button" disabled>開始練習</button>
             </div>
 
             <div class="points-info-container">
                 <h3 id="points-info-title">如何獲得點數？🪙</h3>
-                <ul id="points-info-list">
-                    <li>完成「單字拼寫」或「文法練習」達成各項成就可獲得對應點數。</li>
-                    <li>期間限定：通過任一模式第 1、2 回合可獲得 5 點，第 3 回合可獲得 10 點。</li>
-                    <li>文法闖關：關卡拿星星、隔天回收錯題、模擬小考及格或進步，都能獲得點數。</li>
-                </ul>
+                <ul id="points-info-list"></ul>
             </div>
         </main>
     </div>
 
+    <!-- 單字拼寫 -->
     <div id="game-container" class="game-container" style="display: none;">
-        <!--
-        <header>
-            <h1>單字拼寫練習</h1>
-        </header>
-        --> 
-
         <div class="progress-wrapper">
             <div class="progress-container">
                 <div id="progress-bar"></div>
             </div>
             <div id="round-display"></div>
+            <button id="spelling-quit-btn" class="quit-button" type="button">離開</button>
         </div>
 
         <div class="word-area">
             <div id="current-word-display" class="word-display"></div>
             <div class="pronunciation-area">
                 <div id="phonetics-display" class="phonetics-display"></div>
-                <button id="play-audio-btn" class="play-audio-btn" title="播放發音">🔊</button>
+                <button id="play-audio-btn" class="play-audio-btn" type="button" title="播放發音" aria-label="播放發音">🔊</button>
             </div>
             <div id="translation-display" class="translation-display"></div>
             <div id="example-display" class="example-display"></div>
         </div>
 
-        <audio id="word-audio" style="display: none;"></audio>
-
         <form id="spelling-form" class="spelling-input-area" style="display: none;">
-            <input type="text" id="spelling-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="請在此拼寫單字並按 Enter">
+            <input type="text" id="spelling-input" aria-label="拼寫單字" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" placeholder="請在這裡拼出單字">
         </form>
 
-        <div id="feedback-message" class="feedback-message"></div>
+        <div id="feedback-message" class="feedback-message" role="status" aria-live="polite"></div>
 
-        <div id="health-display" class="health-display">
-            <!-- Hearts will be rendered here by JS -->
-        </div>
+        <div id="health-display" class="health-display" aria-label="剩餘愛心"></div>
     </div>
 
+    <!-- 文法練習／文法闖關作答畫面 -->
     <div id="grammar-container" class="game-container grammar-container" style="display: none;">
         <div class="progress-wrapper">
             <div class="progress-container">
@@ -101,22 +100,23 @@
 
         <div class="grammar-meta">
             <span id="grammar-topic-badge" class="grammar-topic-badge"></span>
-            <span id="grammar-health-display" class="health-display" aria-label="文法練習剩餘愛心"></span>
+            <span id="grammar-health-display" class="health-display" aria-label="剩餘愛心"></span>
         </div>
         <p id="grammar-instruction" class="grammar-instruction"></p>
         <button id="grammar-play-audio-btn" class="grammar-audio-btn" type="button" title="播放英文題目" aria-label="播放英文題目">🔊</button>
         <div id="grammar-question" class="grammar-question"></div>
         <div id="grammar-answer-area" class="grammar-answer-area"></div>
         <div id="grammar-hint" class="grammar-hint" style="display: none;"></div>
-        <div id="grammar-feedback" class="feedback-message grammar-feedback"></div>
+        <div id="grammar-feedback" class="feedback-message grammar-feedback" role="status" aria-live="polite"></div>
         <div class="grammar-controls">
-            <button id="grammar-hint-btn" class="grammar-button secondary">提示</button>
-            <button id="grammar-check-btn" class="grammar-button">檢查答案</button>
-            <button id="grammar-next-btn" class="grammar-button" style="display: none;">下一題</button>
-            <button id="grammar-quit-btn" class="grammar-button secondary" style="display: none;">離開</button>
+            <button id="grammar-hint-btn" class="grammar-button secondary" type="button">提示</button>
+            <button id="grammar-check-btn" class="grammar-button" type="button">檢查答案</button>
+            <button id="grammar-next-btn" class="grammar-button" type="button" style="display: none;">下一題</button>
+            <button id="grammar-quit-btn" class="grammar-button secondary" type="button">離開</button>
         </div>
     </div>
 
+    <!-- 文法闖關大廳 -->
     <div id="challenge-container" class="start-container challenge-hub" style="display: none;">
         <div class="challenge-hub-header">
             <h1 id="challenge-title" class="challenge-title"></h1>
@@ -125,32 +125,41 @@
         <div id="challenge-hub-content" class="challenge-hub-content"></div>
     </div>
 
-    <div id="completion-container" class="start-container" style="display: none;">
-        <h1 class="start-title">恭喜通關！</h1>
-        <p style="color: var(--text-secondary); margin-bottom: 2rem;">你已完成本單元的所有練習。</p>
-        <button id="restart-btn" class="start-button">再次練習</button>
-        <button id="back-to-menu-btn" class="start-button secondary" style="background-color: #a0aec0; margin-top: 10px;">返回主選單</button>
+    <!-- 結算畫面 -->
+    <div id="completion-container" class="start-container completion-container" style="display: none;">
+        <div id="completion-icon" class="completion-icon" aria-hidden="true">🎉</div>
+        <h1 id="completion-title" class="start-title">恭喜通關！</h1>
+        <p id="completion-message" class="completion-message"></p>
+        <ul id="completion-stats" class="completion-stats"></ul>
+        <div id="completion-review" class="completion-review" hidden>
+            <h2 id="completion-review-title" class="completion-review-title"></h2>
+            <ul id="completion-review-list" class="completion-review-list"></ul>
+        </div>
+        <div class="completion-actions">
+            <button id="restart-btn" class="start-button" type="button">再次練習</button>
+            <button id="back-to-menu-btn" class="start-button secondary" type="button">返回主選單</button>
+        </div>
     </div>
 
-    <script src="script.js"></script>
-
-    <!-- Achievement Modal -->
+    <!-- 成就視窗 -->
     <div id="achievement-container" style="display: none;">
-        <div id="achievement-modal">
-            <button id="close-achievements-btn">&times;</button>
-            <h2>我的成就</h2>
+        <div id="achievement-modal" role="dialog" aria-modal="true" aria-labelledby="achievement-modal-title">
+            <button id="close-achievements-btn" type="button" aria-label="關閉">&times;</button>
+            <h2 id="achievement-modal-title">我的成就</h2>
             <div id="achievement-list"></div>
         </div>
     </div>
 
-    <!-- Redemption Modal -->
+    <!-- 兌換視窗 -->
     <div id="redemption-container" style="display: none;">
-        <div id="redemption-modal">
-            <button id="close-redemptions-btn">&times;</button>
-            <h2>我的兌換</h2>
-            <form id="redemption-form" class="redemption-form">
-                <input type="number" id="redeem-points-input" placeholder="兌換點數" required>
-                <input type="text" id="redeem-desc-input" placeholder="兌換說明" required>
+        <div id="redemption-modal" role="dialog" aria-modal="true" aria-labelledby="redemption-modal-title">
+            <button id="close-redemptions-btn" type="button" aria-label="關閉">&times;</button>
+            <h2 id="redemption-modal-title">我的兌換</h2>
+            <p id="redemption-balance" class="redemption-balance"></p>
+            <form id="redemption-form" class="redemption-form" novalidate>
+                <input type="number" id="redeem-points-input" aria-label="兌換點數" placeholder="兌換點數" min="1" step="1" inputmode="numeric" required>
+                <input type="text" id="redeem-desc-input" aria-label="兌換說明" placeholder="兌換說明" maxlength="60" required>
+                <p id="redemption-error" class="form-error" role="alert" hidden></p>
                 <button type="submit">確認兌換</button>
             </form>
             <hr>
@@ -159,28 +168,45 @@
         </div>
     </div>
 
-    <!-- Flash Overlay for feedback -->
-    <div id="flash-overlay"></div>
-
-    <!-- Achievement Toast -->
-    <div id="achievement-toast" style="display: none;">
-        <div class="toast-icon">🏆</div>
-        <div class="toast-text">
-            <div class="toast-title">成就解鎖！</div>
-            <div class="toast-description"></div>
-        </div>
-    </div>
-
-    <!-- Admin Password Modal -->
+    <!-- 管理員視窗 -->
     <div id="admin-modal-container" style="display: none;">
-        <div id="admin-password-modal">
-            <button id="close-admin-modal-btn">&times;</button>
-            <h2>管理員驗證</h2>
-            <form id="admin-password-form" class="redemption-form">
-                <input type="password" id="admin-password-input" placeholder="請輸入管理員密碼" required>
+        <div id="admin-password-modal" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+            <button id="close-admin-modal-btn" type="button" aria-label="關閉">&times;</button>
+            <h2 id="admin-modal-title">管理員驗證</h2>
+            <form id="admin-password-form" class="redemption-form" novalidate>
+                <input type="password" id="admin-password-input" aria-label="管理員密碼" placeholder="請輸入管理員密碼" autocomplete="off" required>
+                <p id="admin-password-error" class="form-error" role="alert" hidden></p>
                 <button type="submit">驗證並繼續</button>
+            </form>
+            <form id="admin-grant-form" class="redemption-form" novalidate hidden>
+                <label class="form-field">增加點數
+                    <input type="number" id="admin-points-input" min="1" step="1" inputmode="numeric" required>
+                </label>
+                <label class="form-field">加點原因
+                    <input type="text" id="admin-reason-input" maxlength="60" required>
+                </label>
+                <p id="admin-grant-error" class="form-error" role="alert" hidden></p>
+                <button type="submit">確認加點</button>
             </form>
         </div>
     </div>
+
+    <!-- 通用對話框（取代瀏覽器內建的 alert / confirm） -->
+    <div id="dialog-container" class="dialog-overlay" style="display: none;">
+        <div class="dialog-box" role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-message">
+            <h2 id="dialog-title" class="dialog-title"></h2>
+            <p id="dialog-message" class="dialog-message"></p>
+            <div class="dialog-actions">
+                <button id="dialog-cancel-btn" class="grammar-button secondary" type="button">取消</button>
+                <button id="dialog-confirm-btn" class="grammar-button" type="button">確定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 答題回饋閃光 -->
+    <div id="flash-overlay" aria-hidden="true"></div>
+
+    <!-- 通知訊息 -->
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite"></div>
 </body>
 </html>

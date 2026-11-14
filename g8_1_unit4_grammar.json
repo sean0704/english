@@ -251,6 +251,7 @@
     "instruction": "依括號內的動詞，填入正確的形式。",
     "question": "___ a doctor is not easy. (be)",
     "answer": "Being",
+    "acceptedAnswers": ["To be"],
     "hint": "be 動詞的動名詞形式是什麼？",
     "explanation": "be 的動名詞是 being：Being a doctor is not easy。"
   },

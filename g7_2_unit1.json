@@ -26,13 +26,13 @@
   {
     "english": "practice",
     "chinese": "練習",
-    "phonetics": "[`præktɪs]",
+    "phonetics": "[ˈpræktɪs]",
     "example": "Jack practices basketball after school every day."
   },
   {
     "english": "every",
     "chinese": "每一",
-    "phonetics": "[`ɛvrɪ]",
+    "phonetics": "[ˈɛvrɪ]",
     "example": "I wash my book bag every six months."
   },
   {
@@ -74,37 +74,37 @@
   {
     "english": "hundred",
     "chinese": "百",
-    "phonetics": "[`hʌndrəd]",
+    "phonetics": "[ˈhʌndrəd]",
     "example": "There are nine hundred students in my school."
   },
   {
     "english": "centimeter",
     "chinese": "公分 (= cm)",
-    "phonetics": "[`sɛntəˌmitɚ]",
+    "phonetics": "[ˈsɛntəˌmitɚ]",
     "example": "The ruler is fifteen centimeters long."
   },
   {
     "english": "You can say that again",
     "chinese": "一點也沒錯！",
-    "phonetics": "[ju kən ˌse `ðæt ə`gɛn]",
+    "phonetics": "[ju kən ˌse ˈðæt əˈgɛn]",
     "example": "A: That band is really popular in the USA. B: You can say that again!"
   },
   {
     "english": "guitar",
     "chinese": "吉他",
-    "phonetics": "[gɪ`tɑr]",
+    "phonetics": "[gɪˈtɑr]",
     "example": "My sister practices the guitar in her room."
   },
   {
     "english": "piano",
     "chinese": "鋼琴",
-    "phonetics": "[pɪ`æno]",
+    "phonetics": "[pɪˈæno]",
     "example": "Many students in the class can play the piano."
   },
   {
     "english": "fly a kite",
     "chinese": "放風箏",
-    "phonetics": "[ˌflaɪ ə `kaɪt]",
+    "phonetics": "[ˌflaɪ ə ˈkaɪt]",
     "example": "The boy is flying a kite."
   },
   {
@@ -116,7 +116,7 @@
   {
     "english": "make a cake",
     "chinese": "做蛋糕",
-    "phonetics": "[ˌmek ə `kek]",
+    "phonetics": "[ˌmek ə ˈkek]",
     "example": "A: We can make a cake for Sue's birthday. B: Yeah, let's do it."
   },
   {
@@ -182,49 +182,49 @@
   {
     "english": "player",
     "chinese": "選手；球員",
-    "phonetics": "[`pleɚ]",
+    "phonetics": "[ˈpleɚ]",
     "example": "That handsome man over there is Zoe's favorite baseball player."
   },
   {
     "english": "the USA",
-    "chinese": "美國",
-    "phonetics": "[ðə `ju `ɛs `e] (= the United States of America)",
+    "chinese": "美國 (= the United States of America)",
+    "phonetics": "[ðə ˈju ˈɛs ˈe]",
     "example": "The girl band comes from the USA."
   },
   {
     "english": "body",
     "chinese": "身體",
-    "phonetics": "[`bɑdɪ]",
+    "phonetics": "[ˈbɑdɪ]",
     "example": "He has a strong body."
   },
   {
     "english": "put one's all",
     "chinese": "盡全力",
-    "phonetics": "[pʊt wʌnz `ɔl]",
+    "phonetics": "[pʊt wʌnz ˈɔl]",
     "example": "Jeremy puts his all into every game."
   },
   {
     "english": "into",
     "chinese": "到...裡面",
-    "phonetics": "[`ɪntə]",
+    "phonetics": "[ˈɪntə]",
     "example": "Please put your pencils into the pencil case."
   },
   {
     "english": "a lot of",
     "chinese": "很多的 (= lots of)",
-    "phonetics": "[ə `lɑt əv]",
+    "phonetics": "[ə ˈlɑt əv]",
     "example": "Grandma cooks a lot of food for us on Thanksgiving every year."
   },
   {
     "english": "stand out",
     "chinese": "突出",
-    "phonetics": "[ˌstænd `aʊt]",
+    "phonetics": "[ˌstænd ˈaʊt]",
     "example": "The black picture on the orange wall really stands out."
   },
   {
     "english": "different",
     "chinese": "不同的",
-    "phonetics": "[`dɪf(ə)rənt]",
+    "phonetics": "[ˈdɪf(ə)rənt]",
     "example": "Vincent is very different from his brother."
   },
   {
@@ -236,13 +236,13 @@
   {
     "english": "on the other hand",
     "chinese": "另一方面",
-    "phonetics": "[ˌɑn ðɪ `ʌðɚ hænd]",
+    "phonetics": "[ˌɑn ðɪ ˈʌðɚ hænd]",
     "example": "Adam is very good at basketball. On the other hand, he's new to baseball."
   },
   {
     "english": "make up for",
     "chinese": "彌補",
-    "phonetics": "[mek `ʌp ˌfɔr]",
+    "phonetics": "[mek ˈʌp ˌfɔr]",
     "example": "For a baseball player, he's not very strong, but he makes up for it with a lot of practice."
   }
 ]

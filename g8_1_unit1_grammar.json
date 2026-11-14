@@ -106,7 +106,6 @@
     "instruction": "填入適當的介系詞。",
     "question": "It is snowy ___ the USA ___ winter.",
     "answer": "in; in",
-    "acceptedAnswers": ["in in"],
     "hint": "地點和季節前面都使用 in。",
     "explanation": "描述某地某季節的天氣時，使用 in + 地點、in + 季節。"
   },
@@ -162,7 +161,7 @@
     "topicLabel": "授與動詞",
     "type": "choice",
     "instruction": "選出正確的代名詞位置。",
-    "question": "Tom showed ___ to ___.",
+    "question": "Tom's friends wanted to see his new watch, so Tom showed ___ to ___.",
     "options": ["it; them", "them; it", "it; they", "them; they"],
     "answer": "it; them",
     "hint": "物的代名詞放在 to 前面；人的代名詞放在 to 後面。",

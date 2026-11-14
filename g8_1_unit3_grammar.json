@@ -112,6 +112,7 @@
     "instruction": "填入適當的字，完成問句。",
     "question": "What was Amy ___ at half past three? She was studying history.",
     "answer": "doing",
+    "acceptedAnswers": ["studying"],
     "hint": "問「當時正在做什麼」的固定句型是 What was/were + 主詞 + doing...?",
     "explanation": "What was Amy doing...? 問 Amy 當時正在做什麼。"
   },

@@ -488,6 +488,9 @@
     "instruction": "針對 cleaning his drawers 造問句。",
     "question": "John was cleaning his drawers when Dad called him.",
     "answer": "What was John doing when Dad called him?",
+    "acceptedAnswers": [
+      "When Dad called him, what was John doing?"
+    ],
     "hint": "問「在做什麼」用 What...doing。",
     "explanation": "What + was + John + doing + when Dad called him?"
   },
@@ -653,10 +656,10 @@
     "source": "Try it! 3",
     "type": "fill",
     "instruction": "依括號內的動詞（ride），填入兩個字。",
-    "question": "John ___ ___ a bike when their teacher went to the park.",
+    "question": "John ___ ___ a bike when his teacher went to the park.",
     "answer": "was riding",
     "hint": "老師去公園時，John「正在」騎腳踏車；ride 去 e 加 ing。",
-    "explanation": "John was riding a bike when their teacher went to the park."
+    "explanation": "John was riding a bike when his teacher went to the park."
   },
   {
     "id": "c-when-7",
@@ -677,10 +680,10 @@
     "source": "Try it! 3",
     "type": "fill",
     "instruction": "填入兩個字，完成句子。",
-    "question": "Leo was playing soccer when their teacher ___ ___ the park.",
+    "question": "Leo was playing soccer when his teacher ___ ___ the park.",
     "answer": "went to",
     "hint": "「去公園」是瞬間的動作，用過去簡單式。",
-    "explanation": "go 的過去式是 went：when their teacher went to the park。"
+    "explanation": "go 的過去式是 went：when his teacher went to the park。"
   },
   {
     "id": "c-when-9",
@@ -798,7 +801,10 @@
     ],
     "answer": "The kids were moving their things to the new room when they saw some old clothes under the bed.",
     "acceptedAnswers": [
-      "When they saw some old clothes under the bed, the kids were moving their things to the new room."
+      "When they saw some old clothes under the bed, the kids were moving their things to the new room.",
+      "The kids saw some old clothes under the bed when they were moving their things to the new room.",
+      "When they were moving their things to the new room, the kids saw some old clothes under the bed.",
+      "When the kids were moving their things to the new room, they saw some old clothes under the bed."
     ],
     "hint": "「正在搬」用過去進行式，「看見」用過去簡單式；有一個字用不到。",
     "explanation": "The kids were moving their things to the new room when they saw some old clothes under the bed."
@@ -895,7 +901,7 @@
     "question": "What were you doing at seven minutes ___ nine last night?",
     "options": [
       "at",
-      "before",
+      "on",
       "past",
       "behind"
     ],
@@ -912,9 +918,9 @@
     "instruction": "選出正確的答案。",
     "question": "What time is it? It's a quarter ___ six. It's time for dinner.",
     "options": [
-      "of",
+      "at",
       "to",
-      "before",
+      "on",
       "from"
     ],
     "answer": "to",
@@ -1028,7 +1034,8 @@
     ],
     "answer": "Mom was making dinner at a quarter to six the day before yesterday.",
     "acceptedAnswers": [
-      "The day before yesterday Mom was making dinner at a quarter to six."
+      "The day before yesterday Mom was making dinner at a quarter to six.",
+      "At a quarter to six the day before yesterday, Mom was making dinner."
     ],
     "hint": "5:45 要用 to 和下一個點鐘來說；有兩個字用不到。",
     "explanation": "5:45 = a quarter to six；「正在做」用過去進行式 was making。"

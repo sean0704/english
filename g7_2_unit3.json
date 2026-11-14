@@ -2,13 +2,13 @@
   {
     "english": "painting",
     "chinese": "畫作",
-    "phonetics": "[`pentɪŋ]",
+    "phonetics": "[ˈpentɪŋ]",
     "example": "The paintings on the wall are beautiful."
   },
   {
     "english": "flower",
     "chinese": "花",
-    "phonetics": "[`flaʊɚ]",
+    "phonetics": "[ˈflaʊɚ]",
     "example": "Do we have enough flowers for our dinner party?"
   },
   {
@@ -20,13 +20,13 @@
   {
     "english": "thirsty",
     "chinese": "口渴的",
-    "phonetics": "[`θɝstɪ]",
+    "phonetics": "[ˈθɝstɪ]",
     "example": "I am always hot and thirsty after baseball games."
   },
   {
     "english": "coffee",
     "chinese": "咖啡",
-    "phonetics": "[`kɔfɪ]",
+    "phonetics": "[ˈkɔfɪ]",
     "example": "Too much coffee is not good for you."
   },
   {
@@ -38,13 +38,13 @@
   {
     "english": "later",
     "chinese": "稍後；晚點",
-    "phonetics": "[`letɚ]",
+    "phonetics": "[ˈletɚ]",
     "example": "A: I'm going home now. Bye. B: See you later."
   },
   {
     "english": "Of course.",
     "chinese": "當然。",
-    "phonetics": "[əv `kɔrs]",
+    "phonetics": "[əv ˈkɔrs]",
     "example": "A: Are you going to Ed's birthday party later? B: Of course."
   },
   {
@@ -74,7 +74,7 @@
   {
     "english": "anything",
     "chinese": "任何事物",
-    "phonetics": "[`ɛnɪˌθɪŋ]",
+    "phonetics": "[ˈɛnɪˌθɪŋ]",
     "example": "Do you know anything about Van Gogh?"
   },
   {
@@ -104,31 +104,31 @@
   {
     "english": "chocolate",
     "chinese": "巧克力",
-    "phonetics": "[`tʃɑkəlɪt]",
+    "phonetics": "[ˈtʃɑkəlɪt]",
     "example": "Chocolate ice cream is my favorite."
   },
   {
     "english": "dollar",
     "chinese": "元",
-    "phonetics": "[`dɑlɚ]",
+    "phonetics": "[ˈdɑlɚ]",
     "example": "A: How much is that comic book? B: It's two hundred dollars."
   },
   {
     "english": "for here",
     "chinese": "內用",
-    "phonetics": "[fɚ `hɪr]",
+    "phonetics": "[fɚ ˈhɪr]",
     "example": "May I have black coffee for here, please?"
   },
   {
     "english": "to go",
     "chinese": "外帶",
-    "phonetics": "[tə `go]",
+    "phonetics": "[tə ˈgo]",
     "example": "A: Do you want your juice for here or to go? B: To go. Thanks."
   },
   {
     "english": "Here you are.",
     "chinese": "給你。(= Here you go.)",
-    "phonetics": "[ˌhɪr ju `ɑr]",
+    "phonetics": "[ˌhɪr ju ˈɑr]",
     "example": "A: May I have some tea, please? B: Sure. Here you are."
   },
   {
@@ -158,13 +158,13 @@
   {
     "english": "hamburger",
     "chinese": "漢堡 (= burger)",
-    "phonetics": "[`hæmbɝgɚ]",
+    "phonetics": "[ˈhæmbɝgɚ]",
     "example": "The hamburger house on Elm Street is great."
   },
   {
     "english": "chicken rice",
     "chinese": "雞肉飯",
-    "phonetics": "[`tʃɪkɪn ˌraɪs]",
+    "phonetics": "[ˈtʃɪkɪn ˌraɪs]",
     "example": "My mom makes good chicken rice."
   },
   {
@@ -176,19 +176,19 @@
   {
     "english": "ice cream",
     "chinese": "冰淇淋",
-    "phonetics": "[`aɪs ˌkrim]",
+    "phonetics": "[ˈaɪs ˌkrim]",
     "example": "Lara's favorite food is ice cream."
   },
   {
     "english": "soup",
     "chinese": "湯",
     "phonetics": "[sup]",
-    "example": "In English, we always say [eat soup], not [drink soup]."
+    "example": "In English, we always say \"eat soup,\" not \"drink soup.\""
   },
   {
     "english": "sandwich",
     "chinese": "三明治",
-    "phonetics": "[`sændwɪtʃ]",
+    "phonetics": "[ˈsændwɪtʃ]",
     "example": "That shop has really good sandwiches."
   },
   {
