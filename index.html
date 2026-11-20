@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="英語練習：單字拼寫、文法練習與文法闖關，搭配點數與成就系統，讓每天的英語練習更有動力。">
+    <meta name="description" content="英語練習：單字拼寫與段考特訓，搭配點數與成就系統，讓每天的英語練習更有動力。">
     <meta name="theme-color" content="#1a202c">
     <meta name="color-scheme" content="dark">
     <title>英語練習</title>
@@ -12,6 +12,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="trainer.css">
+    <script src="trainer-grading.js" defer></script>
+    <script src="trainer-core.js" defer></script>
+    <script src="trainer.js" defer></script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -37,8 +41,7 @@
                 <h2 id="mode-step-title">步驟一：選擇練習模式</h2>
                 <div class="mode-selection" role="group" aria-labelledby="mode-step-title">
                     <button id="mode-btn-spelling" class="start-button secondary" type="button" data-mode="spelling" aria-pressed="false">單字拼寫</button>
-                    <button id="mode-btn-grammar" class="start-button secondary" type="button" data-mode="grammar" aria-pressed="false">文法練習</button>
-                    <button id="mode-btn-challenge" class="start-button secondary" type="button" data-mode="challenge" aria-pressed="false">文法闖關</button>
+                    <button id="mode-btn-trainer" class="start-button secondary" type="button" data-mode="trainer" aria-pressed="false">段考特訓</button>
                 </div>
             </div>
 
@@ -89,41 +92,8 @@
         <div id="health-display" class="health-display" aria-label="剩餘愛心"></div>
     </div>
 
-    <!-- 文法練習／文法闖關作答畫面 -->
-    <div id="grammar-container" class="game-container grammar-container" style="display: none;">
-        <div class="progress-wrapper">
-            <div class="progress-container">
-                <div id="grammar-progress-bar"></div>
-            </div>
-            <div id="grammar-progress-display"></div>
-        </div>
-
-        <div class="grammar-meta">
-            <span id="grammar-topic-badge" class="grammar-topic-badge"></span>
-            <span id="grammar-health-display" class="health-display" aria-label="剩餘愛心"></span>
-        </div>
-        <p id="grammar-instruction" class="grammar-instruction"></p>
-        <button id="grammar-play-audio-btn" class="grammar-audio-btn" type="button" title="播放英文題目" aria-label="播放英文題目">🔊</button>
-        <div id="grammar-question" class="grammar-question"></div>
-        <div id="grammar-answer-area" class="grammar-answer-area"></div>
-        <div id="grammar-hint" class="grammar-hint" style="display: none;"></div>
-        <div id="grammar-feedback" class="feedback-message grammar-feedback" role="status" aria-live="polite"></div>
-        <div class="grammar-controls">
-            <button id="grammar-hint-btn" class="grammar-button secondary" type="button">提示</button>
-            <button id="grammar-check-btn" class="grammar-button" type="button">檢查答案</button>
-            <button id="grammar-next-btn" class="grammar-button" type="button" style="display: none;">下一題</button>
-            <button id="grammar-quit-btn" class="grammar-button secondary" type="button">離開</button>
-        </div>
-    </div>
-
-    <!-- 文法闖關大廳 -->
-    <div id="challenge-container" class="start-container challenge-hub" style="display: none;">
-        <div class="challenge-hub-header">
-            <h1 id="challenge-title" class="challenge-title"></h1>
-            <button id="challenge-back-btn" class="grammar-button secondary" type="button">返回主選單</button>
-        </div>
-        <div id="challenge-hub-content" class="challenge-hub-content"></div>
-    </div>
+    <!-- 段考特訓（畫面由 trainer.js 產生） -->
+    <div id="trainer-container" class="trainer-container" style="display: none;"></div>
 
     <!-- 結算畫面 -->
     <div id="completion-container" class="start-container completion-container" style="display: none;">
@@ -197,8 +167,8 @@
             <h2 id="dialog-title" class="dialog-title"></h2>
             <p id="dialog-message" class="dialog-message"></p>
             <div class="dialog-actions">
-                <button id="dialog-cancel-btn" class="grammar-button secondary" type="button">取消</button>
-                <button id="dialog-confirm-btn" class="grammar-button" type="button">確定</button>
+                <button id="dialog-cancel-btn" class="dialog-button secondary" type="button">取消</button>
+                <button id="dialog-confirm-btn" class="dialog-button" type="button">確定</button>
             </div>
         </div>
     </div>

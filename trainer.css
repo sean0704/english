@@ -1,0 +1,1057 @@
+/* 段考特訓 — 樣式（只放 .trainer-* 與觀念卡 .concept-* 規則；色彩沿用 style.css 的變數） */
+
+.trainer-container {
+    width: 94%;
+    max-width: 920px;
+    align-self: flex-start;
+    text-align: left;
+    line-height: 1.6;
+}
+
+.trainer-loading {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 4rem 0;
+}
+
+/* ---------- 標題列 ---------- */
+.trainer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.trainer-header.compact {
+    margin-bottom: 0.6rem;
+}
+
+.trainer-title {
+    font-size: 1.6rem;
+    margin: 0;
+    color: #fff;
+}
+
+.trainer-title.small {
+    font-size: 1.15rem;
+}
+
+.trainer-subtitle {
+    margin: 0.2rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.trainer-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.trainer-points,
+.trainer-progress-text {
+    color: var(--notice-color);
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.trainer-container .dialog-button {
+    font-size: 0.98rem;
+    padding: 0.6rem 1rem;
+}
+
+/* ---------- 區塊 ---------- */
+.trainer-section,
+.trainer-todo,
+.trainer-banner,
+.trainer-concept,
+.trainer-work,
+.trainer-summary,
+.trainer-paper-section,
+.trainer-score {
+    background: var(--container-bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.1rem;
+}
+
+.trainer-section-title,
+.trainer-todo-title,
+.trainer-paper-title {
+    font-size: 1.15rem;
+    margin: 0 0 0.35rem;
+    color: #fff;
+}
+
+.trainer-section-desc {
+    margin: 0 0 0.9rem;
+    color: var(--text-secondary);
+    font-size: 0.93rem;
+}
+
+.trainer-todo {
+    border-color: var(--notice-color);
+    background: rgba(246, 173, 85, 0.08);
+}
+
+.trainer-todo-list {
+    margin: 0.4rem 0 0;
+    padding-left: 1.4rem;
+}
+
+.trainer-todo-list li {
+    margin: 0.2rem 0;
+}
+
+.trainer-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-color: #63b3ed;
+    background: rgba(66, 153, 225, 0.12);
+}
+
+.trainer-banner p {
+    margin: 0;
+}
+
+.trainer-row,
+.trainer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.trainer-actions {
+    justify-content: center;
+    margin: 1.1rem 0;
+}
+
+.trainer-rate {
+    font-size: 0.88rem;
+    color: var(--text-color);
+    background: #1a202c;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+    white-space: nowrap;
+}
+
+.trainer-rate.good {
+    color: var(--correct-color);
+    border-color: var(--correct-color);
+}
+
+.trainer-rate.low {
+    color: var(--incorrect-text);
+    border-color: var(--incorrect-text);
+}
+
+.trainer-rate.none {
+    color: var(--text-secondary);
+}
+
+.trainer-tag {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: bold;
+    color: #bee3f8;
+    background: rgba(66, 153, 225, 0.2);
+    border-radius: 0.4rem;
+    padding: 0.1rem 0.5rem;
+    white-space: nowrap;
+}
+
+.trainer-tag.warn {
+    color: #1a202c;
+    background: var(--notice-color);
+}
+
+.trainer-pulse {
+    animation: trainerPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes trainerPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(246, 173, 85, 0.6); }
+    50% { box-shadow: 0 0 0 10px rgba(246, 173, 85, 0); }
+}
+
+/* ---------- 文法點 ---------- */
+.trainer-point {
+    border: 1px solid var(--border-color);
+    border-radius: 0.8rem;
+    padding: 0.85rem 1rem;
+    margin-top: 0.7rem;
+    background: rgba(26, 32, 44, 0.45);
+}
+
+.trainer-point.weak,
+.trainer-format.weak {
+    border-color: var(--notice-color);
+}
+
+.trainer-point-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+}
+
+.trainer-point-title {
+    font-size: 1.02rem;
+    margin: 0;
+    margin-right: auto;
+}
+
+.trainer-point-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.trainer-point-grid .dialog-button {
+    font-size: 0.88rem;
+    padding: 0.55rem 0.4rem;
+}
+
+/* ---------- 題型專練、模擬考卡片 ---------- */
+.trainer-format-grid,
+.trainer-mock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 0.7rem;
+}
+
+.trainer-format {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-align: left;
+    color: var(--text-color);
+    font: inherit;
+    background: rgba(26, 32, 44, 0.45);
+    border: 1px solid var(--border-color);
+    border-radius: 0.8rem;
+    padding: 0.8rem 0.9rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.trainer-format:hover {
+    transform: translateY(-2px);
+    border-color: var(--header-color);
+    background: #3a4558;
+}
+
+.trainer-format-name {
+    font-weight: bold;
+    font-size: 1.02rem;
+    color: #fff;
+}
+
+.trainer-format-desc {
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    flex: 1;
+}
+
+.trainer-format-meta {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.trainer-mock-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+    background: rgba(26, 32, 44, 0.45);
+    border: 1px solid var(--border-color);
+    border-radius: 0.8rem;
+    padding: 0.9rem;
+}
+
+.trainer-mock-title {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.trainer-mock-meta {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.trainer-mock-card .dialog-button {
+    align-self: stretch;
+}
+
+/* ---------- 觀念卡 ---------- */
+.concept-rule {
+    font-size: 1.12rem;
+    font-weight: bold;
+    color: #fbd38d;
+    background: rgba(246, 173, 85, 0.1);
+    border-left: 4px solid var(--notice-color);
+    border-radius: 0.4rem;
+    padding: 0.7rem 0.9rem;
+    margin: 0 0 0.9rem;
+}
+
+.concept-tip {
+    background: rgba(66, 153, 225, 0.12);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.9rem;
+    margin: 0 0 0.9rem;
+}
+
+.concept-heading {
+    font-size: 1rem;
+    margin: 0 0 0.5rem;
+    color: #fff;
+}
+
+.concept-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 0.9rem;
+}
+
+.concept-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.concept-table th,
+.concept-table td {
+    border: 1px solid var(--border-color);
+    padding: 0.45rem 0.7rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.concept-table th {
+    background: #1a202c;
+    color: var(--header-color);
+    font-size: 0.9rem;
+}
+
+.concept-examples,
+.concept-traps {
+    margin-bottom: 0.9rem;
+}
+
+.concept-example {
+    margin: 0.3rem 0;
+}
+
+.concept-en {
+    display: block;
+    font-size: 1.05rem;
+}
+
+.concept-zh {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.concept-trap {
+    border: 1px solid var(--border-color);
+    border-radius: 0.6rem;
+    padding: 0.55rem 0.8rem;
+    margin-bottom: 0.5rem;
+    background: rgba(26, 32, 44, 0.45);
+}
+
+.concept-trap p {
+    margin: 0.1rem 0;
+}
+
+.concept-wrong {
+    color: var(--incorrect-text);
+    text-decoration: line-through;
+    text-decoration-color: rgba(252, 129, 129, 0.6);
+}
+
+.concept-right {
+    color: var(--correct-color);
+    font-weight: bold;
+}
+
+.concept-why {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ---------- 作答 ---------- */
+.trainer-progress {
+    height: 8px;
+    background: #1a202c;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.trainer-progress-fill {
+    height: 100%;
+    background: var(--correct-color);
+    transition: width 0.3s ease;
+}
+
+.trainer-item {
+    padding: 0.4rem 0 0.9rem;
+}
+
+.trainer-item + .trainer-item {
+    border-top: 1px dashed var(--border-color);
+    padding-top: 0.9rem;
+}
+
+.trainer-item-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.trainer-item-number {
+    font-weight: bold;
+    color: var(--header-color);
+}
+
+.trainer-prompt {
+    font-size: 1.2rem;
+    margin: 0.2rem 0 0.7rem;
+    overflow-wrap: anywhere;
+}
+
+.trainer-blank-line {
+    line-height: 2.4;
+}
+
+.trainer-zh {
+    font-size: 1.12rem;
+    margin: 0.2rem 0 0.5rem;
+    color: #fff;
+}
+
+.trainer-cue,
+.trainer-note {
+    margin: 0 0 0.6rem;
+    font-size: 0.9rem;
+    color: var(--notice-color);
+}
+
+.trainer-note {
+    color: var(--text-secondary);
+}
+
+.trainer-underline {
+    text-decoration-thickness: 2px;
+    text-underline-offset: 4px;
+    color: #fbd38d;
+}
+
+.trainer-dialogue {
+    background: rgba(26, 32, 44, 0.45);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 0.7rem;
+}
+
+.trainer-dialogue-line {
+    margin: 0.2rem 0;
+    font-size: 1.12rem;
+}
+
+.trainer-speaker {
+    font-weight: bold;
+    color: var(--header-color);
+}
+
+.trainer-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.format-dialogue .trainer-options,
+.format-reading .trainer-options {
+    grid-template-columns: 1fr;
+}
+
+.trainer-option {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    text-align: left;
+    font: inherit;
+    font-size: 1.05rem;
+    color: var(--text-color);
+    background: #1f2733;
+    border: 2px solid var(--border-color);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.trainer-option:hover:not(:disabled) {
+    background: #3a4558;
+    border-color: var(--header-color);
+}
+
+.trainer-option-letter {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.trainer-option.selected {
+    background: rgba(66, 153, 225, 0.3);
+    border-color: #63b3ed;
+}
+
+.trainer-option:disabled {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.trainer-option.is-correct {
+    background: rgba(72, 187, 120, 0.22);
+    border-color: var(--correct-color);
+    opacity: 1;
+}
+
+.trainer-option.is-wrong {
+    background: rgba(229, 62, 62, 0.22);
+    border-color: var(--incorrect-color);
+    opacity: 1;
+}
+
+.trainer-input {
+    font: inherit;
+    font-size: 1.1rem;
+    color: #fff;
+    background: #1a202c;
+    border: 2px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    max-width: 100%;
+}
+
+.trainer-input:focus {
+    outline: none;
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.25);
+}
+
+.trainer-input::placeholder {
+    color: #718096;
+}
+
+.trainer-blank {
+    margin: 0 0.3rem;
+    text-align: center;
+}
+
+.trainer-sentence {
+    width: 100%;
+}
+
+.trainer-input.is-correct {
+    border-color: var(--correct-color);
+    color: #9ae6b4;
+}
+
+.trainer-input.is-wrong {
+    border-color: var(--incorrect-color);
+    color: var(--incorrect-text);
+}
+
+.trainer-input.is-retry {
+    border-color: var(--notice-color);
+}
+
+.trainer-input.shake {
+    animation: shake 0.4s;
+}
+
+.trainer-input:disabled {
+    opacity: 1;
+    -webkit-text-fill-color: currentColor;
+}
+
+.trainer-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.2rem 0 0.6rem;
+}
+
+.trainer-tile {
+    font-size: 1.1rem;
+    background: #1a202c;
+    border: 1px solid var(--border-color);
+    border-radius: 0.45rem;
+    padding: 0.25rem 0.6rem;
+}
+
+.trainer-tile-sep {
+    color: var(--text-secondary);
+}
+
+.trainer-submit {
+    min-width: 11rem;
+}
+
+/* ---------- 文章 ---------- */
+.trainer-passage {
+    background: #1a202c;
+    border: 1px solid var(--border-color);
+    border-radius: 0.7rem;
+    padding: 0.9rem 1.1rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.trainer-passage-title {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+    text-align: center;
+}
+
+.trainer-passage-text {
+    margin: 0 0 0.7rem;
+    font-size: 1.1rem;
+    line-height: 1.85;
+}
+
+.trainer-passage-text:last-child {
+    margin-bottom: 0;
+}
+
+.trainer-slot {
+    display: inline-block;
+    font-weight: bold;
+    color: #1a202c;
+    background: var(--notice-color);
+    border-radius: 0.35rem;
+    padding: 0 0.45rem;
+    margin: 0 0.15rem;
+    line-height: 1.4;
+}
+
+.trainer-slot.dim {
+    background: var(--border-color);
+    color: var(--text-secondary);
+}
+
+/* ---------- 回饋與詳解 ---------- */
+.trainer-feedback {
+    margin-top: 0.8rem;
+    border-radius: 0.7rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--border-color);
+    background: rgba(26, 32, 44, 0.6);
+}
+
+.trainer-feedback.verdict-ok {
+    border-color: var(--correct-color);
+}
+
+.trainer-feedback.verdict-careless {
+    border-color: var(--notice-color);
+}
+
+.trainer-feedback.verdict-wrong,
+.trainer-feedback.verdict-blank {
+    border-color: var(--incorrect-color);
+}
+
+.trainer-verdict {
+    font-weight: bold;
+    font-size: 1.08rem;
+    margin: 0 0 0.4rem;
+}
+
+.verdict-ok .trainer-verdict {
+    color: var(--correct-color);
+}
+
+.verdict-careless .trainer-verdict {
+    color: var(--notice-color);
+}
+
+.verdict-wrong .trainer-verdict,
+.verdict-blank .trainer-verdict {
+    color: var(--incorrect-text);
+}
+
+.trainer-careless {
+    margin: 0 0 0.5rem;
+    padding-left: 1.3rem;
+    color: var(--notice-color);
+}
+
+.trainer-part,
+.trainer-answer,
+.trainer-alt {
+    margin: 0.25rem 0;
+}
+
+.trainer-answer strong {
+    color: #9ae6b4;
+    font-size: 1.1rem;
+}
+
+.trainer-answer-label,
+.trainer-diff-label {
+    color: var(--text-secondary);
+}
+
+.trainer-alt {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.trainer-diff-note {
+    margin: 0.2rem 0;
+    color: var(--notice-color);
+}
+
+.trainer-diff-line {
+    margin: 0.25rem 0;
+    font-size: 1.08rem;
+    line-height: 2;
+}
+
+.diff-del {
+    color: var(--incorrect-text);
+    text-decoration: line-through;
+    margin-right: 0.3rem;
+}
+
+.diff-ins {
+    color: #9ae6b4;
+    font-weight: bold;
+    border-bottom: 2px solid var(--correct-color);
+}
+
+.diff-tag {
+    font-size: 0.72rem;
+    color: #1a202c;
+    background: var(--notice-color);
+    border-radius: 0.3rem;
+    padding: 0 0.3rem;
+    margin-left: 0.25rem;
+    vertical-align: middle;
+}
+
+.trainer-explain {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px dashed var(--border-color);
+}
+
+.trainer-explain-label {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: bold;
+    color: #1a202c;
+    background: #90cdf4;
+    border-radius: 0.3rem;
+    padding: 0 0.45rem;
+}
+
+.trainer-explain p {
+    margin: 0.35rem 0 0;
+}
+
+.trainer-retry {
+    margin-top: 0.7rem;
+}
+
+.trainer-retry-label {
+    margin: 0 0 0.35rem;
+    color: var(--notice-color);
+    font-weight: bold;
+}
+
+.trainer-link {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font: inherit;
+    font-size: 0.88rem;
+    color: #90cdf4;
+    background: none;
+    border: none;
+    padding: 0;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.trainer-link:disabled {
+    color: var(--text-secondary);
+    text-decoration: none;
+    cursor: default;
+}
+
+/* ---------- 結果頁 ---------- */
+.trainer-summary {
+    text-align: center;
+}
+
+.trainer-summary-icon {
+    font-size: 3rem;
+}
+
+.trainer-summary-score {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0.4rem 0;
+}
+
+.trainer-summary-msg {
+    margin: 0.3rem 0;
+}
+
+.trainer-summary-points {
+    color: var(--notice-color);
+    font-weight: bold;
+    margin: 0.3rem 0;
+}
+
+.trainer-summary-warn {
+    color: var(--notice-color);
+    margin: 0.3rem 0;
+}
+
+.trainer-review {
+    border: 1px solid var(--border-color);
+    border-radius: 0.6rem;
+    margin-top: 0.5rem;
+    background: rgba(26, 32, 44, 0.45);
+}
+
+.trainer-review.verdict-wrong,
+.trainer-review.verdict-blank {
+    border-left: 4px solid var(--incorrect-color);
+}
+
+.trainer-review.verdict-careless {
+    border-left: 4px solid var(--notice-color);
+}
+
+.trainer-review.verdict-ok {
+    border-left: 4px solid var(--correct-color);
+}
+
+.trainer-review-summary {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 0.55rem 0.8rem;
+    cursor: pointer;
+}
+
+.trainer-review-q {
+    flex: 1;
+    overflow-wrap: anywhere;
+    margin: 0;
+}
+
+.trainer-review-points {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.trainer-review-body {
+    padding: 0 0.9rem 0.8rem 2.2rem;
+}
+
+/* ---------- 模擬段考 ---------- */
+.trainer-exam-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    background: #1a202c;
+    border: 2px solid var(--border-color);
+    border-radius: 0.8rem;
+    padding: 0.6rem 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+.trainer-exam-name {
+    font-weight: bold;
+    margin-right: auto;
+}
+
+.trainer-exam-timer {
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+}
+
+.trainer-exam-timer.urgent {
+    color: var(--incorrect-text);
+}
+
+.trainer-exam-count {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.trainer-score {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.trainer-score-number {
+    font-size: 4rem;
+    font-weight: bold;
+    line-height: 1;
+    min-width: 7rem;
+    text-align: center;
+}
+
+.trainer-score.good .trainer-score-number {
+    color: var(--correct-color);
+}
+
+.trainer-score.pass .trainer-score-number {
+    color: var(--notice-color);
+}
+
+.trainer-score.fail .trainer-score-number {
+    color: var(--incorrect-text);
+}
+
+.trainer-score-side p {
+    margin: 0.2rem 0;
+}
+
+.trainer-report-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
+}
+
+.trainer-report-grid > .trainer-section {
+    margin-bottom: 1.1rem;
+}
+
+.trainer-bar-row {
+    display: grid;
+    grid-template-columns: minmax(7rem, 11rem) 1fr auto;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.35rem 0;
+    font-size: 0.92rem;
+}
+
+.trainer-bar-track {
+    height: 10px;
+    background: #1a202c;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.trainer-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.trainer-bar-fill.good {
+    background: var(--correct-color);
+}
+
+.trainer-bar-fill.pass {
+    background: var(--notice-color);
+}
+
+.trainer-bar-fill.fail {
+    background: var(--incorrect-color);
+}
+
+.trainer-bar-value {
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* ---------- 報告 ---------- */
+.trainer-export {
+    width: 100%;
+    margin-top: 0.7rem;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    color: var(--text-color);
+    background: #1a202c;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.6rem;
+    resize: vertical;
+}
+
+.trainer-dispute {
+    border: 1px solid var(--border-color);
+    border-radius: 0.6rem;
+    padding: 0.5rem 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.trainer-copy-buffer {
+    position: fixed;
+    left: -9999px;
+    top: 0;
+    opacity: 0;
+}
+
+/* ---------- 窄螢幕 ---------- */
+@media (max-width: 700px) {
+    .trainer-point-grid,
+    .trainer-options,
+    .trainer-report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trainer-section,
+    .trainer-work,
+    .trainer-paper-section {
+        padding: 1rem;
+    }
+
+    .trainer-bar-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .trainer-bar-track {
+        grid-column: 1 / -1;
+        order: 3;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .trainer-pulse,
+    .trainer-input.shake {
+        animation: none;
+    }
+}
