@@ -1247,6 +1247,17 @@ document.addEventListener('DOMContentLoaded', () => {
             .toLowerCase();
     }
 
+    // 訂正階段的輸入框回饋（綠框脈動／紅框抖動）。
+    // 訂正時會很快連續送出，所以每次都先清掉上一次的 class 與計時器，動畫才會重播
+    let spellingInputFlashTimer = null;
+    function flashSpellingInput(className) {
+        clearTimeout(spellingInputFlashTimer);
+        spellingInputEl.classList.remove('input-correct', 'input-incorrect');
+        void spellingInputEl.offsetWidth; // 強制重排，讓同一個動畫可以重新開始
+        spellingInputEl.classList.add(className);
+        spellingInputFlashTimer = setTimeout(() => spellingInputEl.classList.remove(className), 600);
+    }
+
     function checkSpellingAnswer(answer) {
         const cleanCorrectAnswer = currentWord.english.replace(/[.,?!;:]+$/, "");
         const isAnswerCorrect = normalizeSpelling(answer) === normalizeSpelling(currentWord.english);
@@ -1258,19 +1269,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     isCorrecting = false;
                     correctionCount = 0;
                     feedbackEl.textContent = '很好，現在記住了！';
-                    feedbackEl.className = 'feedback-message notice';
+                    feedbackEl.className = 'feedback-message correct';
+                    flashSpellingInput('input-correct');
                     setSpellingLocked(true);
                     updateSpellingProgress();
                     scheduleNextWord(1000);
                 } else {
-                    feedbackEl.textContent = `請再輸入一次（${correctionCount} / ${REQUIRED_CORRECTIONS}）`;
+                    feedbackEl.textContent = `正確！請再輸入一次（${correctionCount} / ${REQUIRED_CORRECTIONS}）`;
+                    feedbackEl.className = 'feedback-message correct';
                     spellingInputEl.value = '';
+                    flashSpellingInput('input-correct');
                 }
             } else {
                 feedbackEl.textContent = `拼寫還是不對喔，請再試一次：${cleanCorrectAnswer}`;
+                feedbackEl.className = 'feedback-message incorrect';
                 spellingInputEl.value = '';
-                spellingInputEl.classList.add('input-incorrect');
-                setTimeout(() => spellingInputEl.classList.remove('input-incorrect'), 600);
+                flashSpellingInput('input-incorrect');
             }
             return;
         }
@@ -1582,20 +1596,26 @@ document.addEventListener('DOMContentLoaded', () => {
             .map(ach => `${ach.icon} ${ach.name} +${ach.points}`).join('、');
         const firstClear = UNIT_ACHIEVEMENTS.FIRST_CLEAR;
         return [
-            `每天過關就有點數：${roundText}。`,
-            `第一次完成這個單元：${firstClear.icon} +${firstClear.points}。`,
-            `通關時愛心剩越多，獎牌越好：${medalText}。愛心全滿就是金牌！`,
-            `常常回來練同一個單元：練滿 ${streakText}。`,
+            { heading: '🎁 只給一次' },
+            `第一次完成單元：每個單元 ${firstClear.icon} +${firstClear.points}。`,
+            `獎牌：通關時愛心剩越多越好，${medalText}。愛心全滿就是金牌！`,
+            `常回來練同一個單元：練滿 ${streakText}。`,
             `超級大獎：${globalText}。詳情請看 🏆 我的成就。`,
+            { heading: '🔁 每天都有' },
+            `過關就有點數：${roundText}。`,
         ];
     }
 
     const TRAINER_POINTS_INFO = [
-        '第一次做到就有：讀完觀念卡並通過檢核 +5；文法點階梯每一階第一次達 80% 給 +5／+10／+15。',
-        '模擬段考最值錢：及格 +20（每天一次）、比自己的最高分每進步 1 分 +1、第一次 80 分 +30、第一次 100 分 +50。',
-        '訂正錯題：到期的錯題第一次就答對，每題 +3；當天到期的錯題全部清完再 +10。',
-        '題型專練：一關正確率 80% 以上 +3。',
-        '每天練習類的點數合計最多 60 點；只算每一題第一次作答，重打訂正不算。',
+        // { heading } 是分組小標題，其餘字串是一般項目
+        { heading: '🎁 只給一次' },
+        '診斷：做完 +10。',
+        '文法點通關獎勵：觀念卡 +3，三階 +5、+7、+10。',
+        '題型專練：每種題型第一次過關 +5。',
+        '模擬段考第一次 60 分以上：完整卷 +30、半卷 +15。',
+        { heading: '🔁 每天都有' },
+        '模擬段考及格：完整卷 +20、半卷 +10。',
+        '錯題本：當天到期的錯題全部答對 +5。',
     ];
 
     function getPointsInfoTexts(mode) {
@@ -1611,7 +1631,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPointsInfo(mode) {
         pointsInfoTitleEl.textContent = MODE_LABELS[mode] ? `「${MODE_LABELS[mode]}」如何獲得點數？🪙` : '如何獲得點數？🪙';
         pointsInfoListEl.innerHTML = '';
-        getPointsInfoTexts(mode).forEach(text => pointsInfoListEl.appendChild(createEl('li', '', text)));
+        getPointsInfoTexts(mode).forEach(entry => {
+            const isHeading = typeof entry === 'object';
+            pointsInfoListEl.appendChild(createEl('li', isHeading ? 'points-info-heading' : '', isHeading ? entry.heading : entry));
+        });
     }
 
     function updateWordListDropdown(selectedMode) {
@@ -1650,12 +1673,55 @@ document.addEventListener('DOMContentLoaded', () => {
         unitRewardsHintEl.hidden = !text;
     }
 
+    // 一枚每日獎勵金幣：拿到之後亮起並打勾
+    function createRewardBadge(points, labelText, hasClaimed) {
+        const badge = createEl('div', `reward-badge${hasClaimed ? ' active' : ''}`);
+        badge.appendChild(createEl('div', 'coin', `+${points}`));
+        badge.appendChild(createEl('div', 'badge-label', labelText));
+        return badge;
+    }
+
+    // 段考特訓的每日點數：3 枚金幣就是全部的每日項目，各每天一次。
+    // 規則在 trainer-core.js 的 grantDaily；這裡只讀存檔，不寫入
+    function updateTrainerRewardsBadge(unitPath) {
+        const badgeContainer = unitRewardsBadgeContainer;
+        const core = window.TrainerCore;
+        const unitDef = core?.UNITS.find(unit => unit.path === unitPath);
+        if (!unitDef) {
+            badgeContainer.style.display = 'none';
+            setUnitRewardsHint('');
+            return;
+        }
+
+        const daily = playerStats.trainerRewards?.dailyUnits?.[unitDef.key];
+        const isToday = isPlainObject(daily) && daily.date === getLocalDateString();
+        const flags = isToday && isPlainObject(daily.flags) ? daily.flags : {};
+        const earned = isToday ? Math.max(0, Number(daily.points) || 0) : 0;
+        const cap = core.DAILY_CAP;
+
+        const badges = [
+            { points: 20, label: '完整卷及格', flag: 'mockpass:full' },
+            { points: 10, label: '半卷及格', flag: 'mockpass:half' },
+            { points: 5, label: '錯題全對', flag: 'clear' },
+        ];
+        badgeContainer.innerHTML = '';
+        badgeContainer.style.display = 'flex';
+        badges.forEach(b => badgeContainer.appendChild(createRewardBadge(b.points, b.label, Boolean(flags[b.flag]))));
+
+        if (earned >= cap) {
+            setUnitRewardsHint(`🎉 太棒了！這個單元今天的每日點數 ${cap} 點都拿到了！`, 'done');
+        } else if (earned > 0) {
+            setUnitRewardsHint(`🔥 這個單元的每日點數今天已拿 ${earned} / ${cap} 點，繼續加油！`, 'gold');
+        } else {
+            setUnitRewardsHint(`💡 這個單元的每日點數，今天最多可以拿 ${cap} 點！`);
+        }
+    }
+
     function updateUnitRewardsBadge() {
         const badgeContainer = unitRewardsBadgeContainer;
 
         if (activeGameMode === 'trainer' && wordListSelectEl.value) {
-            badgeContainer.style.display = 'none';
-            setUnitRewardsHint('📝 先做診斷，再照大廳的建議順序練；模擬段考及格每天 +20！');
+            updateTrainerRewardsBadge(wordListSelectEl.value);
             return;
         }
 
@@ -1682,22 +1748,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         rounds.forEach(r => {
             const hasClaimed = claimedInfo[r.round] === today;
-            
-            const badge = document.createElement('div');
-            badge.className = `reward-badge ${hasClaimed ? 'active' : ''}`;
-            
-            const coin = document.createElement('div');
-            coin.className = 'coin';
-            coin.textContent = `+${r.points}`;
-            
-            const label = document.createElement('div');
-            label.className = 'badge-label';
-            label.textContent = r.label;
-            
-            badge.appendChild(coin);
-            badge.appendChild(label);
-            badgeContainer.appendChild(badge);
-
+            badgeContainer.appendChild(createRewardBadge(r.points, r.label, hasClaimed));
             if (hasClaimed) {
                 completedRounds++;
             }
@@ -1876,8 +1927,8 @@ document.addEventListener('DOMContentLoaded', () => {
         getRewardLedger() {
             if (!isPlainObject(playerStats.trainerRewards)) playerStats.trainerRewards = {};
             const ledger = playerStats.trainerRewards;
-            if (!isPlainObject(ledger.daily)) ledger.daily = { date: '', points: 0, flags: {} };
-            if (!isPlainObject(ledger.daily.flags)) ledger.daily.flags = {};
+            // 每日類點數每個單元各一本帳：{ u3: { date, points, flags }, ... }
+            if (!isPlainObject(ledger.dailyUnits)) ledger.dailyUnits = {};
             if (!isPlainObject(ledger.once)) ledger.once = {};
             return ledger;
         },

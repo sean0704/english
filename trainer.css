@@ -169,6 +169,16 @@
     white-space: nowrap;
 }
 
+.trainer-tag.coin {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.12);
+}
+
+.trainer-tag.done {
+    color: var(--correct-color);
+    background: rgba(72, 187, 120, 0.15);
+}
+
 .trainer-tag.warn {
     color: #1a202c;
     background: var(--notice-color);
@@ -183,43 +193,336 @@
     50% { box-shadow: 0 0 0 10px rgba(246, 173, 85, 0); }
 }
 
-/* ---------- 文法點 ---------- */
-.trainer-point {
+/* ---------- 大廳：兩欄（左邊今天要做的事，右邊所有練習） ---------- */
+.trainer-container[data-view="hub"] {
+    max-width: 1180px;
+}
+
+.trainer-cols {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 1.2rem;
+    align-items: start;
+}
+
+/* 左欄捲動時固定；top 由 trainer.js 依左欄高度調整（比視窗高時先捲到底再固定） */
+.trainer-side {
+    position: sticky;
+    top: 1rem;
+}
+
+.trainer-side .trainer-section {
+    padding: 1rem 1.1rem;
+}
+
+.trainer-side .trainer-section > .dialog-button {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.trainer-side-note {
+    margin: 0.7rem 0 0;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 今天這樣練 */
+.trainer-today {
+    background: rgba(246, 173, 85, 0.08);
+    border: 2px solid var(--notice-color);
+    border-radius: 1rem;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1.1rem;
+}
+
+.trainer-today-title {
+    font-size: 1.15rem;
+    margin: 0 0 0.3rem;
+    color: #fff;
+}
+
+.trainer-today-title small {
+    display: block;
+    font-weight: normal;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.trainer-tasks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.trainer-task {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid rgba(246, 173, 85, 0.25);
+}
+
+.trainer-task:first-child {
+    border-top: none;
+}
+
+.trainer-task:last-child {
+    padding-bottom: 0.2rem;
+}
+
+.trainer-task-num {
+    flex: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin-top: 0.1rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    background: #1a202c;
     border: 1px solid var(--border-color);
-    border-radius: 0.8rem;
-    padding: 0.85rem 1rem;
-    margin-top: 0.7rem;
+}
+
+.trainer-task.is-next .trainer-task-num {
+    color: #1a202c;
+    background: var(--notice-color);
+    border-color: var(--notice-color);
+}
+
+.trainer-task-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.trainer-task-title {
+    margin: 0;
+    font-weight: bold;
+    color: #fff;
+}
+
+.trainer-task-sub {
+    margin: 0.1rem 0 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.trainer-task .dialog-button {
+    width: 100%;
+    padding: 0.45rem 0.9rem;
+}
+
+/* 今天的點數：和首頁同一組金幣 */
+.trainer-coins {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.trainer-coin {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.trainer-coin-face {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--header-color);
+    background: var(--bg-color);
+    border: 2px dashed var(--border-color);
+}
+
+.trainer-coin.on .trainer-coin-face {
+    color: #fff;
+    background: linear-gradient(135deg, #ffd700, #ff9800);
+    border: 2px solid #ff9800;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.45);
+}
+
+.trainer-coin.on .trainer-coin-face::after {
+    content: '✓';
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: #fff;
+    background: var(--correct-color);
+    border: 1.5px solid var(--container-bg-color);
+}
+
+.trainer-coin-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.trainer-coin.on .trainer-coin-label {
+    color: #ffd700;
+}
+
+.trainer-daily-text {
+    margin: 0.8rem 0 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    color: var(--notice-color);
+}
+
+/* 錯題本的三個數字 */
+.trainer-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+    margin: 0.5rem 0 0.3rem;
+}
+
+.trainer-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.5rem 0.2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.7rem;
     background: rgba(26, 32, 44, 0.45);
 }
 
-.trainer-point.weak,
+.trainer-stat-value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.trainer-stat-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.trainer-stat.due {
+    border-color: var(--notice-color);
+}
+
+.trainer-stat.due .trainer-stat-value {
+    color: var(--notice-color);
+}
+
+.trainer-stat.good .trainer-stat-value {
+    color: var(--correct-color);
+}
+
+/* ---------- 文法點表格：表頭說明每一階，格子裡只寫狀態 ---------- */
+.trainer-ptable {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0 0.45rem;
+}
+
+.trainer-ptable thead th {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #fff;
+    padding: 0 0.3rem 0.2rem;
+    vertical-align: bottom;
+}
+
+.trainer-ptable th small {
+    display: block;
+    font-weight: normal;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.trainer-ptable thead th:first-child,
+.trainer-ptable-name {
+    width: 34%;
+    text-align: left;
+}
+
+.trainer-ptable-name {
+    font-weight: bold;
+    color: #fff;
+    padding-right: 0.5rem;
+}
+
+.trainer-ptable-name .trainer-tag {
+    margin-left: 0.4rem;
+}
+
+.trainer-ptable td {
+    padding: 0 0.25rem;
+}
+
+.trainer-ptable td:last-child {
+    padding-right: 0;
+}
+
+.trainer-ptable .dialog-button {
+    width: 100%;
+    font-size: 0.92rem;
+    padding: 0.6rem 0.3rem;
+}
+
+.trainer-container .dialog-button.is-done {
+    color: var(--correct-color);
+    background: transparent;
+    border-color: rgba(72, 187, 120, 0.6);
+}
+
+.trainer-container .dialog-button.is-done:hover:not(:disabled) {
+    background: rgba(72, 187, 120, 0.12);
+}
+
 .trainer-format.weak {
     border-color: var(--notice-color);
 }
 
-.trainer-point-head {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.6rem;
+/* 右欄較窄：題型一列五個、考卷一列兩張，避免最後一列只剩一個 */
+.trainer-main .trainer-format-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
-.trainer-point-title {
-    font-size: 1.02rem;
-    margin: 0;
-    margin-right: auto;
+.trainer-main .trainer-mock-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.trainer-point-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 0.5rem;
+.trainer-diag-row {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border-color);
 }
 
-.trainer-point-grid .dialog-button {
-    font-size: 0.88rem;
-    padding: 0.55rem 0.4rem;
+.trainer-mock-card .dialog-button {
+    margin-top: auto;
+}
+
+@media (max-width: 900px) {
+    .trainer-cols {
+        grid-template-columns: 1fr;
+    }
+
+    .trainer-side {
+        position: static;
+    }
 }
 
 /* ---------- 題型專練、模擬考卡片 ---------- */
@@ -1027,7 +1330,6 @@
 
 /* ---------- 窄螢幕 ---------- */
 @media (max-width: 700px) {
-    .trainer-point-grid,
     .trainer-options,
     .trainer-report-grid {
         grid-template-columns: 1fr;

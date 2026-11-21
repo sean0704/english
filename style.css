@@ -417,11 +417,14 @@ summary:focus-visible {
 
 .points-info-container ul {
     margin: 0;
-    padding-left: 20px;
+    padding-left: 0;
     list-style: none;
 }
 
+/* ✨ 用絕對定位放在左側固定欄位，文字折行後才會和第一行對齊 */
 .points-info-container li {
+    position: relative;
+    padding-left: 1.75rem;
     margin-bottom: 0.5rem;
     color: var(--header-color);
     font-size: 0.9rem;
@@ -430,8 +433,25 @@ summary:focus-visible {
 
 .points-info-container li::before {
     content: '✨';
-    margin-left: -20px;
-    margin-right: 10px;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* 分組小標題（例如「只給一次」「每天都有」）：不顯示 ✨，靠左對齊 */
+.points-info-container li.points-info-heading {
+    padding-left: 0;
+    margin-top: 0.9rem;
+    color: var(--notice-color);
+    font-weight: bold;
+}
+
+.points-info-container li.points-info-heading:first-child {
+    margin-top: 0;
+}
+
+.points-info-container li.points-info-heading::before {
+    content: none;
 }
 
 .points-info-container li:last-child {

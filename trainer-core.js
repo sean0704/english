@@ -6,8 +6,10 @@
 })(typeof self !== 'undefined' ? self : this, function (G) {
     const STORE_KEY = 'englishTrainer_v1';
     const LOG_LIMIT = 4000;
-    const DAILY_CAP = 60;
+    // 每日類點數只有三種，各每天一次：完整卷及格 20＋半卷及格 10＋到期錯題全對 5
+    const DAILY_CAP = 35;
     const PASS_RATE = 0.8;
+    const FORMAT_ONCE = 5;   // 題型專練：每種題型第一次過關的點數
 
     const UNITS = [
         { key: 'u3', path: 'g8_1_unit3_trainer.json', short: 'Unit 3' },
@@ -30,8 +32,8 @@
     const STAGE_BY_FORMAT = { choice: 1, verbform: 2, order: 2, guided: 2, rewrite: 3, translate: 3 };
     const STAGES = [
         { stage: 1, label: '第 1 階 辨認', desc: '選擇題', once: 5 },
-        { stage: 2, label: '第 2 階 引導產出', desc: '動詞形式、重組、引導式翻譯', once: 10 },
-        { stage: 3, label: '第 3 階 完整產出', desc: '改寫、整句翻譯', once: 15 },
+        { stage: 2, label: '第 2 階 引導產出', desc: '動詞形式、重組、引導式翻譯', once: 7 },
+        { stage: 3, label: '第 3 階 完整產出', desc: '改寫、整句翻譯', once: 10 },
     ];
     const SESSION_SIZE = 8;
 
@@ -181,6 +183,8 @@
             const today = env.today();
             const entry = u.wrong[item.id];
             let promoted = false, graduated = false;
+            // 訂正到期錯題時只要答錯一題，當天就拿不到「到期錯題全對」（中途離開也算）
+            if (!right && ctx === 'review' && due) { dailyOf(key).flags.reviewMiss = true; env.bridge.saveLedger(); }
             if (!right) {
                 u.wrong[item.id] = { box: 1, due: addDays(today, 1), lapses: (entry ? entry.lapses : 0) + 1, last: answerText(answer), added: entry ? entry.added : today };
             } else if (entry && ctx === 'review' && due) {
@@ -289,7 +293,8 @@
         function pickReview(unitKey, onlyDue) { return toWorkUnits(wrongIds(unitKey, onlyDue), onlyDue ? 15 : 20); }
 
         // ---------- 模擬段考 ----------
-        function buildExam(scope, kind, isDiag) {
+        // unitKey：從哪個單元的大廳開考，每日點數就記在那個單元
+        function buildExam(scope, kind, isDiag, unitKey) {
             const unitKeys = SCOPES[scope].filter(hasUnit);
             const spec = MOCK[kind];
             const sections = spec.sections.map(([format, count, each], i) => {
@@ -300,7 +305,7 @@
                 return { format, title: `${SECTION_NUMERALS[i]}、${f.label}`, each, units };
             }).filter(s => s.units.length);
             const now = env.now();
-            state.examInProgress = { scope, kind, diag: Boolean(isDiag), startedAt: now, deadline: now + spec.minutes * 60000, sections, answers: {} };
+            state.examInProgress = { scope, kind, unit: SCOPES[scope].includes(unitKey) ? unitKey : SCOPES[scope][0], diag: Boolean(isDiag), startedAt: now, deadline: now + spec.minutes * 60000, sections, answers: {} };
             save();
             return state.examInProgress;
         }
@@ -361,10 +366,10 @@
                 if (exam.diag) rewards.push(grantOnce(`diag:${exam.scope}`, 10, '完成診斷'));
                 else {
                     const passPoints = exam.kind === 'full' ? 20 : 10;
-                    if (report.score >= 60) rewards.push(grantDaily(passPoints, '模擬段考及格', `mockpass:${exam.kind}`));
-                    if (bestBefore !== null && report.score > bestBefore) rewards.push(grantDaily(report.score - bestBefore, `比最高分進步 ${report.score - bestBefore} 分`));
-                    if (exam.kind === 'full' && report.score >= 80) rewards.push(grantOnce(`mock80:${exam.scope}`, 30, '完整卷第一次 80 分'));
-                    if (exam.kind === 'full' && report.score >= 100) rewards.push(grantOnce(`mock100:${exam.scope}`, 50, '完整卷第一次滿分'));
+                    if (report.score >= 60) rewards.push(grantDaily(exam.unit || SCOPES[exam.scope][0], passPoints, '模擬段考及格', `mockpass:${exam.kind}`));
+                    // 首次及格獎勵：每個範圍的完整卷、半卷各一次（完整卷沿用舊的紀錄名稱，領過的不會重發）
+                    if (exam.kind === 'full' && report.score >= 60) rewards.push(grantOnce(`mock60:${exam.scope}`, 30, '完整卷第一次 60 分以上'));
+                    if (exam.kind === 'half' && report.score >= 60) rewards.push(grantOnce(`mock60half:${exam.scope}`, 15, '半卷第一次 60 分以上'));
                 }
             }
             report.rewards = rewards.filter(r => r && r.points > 0);
@@ -376,10 +381,14 @@
         function abandonExam() { state.examInProgress = null; save(); }
 
         // ---------- 點數 ----------
-        function ledger() {
-            const l = env.bridge.getRewardLedger();
-            if (l.daily.date !== env.today()) l.daily = { date: env.today(), points: 0, flags: {} };
-            return l;
+        function ledger() { return env.bridge.getRewardLedger(); }
+        // 每日類點數每個單元各有一本帳，換日就歸零
+        function dailyOf(unitKey) {
+            const l = ledger();
+            if (!isObj(l.dailyUnits)) l.dailyUnits = {};
+            const d = l.dailyUnits[unitKey];
+            if (!isObj(d) || d.date !== env.today() || !isObj(d.flags)) l.dailyUnits[unitKey] = { date: env.today(), points: 0, flags: {} };
+            return l.dailyUnits[unitKey];
         }
         function grantOnce(key, points, label) {
             const l = ledger();
@@ -388,17 +397,17 @@
             env.bridge.grantPoints(points);
             return { points, label };
         }
-        // 每日類點數：合計上限 DAILY_CAP；flag 用來限制「每天一次」
-        function grantDaily(points, label, flag) {
-            const l = ledger();
-            if (flag && l.daily.flags[flag]) return { points: 0, label };
-            const allowed = Math.max(0, Math.min(points, DAILY_CAP - l.daily.points));
-            if (flag) l.daily.flags[flag] = true;
-            if (allowed > 0) { l.daily.points += allowed; env.bridge.grantPoints(allowed); }
+        // 每日類點數：每個單元每天合計上限 DAILY_CAP；flag 用來限制「每天一次」
+        function grantDaily(unitKey, points, label, flag) {
+            const d = dailyOf(unitKey);
+            if (flag && d.flags[flag]) return { points: 0, label };
+            const allowed = Math.max(0, Math.min(points, DAILY_CAP - d.points));
+            if (flag) d.flags[flag] = true;
+            if (allowed > 0) { d.points += allowed; env.bridge.grantPoints(allowed); }
             else env.bridge.saveLedger();
             return { points: allowed, label, capped: allowed < points };
         }
-        function dailyLeft() { return Math.max(0, DAILY_CAP - ledger().daily.points); }
+        function dailyLeft(unitKey) { return Math.max(0, DAILY_CAP - dailyOf(unitKey).points); }
         function practiceDay(unitKey) {
             const u = UNITS.find(x => x.key === unitKey);
             if (u) env.bridge.recordPracticeDay(u.path);
@@ -420,15 +429,16 @@
             } else if (session.kind === 'format') {
                 const prev = isObj(u.formats[session.format]) ? u.formats[session.format] : { best: 0, plays: 0 };
                 u.formats[session.format] = { best: Math.max(prev.best, rate), plays: prev.plays + 1 };
-                if (passed) rewards.push(grantDaily(3, '題型專練達 80%'));
+                // 每種題型第一次過關給一次（每個單元各算）
+                if (passed) rewards.push(grantOnce(`format:${session.unit}:${session.format}`, FORMAT_ONCE, `題型專練「${FORMAT_BY_ID[session.format].label}」第一次過關`));
             } else if (session.kind === 'concept') {
                 const c = u.concepts[session.conceptId] = isObj(u.concepts[session.conceptId]) ? u.concepts[session.conceptId] : {};
                 c.readAt = c.readAt || env.today();
-                if (rate >= 0.75) { c.passedAt = c.passedAt || env.today(); rewards.push(grantOnce(`concept:${session.conceptId}`, 5, '觀念卡檢核通過')); }
+                if (rate >= 0.75) { c.passedAt = c.passedAt || env.today(); rewards.push(grantOnce(`concept:${session.conceptId}`, 3, '觀念卡檢核通過')); }
             } else if (session.kind === 'review') {
                 const promoted = session.results.filter(r => r.promoted).length;
-                if (promoted) rewards.push(grantDaily(promoted * 3, `訂正 ${promoted} 題到期錯題`));
-                if (wrongIds(session.unit, true).length === 0 && promoted) rewards.push(grantDaily(10, '今天到期的錯題全部清完', `clear:${session.unit}`));
+                // 今天到期的都做完，而且沒有任何一題答錯，才給
+                if (wrongIds(session.unit, true).length === 0 && promoted && !dailyOf(session.unit).flags.reviewMiss) rewards.push(grantDaily(session.unit, 5, '今天到期的錯題全部答對', 'clear'));
             }
             practiceDay(session.unit);
             save();
@@ -454,13 +464,14 @@
                         weak: weak(u.stat.point[p.id]),
                     };
                 }),
-                formats: FORMATS.map(f => ({ ...f, state: u.formats[f.id] || null, stat: u.stat.format[f.id] || null, weak: weak(u.stat.format[f.id]) })),
+                formats: FORMATS.map(f => ({ ...f, rewarded: Boolean(ledger().once[`format:${unitKey}:${f.id}`]), state: u.formats[f.id] || null, stat: u.stat.format[f.id] || null, weak: weak(u.stat.format[f.id]) })),
                 wrongTotal: wrongIds(unitKey, false).length,
                 wrongDue: wrongIds(unitKey, true).length,
                 mastered: u.mastered,
                 exam: state.examInProgress,
                 exams: state.exams.slice(),
-                dailyLeft: dailyLeft(),
+                dailyLeft: dailyLeft(unitKey),
+                daily: { points: dailyOf(unitKey).points, flags: { ...dailyOf(unitKey).flags }, cap: DAILY_CAP },
             };
         }
         function bestExam(scope, kind) {
@@ -598,5 +609,5 @@
         };
     }
 
-    return { createCore, UNITS, FORMATS, FORMAT_BY_ID, STAGES, STAGE_BY_FORMAT, MOCK, SCOPES, SCOPE_LABELS, CTX_LABELS, VERDICT_LABELS, SESSION_SIZE, DAILY_CAP, PASS_RATE, addDays, pct };
+    return { createCore, UNITS, FORMATS, FORMAT_BY_ID, STAGES, STAGE_BY_FORMAT, MOCK, SCOPES, SCOPE_LABELS, CTX_LABELS, VERDICT_LABELS, SESSION_SIZE, DAILY_CAP, PASS_RATE, FORMAT_ONCE, addDays, pct };
 });

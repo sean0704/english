@@ -325,6 +325,9 @@
         return h('span', 'trainer-rate none', '還沒練');
     }
 
+    // 文法點表格的表頭小字：每一階在練什麼，只說明一次
+    const STAGE_HINTS = { 1: '選擇題', 2: '填空、重組', 3: '自己寫整句' };
+
     function renderHub(notice) {
         stopTimers();
         session = null;
@@ -333,13 +336,20 @@
         const info = core.hubInfo(unitKey);
         const unit = info.unit;
 
+        const startLadder = (p, s) => startSession({ kind: 'ladder', unit: unitKey, point: p.id, stage: s.stage, title: `${p.label}｜${s.label}`, units: core.pickLadder(unitKey, p.id, s.stage) });
+        const startFormat = f => startSession({ kind: 'format', unit: unitKey, format: f.id, title: `題型專練｜${f.label}`, units: core.pickFormat(unitKey, f.id) });
+        const startReview = () => startSession({ kind: 'review', unit: unitKey, title: '錯題訂正', units: core.pickReview(unitKey, true) });
+        const startDiag = () => startExam(unitKey, 'half', true);
+
+        // 標題列
         const header = h('div', 'trainer-header');
         const titles = h('div', 'trainer-titles');
         titles.appendChild(h('h1', 'trainer-title', `${unit.title} 段考特訓`));
         titles.appendChild(h('p', 'trainer-subtitle', unit.subtitle));
         header.appendChild(titles);
         const headBtns = h('div', 'trainer-header-actions');
-        headBtns.appendChild(h('span', 'trainer-points', `🪙 ${bridge.getTotalPoints()}　今日還可拿 ${info.dailyLeft} 點`));
+        headBtns.appendChild(h('span', 'trainer-points', `🪙 ${bridge.getTotalPoints()}`));
+        headBtns.appendChild(button('家長報告', 'secondary', () => renderReport()));
         headBtns.appendChild(button('返回主選單', 'secondary', () => bridge.exit()));
         header.appendChild(headBtns);
         root.appendChild(header);
@@ -355,64 +365,130 @@
             root.appendChild(banner);
         }
 
-        // 今天建議
-        const todo = h('div', 'trainer-todo');
-        todo.appendChild(h('h2', 'trainer-todo-title', '今天建議這樣練（約 15–20 分鐘）'));
-        const steps = h('ol', 'trainer-todo-list');
-        if (!info.diagnosed) steps.appendChild(h('li', '', '先做「診斷」，找出最弱的地方。'));
-        if (info.wrongDue) steps.appendChild(h('li', '', `訂正 ${info.wrongDue} 題到期的錯題。`));
-        const weakPoint = info.points.find(p => p.weak) || info.points.find(p => !p.stages.every(s => s.state && s.state.passed));
-        if (weakPoint) {
-            const nextStage = weakPoint.stages.find(s => !(s.state && s.state.passed));
-            const needCard = weakPoint.concept && !weakPoint.conceptState.passedAt;
-            steps.appendChild(h('li', '', `文法點「${weakPoint.label}」：${needCard ? '先讀觀念卡，再' : ''}練${nextStage ? nextStage.label : '第 3 階'}。`));
+        // 兩欄：左邊固定顯示今天要做的事、點數、錯題本；右邊是所有練習
+        const cols = h('div', 'trainer-cols');
+        const side = h('aside', 'trainer-side');
+        const main = h('div', 'trainer-main');
+        cols.appendChild(side);
+        cols.appendChild(main);
+        root.appendChild(cols);
+
+        const mock = sectionBlock('模擬段考', '比照學校考卷：計時、沒有提示、交卷後才看答案。大小寫和標點寫錯會扣一半分數。');
+
+        // ---------- 左欄：今天這樣練（符合狀況的才列出來，只有第一項是主要按鈕） ----------
+        const tasks = [];
+        if (!info.diagnosed) tasks.push({ title: '先做「診斷」', sub: '20 分鐘小考卷，找出最弱的地方・第一次完成 +10', action: '開始診斷', run: startDiag });
+        if (info.wrongDue) tasks.push({ title: `訂正 ${info.wrongDue} 題到期的錯題`, sub: info.daily.flags.clear ? '今天的 +5 已經拿到了' : info.daily.flags.reviewMiss ? '今天已經有答錯的題目，這次沒有點數' : '全部答對 +5', action: '開始訂正', run: startReview });
+        const focusPoint = info.points.find(p => p.weak) || info.points.find(p => !p.stages.every(s => s.state && s.state.passed));
+        if (focusPoint) {
+            const needCard = focusPoint.concept && !focusPoint.conceptState.passedAt;
+            const stage = focusPoint.stages.find(s => s.pool && !(s.state && s.state.passed)) || focusPoint.stages.filter(s => s.pool).pop();
+            if (needCard) tasks.push({ title: `文法點「${focusPoint.label}」`, sub: '先讀觀念卡・通過小檢核 +3', action: '讀觀念卡', run: () => renderConcept(focusPoint.concept) });
+            else if (stage) tasks.push({ title: `文法點「${focusPoint.label}」`, sub: `練${stage.label}・答對 8 成過關${stage.state && stage.state.passed ? '' : ` +${stage.once}`}`, action: '開始練習', run: () => startLadder(focusPoint, stage) });
         }
-        const weakFormat = info.formats.find(f => f.weak) || info.formats.find(f => !f.state);
-        if (weakFormat) steps.appendChild(h('li', '', `題型專練做一關「${weakFormat.label}」。`));
-        steps.appendChild(h('li', '', '週末寫一份完整的模擬段考。'));
-        todo.appendChild(steps);
-        root.appendChild(todo);
+        const focusFormat = info.formats.find(f => f.weak) || info.formats.find(f => !f.state);
+        if (focusFormat) tasks.push({ title: `題型專練「${focusFormat.label}」`, sub: `一關 8 題，答對 8 成過關${focusFormat.rewarded ? '' : ` +${C.FORMAT_ONCE}`}`, action: '開始練習', run: () => startFormat(focusFormat) });
+        tasks.push({ title: '週末寫一份完整的模擬段考', sub: '完整卷及格 +20、半卷及格 +10', action: '去選考卷', run: () => mock.scrollIntoView({ behavior: 'smooth', block: 'start' }) });
 
-        // 1 診斷
-        const diag = sectionBlock('① 診斷', '20 分鐘的小考卷，涵蓋所有大題。做完就知道哪個大題、哪個文法點最需要練。');
-        const diagRow = h('div', 'trainer-row');
-        diagRow.appendChild(h('span', `trainer-rate ${info.diagnosed ? 'good' : 'none'}`, info.diagnosed ? '已完成' : '還沒做'));
-        const diagBtn = button(info.diagnosed ? '再診斷一次' : '開始診斷', info.diagnosed ? 'secondary' : '', () => startExam(unitKey, 'half', true));
-        if (!info.diagnosed) diagBtn.classList.add('trainer-pulse');
-        diagRow.appendChild(diagBtn);
-        diag.appendChild(diagRow);
-        root.appendChild(diag);
-
-        // 2 觀念卡與階梯
-        const ladder = sectionBlock('② 文法點：觀念卡 → 三階練習', '每個文法點先讀觀念卡，再從選擇題一路練到自己寫出整句。每一階做到 80% 就過關。');
-        info.points.forEach(p => {
-            const card = h('div', `trainer-point${p.weak ? ' weak' : ''}`);
-            const top = h('div', 'trainer-point-head');
-            top.appendChild(h('h3', 'trainer-point-title', p.label));
-            if (p.weak) top.appendChild(h('span', 'trainer-tag warn', '優先'));
-            if (p.stat && p.stat.n) top.appendChild(h('span', 'trainer-rate', `答對率 ${C.pct(p.stat.ok, p.stat.n)}%（${p.stat.n} 題）`));
-            card.appendChild(top);
-            const grid = h('div', 'trainer-point-grid');
-            if (p.concept) {
-                const done = Boolean(p.conceptState.passedAt);
-                const b = button(`📖 觀念卡${done ? ' ✓' : ''}`, done ? 'secondary' : '', () => renderConcept(p.concept));
-                grid.appendChild(b);
-            }
-            p.stages.forEach(s => {
-                const passed = s.state && s.state.passed;
-                const label = `${s.label}${s.state ? `　${percent(s.state.best)}${passed ? ' ✓' : ''}` : ''}`;
-                const b = button(label, passed ? 'secondary' : '', () => startSession({ kind: 'ladder', unit: unitKey, point: p.id, stage: s.stage, title: `${p.label}｜${s.label}`, units: core.pickLadder(unitKey, p.id, s.stage) }));
-                b.title = s.desc;
-                if (!s.pool) b.disabled = true;
-                grid.appendChild(b);
-            });
-            card.appendChild(grid);
-            ladder.appendChild(card);
+        const today = h('section', 'trainer-today');
+        const todayTitle = h('h2', 'trainer-today-title', '今天這樣練');
+        todayTitle.appendChild(h('small', '', '照順序做，約 15–20 分鐘'));
+        today.appendChild(todayTitle);
+        const taskList = h('ol', 'trainer-tasks');
+        tasks.forEach((task, i) => {
+            const li = h('li', `trainer-task${i === 0 ? ' is-next' : ''}`);
+            li.appendChild(h('span', 'trainer-task-num', String(i + 1)));
+            const body = h('div', 'trainer-task-body');
+            body.appendChild(h('p', 'trainer-task-title', task.title));
+            body.appendChild(h('p', 'trainer-task-sub', task.sub));
+            body.appendChild(button(task.action, i === 0 ? '' : 'secondary', task.run));
+            li.appendChild(body);
+            taskList.appendChild(li);
         });
-        root.appendChild(ladder);
+        today.appendChild(taskList);
+        side.appendChild(today);
 
-        // 3 題型專練
-        const formats = sectionBlock('③ 考卷題型專練', '照測驗卷的大題練。各文法點混在一起出，不會告訴你考哪個文法，要自己判斷。');
+        // ---------- 左欄：每日點數（和首頁同一組金幣；不含只給一次的獎勵） ----------
+        const daily = sectionBlock('每日點數');
+        const coins = h('div', 'trainer-coins');
+        [[20, '完整卷及格', 'mockpass:full'], [10, '半卷及格', 'mockpass:half'], [5, '錯題全對', 'clear']].forEach(([points, label, flag]) => {
+            const got = Boolean(info.daily.flags[flag]);
+            const coin = h('div', `trainer-coin${got ? ' on' : ''}`, null, { title: `${label} +${points}${got ? '（今天已拿到）' : ''}` });
+            coin.appendChild(h('span', 'trainer-coin-face', `+${points}`));
+            coin.appendChild(h('span', 'trainer-coin-label', label));
+            coins.appendChild(coin);
+        });
+        daily.appendChild(coins);
+        daily.appendChild(h('p', 'trainer-daily-text', `今天已拿 ${info.daily.points} / ${info.daily.cap} 點`));
+        side.appendChild(daily);
+
+        // ---------- 左欄：錯題本 ----------
+        const wrong = sectionBlock('錯題本');
+        wrong.title = '答錯的題目會留在這裡，隔 1 天、3 天、7 天各再考一次，連續答對才會畢業。';
+        const stats = h('div', 'trainer-stats');
+        [[info.wrongDue, '今天到期', info.wrongDue ? 'due' : ''], [info.wrongTotal, '錯題', ''], [info.mastered, '已畢業', 'good']].forEach(([value, label, tone]) => {
+            const tile = h('div', `trainer-stat${tone ? ` ${tone}` : ''}`);
+            tile.appendChild(h('span', 'trainer-stat-value', String(value)));
+            tile.appendChild(h('span', 'trainer-stat-label', label));
+            stats.appendChild(tile);
+        });
+        wrong.appendChild(stats);
+        const dueBtn = button(info.wrongDue ? `訂正到期錯題（${info.wrongDue}）` : '今天沒有到期的錯題', 'secondary', startReview);
+        dueBtn.disabled = !info.wrongDue;
+        const allBtn = button('全部錯題再練一次', 'secondary', () => startSession({ kind: 'cram', unit: unitKey, title: '錯題總複習', units: core.pickReview(unitKey, false) }));
+        allBtn.title = '考前用，不計點';
+        allBtn.disabled = !info.wrongTotal;
+        wrong.appendChild(dueBtn);
+        wrong.appendChild(allBtn);
+        wrong.appendChild(h('p', 'trainer-side-note', '隔 1、3、7 天各再考一次，連續答對才畢業。'));
+        side.appendChild(wrong);
+
+        // ---------- 右欄：文法點表格（綠＝過關、黃＝下一步、灰＝還沒輪到） ----------
+        const ladder = sectionBlock('文法點', '由左到右一格一格練，每一階答對 8 成就過關。');
+        const hasConcept = info.points.some(p => p.concept);
+        const table = h('table', 'trainer-ptable');
+        const headRow = h('tr', '');
+        headRow.appendChild(h('th', '', '', { scope: 'col' }));
+        const headCell = (name, hint) => { const th = h('th', '', name, { scope: 'col' }); th.appendChild(h('small', '', hint)); return th; };
+        if (hasConcept) headRow.appendChild(headCell('📖 觀念卡', '讀規則和例句'));
+        C.STAGES.forEach(s => headRow.appendChild(headCell(`第 ${s.stage} 階`, STAGE_HINTS[s.stage] || s.desc)));
+        const thead = h('thead', '');
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+        const tbody = h('tbody', '');
+        info.points.forEach(p => {
+            const row = h('tr', p.weak ? 'weak' : '');
+            const nameCell = h('th', 'trainer-ptable-name', p.label, { scope: 'row' });
+            if (p.weak) nameCell.appendChild(h('span', 'trainer-tag warn', '優先'));
+            if (p.stat && p.stat.n) nameCell.appendChild(h('small', '', `答對率 ${C.pct(p.stat.ok, p.stat.n)}%（${p.stat.n} 題）`));
+            row.appendChild(nameCell);
+
+            const cells = [];
+            if (hasConcept) cells.push(p.concept ? { what: '觀念卡', done: Boolean(p.conceptState.passedAt), text: '開始', hint: '讀規則和例句，再做小檢核', run: () => renderConcept(p.concept) } : null);
+            p.stages.forEach(s => {
+                const passed = Boolean(s.state && s.state.passed);
+                cells.push({ what: s.label, done: passed, text: s.state && !passed ? `${percent(s.state.best)}　再練` : '開始', hint: s.desc, disabled: !s.pool, run: () => startLadder(p, s) });
+            });
+            const nextCell = cells.find(c => c && !c.done && !c.disabled);
+            cells.forEach(c => {
+                const td = h('td', '');
+                if (c) {
+                    const b = button(c.done ? '✓ 過關' : c.text, c.done ? 'is-done' : c === nextCell ? '' : 'secondary', c.run);
+                    b.title = c.hint;
+                    b.setAttribute('aria-label', `${p.label}｜${c.what}｜${c.done ? '已過關' : c.text}`);
+                    b.disabled = Boolean(c.disabled);
+                    td.appendChild(b);
+                }
+                row.appendChild(td);
+            });
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        ladder.appendChild(table);
+        main.appendChild(ladder);
+
+        // ---------- 右欄：題型專練 ----------
+        const formats = sectionBlock('考卷題型專練', '照考卷的大題練，一關 8 題。各文法點混在一起出，要自己判斷考哪個文法。');
         const fgrid = h('div', 'trainer-format-grid');
         info.formats.forEach(f => {
             const card = h('button', `trainer-format${f.weak ? ' weak' : ''}`, null, { type: 'button' });
@@ -421,52 +497,48 @@
             const meta = h('span', 'trainer-format-meta');
             if (f.weak) meta.appendChild(h('span', 'trainer-tag warn', '優先'));
             meta.appendChild(rateBadge(f.state, f.stat));
+            // 首次過關獎勵：還沒領顯示可以拿幾點，領過顯示已領
+            meta.appendChild(f.rewarded
+                ? h('span', 'trainer-tag done', '✓ 已領', { title: `第一次過關的 +${C.FORMAT_ONCE} 已經領過` })
+                : h('span', 'trainer-tag coin', `🪙 +${C.FORMAT_ONCE}`, { title: `第一次答對 8 成過關 +${C.FORMAT_ONCE}` }));
             card.appendChild(meta);
-            card.addEventListener('click', () => startSession({ kind: 'format', unit: unitKey, format: f.id, title: `題型專練｜${f.label}`, units: core.pickFormat(unitKey, f.id) }));
+            card.addEventListener('click', () => startFormat(f));
             fgrid.appendChild(card);
         });
         formats.appendChild(fgrid);
-        root.appendChild(formats);
+        main.appendChild(formats);
 
-        // 4 模擬段考
-        const mock = sectionBlock('④ 模擬段考', '比照學校考卷：計時、沒有提示、交卷後才看答案。大小寫和標點寫錯會扣一半分數。');
-        const other = unitKey === 'u3' ? 'u4' : 'u3';
-        const scopes = [unitKey].concat(core.hasUnit(other) ? ['u34'] : []);
-        const table = h('div', 'trainer-mock-grid');
+        // ---------- 右欄：模擬段考（診斷卷放在最下面） ----------
+        // 合卷只放在 Unit 4：兩個單元都學過才適合考，也避免同一張合卷在兩個單元各領一次及格點數
+        const scopes = [unitKey].concat(unitKey === 'u4' && core.hasUnit('u3') ? ['u34'] : []);
+        const mockGrid = h('div', 'trainer-mock-grid');
         scopes.forEach(scope => {
             ['half', 'full'].forEach(kind => {
                 const spec = C.MOCK[kind];
                 const best = core.bestExam(scope, kind);
                 const card = h('div', 'trainer-mock-card');
                 card.appendChild(h('h3', 'trainer-mock-title', `${C.SCOPE_LABELS[scope]}｜${spec.label}`));
+                if (scope === 'u34' && kind === 'full') card.appendChild(h('span', 'trainer-tag', '最接近段考'));
                 card.appendChild(h('p', 'trainer-mock-meta', `${spec.minutes} 分鐘・${kind === 'full' ? '100 分' : '約 50 分，換算成百分'}`));
                 card.appendChild(h('span', `trainer-rate ${best === null ? 'none' : best >= 80 ? 'good' : best >= 60 ? '' : 'low'}`, best === null ? '還沒考過' : `最高 ${best} 分`));
-                card.appendChild(button('開始考試', scope === 'u34' && kind === 'full' ? '' : 'secondary', () => startExam(scope, kind, false)));
-                table.appendChild(card);
+                card.appendChild(button('開始考試', 'secondary', () => startExam(scope, kind, false)));
+                mockGrid.appendChild(card);
             });
         });
-        mock.appendChild(table);
-        root.appendChild(mock);
+        mock.appendChild(mockGrid);
+        const diagRow = h('div', 'trainer-row trainer-diag-row');
+        diagRow.appendChild(h('span', `trainer-rate ${info.diagnosed ? 'good' : 'none'}`, `診斷卷：${info.diagnosed ? '已完成' : '還沒做'}`));
+        diagRow.appendChild(button(info.diagnosed ? '再診斷一次' : '開始診斷', 'secondary', startDiag));
+        mock.appendChild(diagRow);
+        main.appendChild(mock);
 
-        // 5 錯題本
-        const wrong = sectionBlock('⑤ 錯題本', '答錯的題目會留在這裡，隔 1 天、3 天、7 天各再考一次，連續答對才會畢業。');
-        const wrow = h('div', 'trainer-row');
-        wrow.appendChild(h('span', 'trainer-rate', `錯題 ${info.wrongTotal} 題・今天到期 ${info.wrongDue} 題・已畢業 ${info.mastered} 題`));
-        const dueBtn = button(`訂正到期錯題（${info.wrongDue}）`, info.wrongDue ? '' : 'secondary', () => startSession({ kind: 'review', unit: unitKey, title: '錯題訂正', units: core.pickReview(unitKey, true) }));
-        dueBtn.disabled = !info.wrongDue;
-        const allBtn = button('全部錯題再練一次（考前用，不計點）', 'secondary', () => startSession({ kind: 'cram', unit: unitKey, title: '錯題總複習', units: core.pickReview(unitKey, false) }));
-        allBtn.disabled = !info.wrongTotal;
-        wrow.appendChild(dueBtn);
-        wrow.appendChild(allBtn);
-        wrong.appendChild(wrow);
-        root.appendChild(wrong);
-
-        // 6 報告
-        const rep = sectionBlock('⑥ 家長報告與做題歷程', '各文法點與各大題的正確率、模擬考成績，以及可以一鍵複製貼給 AI 分析的完整做題紀錄。');
-        const rrow = h('div', 'trainer-row');
-        rrow.appendChild(button('查看報告／匯出', 'secondary', () => renderReport()));
-        rep.appendChild(rrow);
-        root.appendChild(rep);
+        // 左欄比視窗高時，讓它先跟著頁面捲到底再固定，才不會有看不到的部分
+        const placeSide = () => {
+            if (!side.isConnected) { window.removeEventListener('resize', placeSide); return; }
+            side.style.top = `${Math.min(16, window.innerHeight - side.offsetHeight - 16)}px`;
+        };
+        placeSide();
+        window.addEventListener('resize', placeSide);
     }
 
     // ---------- 觀念卡 ----------
@@ -716,7 +788,7 @@
             confirmText: '開始', cancelText: '取消',
         });
         if (!ok) return;
-        core.buildExam(scope, kind, isDiag);
+        core.buildExam(scope, kind, isDiag, unitKey);
         renderExam();
     }
 
@@ -837,9 +909,9 @@
             advice.appendChild(h('h2', 'trainer-todo-title', '接下來先練這些'));
             const ol = h('ol', 'trainer-todo-list');
             ol.appendChild(h('li', '', '先把下面答錯的題目逐題看完詳解，按「立刻訂正這張考卷的錯題」。'));
-            weakest.forEach(s => ol.appendChild(h('li', '', `大題「${s.title.replace(/^.、/, '')}」只拿到 ${Math.round((s.got / s.max) * 100)}%：到「③ 考卷題型專練」多練這個題型。`)));
+            weakest.forEach(s => ol.appendChild(h('li', '', `大題「${s.title.replace(/^.、/, '')}」只拿到 ${Math.round((s.got / s.max) * 100)}%：到大廳的「考卷題型專練」多練這個題型。`)));
             const weakPts = Object.entries(report.byPoint).filter(([pid, r]) => !['vocab', 'reading', 'mixed'].includes(pid) && r.n >= 2 && r.ok / r.n < 0.6);
-            weakPts.forEach(([pid]) => ol.appendChild(h('li', '', `文法點「${core.pointLabel(pid)}」：到「② 文法點」重讀觀念卡，從第 1 階練起。`)));
+            weakPts.forEach(([pid]) => ol.appendChild(h('li', '', `文法點「${core.pointLabel(pid)}」：到大廳的「文法點」重讀觀念卡，從第 1 階練起。`)));
             advice.appendChild(ol);
             root.appendChild(advice);
         }
