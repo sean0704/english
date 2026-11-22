@@ -11,12 +11,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="trainer.css">
-    <script src="trainer-grading.js" defer></script>
-    <script src="trainer-core.js" defer></script>
-    <script src="trainer.js" defer></script>
-    <script src="script.js" defer></script>
+    <!-- 每次開啟都在網址後面加上當下的時間，讓瀏覽器重新下載樣式與程式，
+         不會拿舊的快取檔案配新檔案。新增檔案時加進下面對應的清單（程式照清單順序執行）。 -->
+    <script>
+        (function () {
+            var v = Date.now();
+            ['style.css', 'trainer.css'].forEach(function (file) {
+                document.write('<link rel="stylesheet" href="' + file + '?v=' + v + '">');
+            });
+            ['trainer-grading.js', 'trainer-core.js', 'trainer.js', 'script.js'].forEach(function (file) {
+                document.write('<script src="' + file + '?v=' + v + '" defer><\/script>');
+            });
+        })();
+    </script>
+    <noscript><link rel="stylesheet" href="style.css"></noscript>
 </head>
 <body>
     <noscript>

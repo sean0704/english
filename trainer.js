@@ -388,7 +388,9 @@
         }
         const focusFormat = info.formats.find(f => f.weak) || info.formats.find(f => !f.state);
         if (focusFormat) tasks.push({ title: `題型專練「${focusFormat.label}」`, sub: `一關 8 題，答對 8 成過關${focusFormat.rewarded ? '' : ` +${C.FORMAT_ONCE}`}`, action: '開始練習', run: () => startFormat(focusFormat) });
-        tasks.push({ title: '週末寫一份完整的模擬段考', sub: '完整卷及格 +20、半卷及格 +10', action: '去選考卷', run: () => mock.scrollIntoView({ behavior: 'smooth', block: 'start' }) });
+        // 只列今天還拿得到的及格點數
+        const passLeft = [['mockpass:full', '完整卷及格 +20'], ['mockpass:half', '半卷及格 +10']].filter(([flag]) => !info.daily.flags[flag]).map(([, text]) => text);
+        tasks.push({ title: '週末寫一份完整的模擬段考', sub: passLeft.length ? passLeft.join('、') : '今天的及格點數都拿到了', action: '去選考卷', run: () => mock.scrollIntoView({ behavior: 'smooth', block: 'start' }) });
 
         const today = h('section', 'trainer-today');
         const todayTitle = h('h2', 'trainer-today-title', '今天這樣練');
@@ -720,6 +722,12 @@
             : done.kind === 'cram' ? '總複習完成。' : (good ? '做得很好！' : '看完下面的詳解，明天再練一關。');
         box.appendChild(h('p', 'trainer-summary-msg', msg));
         if (summary.rewards.length) box.appendChild(h('p', 'trainer-summary-points', '🪙 ' + summary.rewards.map(r => `${r.label} +${r.points}`).join('、')));
+        // 訂正錯題沒拿到「全部答對」的點數時，說明原因
+        if (done.kind === 'review' && !summary.rewards.length) {
+            const after = core.hubInfo(done.unit);
+            if (after.daily.flags.reviewMiss && !after.daily.flags.clear) box.appendChild(h('p', 'trainer-summary-msg', '這次有題目第一次答錯，所以今天沒有「全部答對」的 +5。下次有錯題到期時再挑戰！'));
+            else if (!after.daily.flags.clear && after.wrongDue) box.appendChild(h('p', 'trainer-summary-msg', `還有 ${after.wrongDue} 題到期的錯題，全部答對就有 +5。`));
+        }
         const careless = done.results.filter(r => r.result.verdict === 'careless').length;
         if (careless) box.appendChild(h('p', 'trainer-summary-warn', `⚠️ 有 ${careless} 題文法對但大小寫或標點寫錯，考試會被扣分。`));
         root.appendChild(box);
