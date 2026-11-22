@@ -41,7 +41,7 @@
         return arr;
     }
     function percent(rate) { return `${Math.round(rate * 100)}%`; }
-    function clearRoot() { root.innerHTML = ''; window.scrollTo(0, 0); }
+    function clearRoot() { stopReading(); root.innerHTML = ''; window.scrollTo(0, 0); }
     function setView(name) { view = name; root.dataset.view = name; }
     function textInput(extraClass) {
         const input = h('input', `trainer-input ${extraClass || ''}`.trim(), null, { type: 'text', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', lang: 'en' });
@@ -56,9 +56,6 @@
             if (m) parent.appendChild(h('u', 'trainer-underline', m[1]));
             else if (part) parent.appendChild(document.createTextNode(part));
         });
-    }
-    function toastRewards(rewards) {
-        rewards.forEach(r => bridge.showToast(`${r.label}，獲得 ${r.points} 點！`, { title: '段考特訓', icon: '🪙' }));
     }
     function copyText(text) {
         const fallback = () => {
@@ -118,23 +115,37 @@
                 const b = h('button', 'trainer-option', null, { type: 'button', 'aria-pressed': 'false' });
                 b.appendChild(h('span', 'trainer-option-letter', `(${LETTERS[i]})`));
                 b.appendChild(h('span', 'trainer-option-text', option));
-                b.addEventListener('click', () => { api.setAnswer(option); changed(); if (opts.onPick) opts.onPick(); });
+                b.addEventListener('click', () => api.pick(option));
                 list.appendChild(b);
                 return { option, b };
             });
             body.appendChild(list);
+            // 克漏字改在文章的空格上作答：作答時先藏起這一題，檢查答案後才顯示對錯與詳解。
+            // slotHooks 由 renderPassage 接上，讓空格跟著答案、鎖定與批改結果更新。
+            if (opts.inline) wrap.hidden = true;
+            api.options = order;
+            api.number = opts.mock ? opts.number : 0;
+            api.slotHooks = null;
+            api.pick = option => { api.setAnswer(option); changed(); if (opts.onPick) opts.onPick(); };
             api.getAnswer = () => selected;
             api.setAnswer = value => {
                 selected = value || '';
                 buttons.forEach(({ option, b }) => { const on = option === selected; b.classList.toggle('selected', on); b.setAttribute('aria-pressed', String(on)); });
+                if (api.slotHooks) api.slotHooks.sync();
             };
             api.pickIndex = i => { if (buttons[i] && !buttons[i].b.disabled) buttons[i].b.click(); };
-            api.focus = () => buttons[0].b.focus({ preventScroll: true });
-            api.lock = () => buttons.forEach(({ b }) => { b.disabled = true; });
-            api.mark = () => buttons.forEach(({ option, b }) => {
-                if (option === item.answer) b.classList.add('is-correct');
-                else if (option === selected) b.classList.add('is-wrong');
-            });
+            api.focus = () => { if (api.slotHooks) api.slotHooks.focus(); else buttons[0].b.focus({ preventScroll: true }); };
+            api.lock = () => {
+                buttons.forEach(({ b }) => { b.disabled = true; });
+                if (api.slotHooks) { wrap.hidden = false; api.slotHooks.lock(); }
+            };
+            api.mark = () => {
+                buttons.forEach(({ option, b }) => {
+                    if (option === item.answer) b.classList.add('is-correct');
+                    else if (option === selected) b.classList.add('is-wrong');
+                });
+                if (api.slotHooks) api.slotHooks.mark(selected === item.answer);
+            };
         } else if (format.kind === 'blanks') {
             if (item.zh) body.appendChild(h('p', 'trainer-zh', item.zh));
             if (item.cue) body.appendChild(h('p', 'trainer-cue', item.cue));
@@ -297,19 +308,249 @@
         fb.appendChild(explain);
     }
 
-    function renderPassage(passage, askedSlots) {
+    // ---------- 朗讀文章（閱讀測驗練聽力） ----------
+    const synth = window.speechSynthesis || null;
+    const READ_RATE_KEY = 'englishTrainer_readRate';
+    const READ_RATES = [{ id: 'normal', label: '正常', rate: 0.9 }, { id: 'slow', label: '慢速', rate: 0.7 }];
+    let activeReader = null; // 同一時間只唸一篇
+
+    function stopReading() { if (activeReader) activeReader.stop(); }
+    // 重新整理或關閉頁面時，瀏覽器可能把還沒唸完的句子繼續唸下去
+    if (synth) window.addEventListener('pagehide', () => { if (activeReader) synth.cancel(); });
+
+    // 把一行文字切成句子（保留原本的空白，接回去和原文一樣）
+    function splitSentences(text) {
+        const parts = text.match(/[^.!?]+(?:[.!?]+["'”’)）]*|$)\s*/g) || [text];
+        const out = [];
+        parts.forEach(part => {
+            const prev = out[out.length - 1];
+            // Mr. / Mrs. 這類縮寫、小數點、句點後接小寫，都不是句子結尾
+            const glue = prev !== undefined && (/\b(Mr|Mrs|Ms|Dr|St|Jr)\.\s*$/.test(prev) || /^[a-z]/.test(part) || (/\d\.$/.test(prev) && /^\d/.test(part)));
+            if (glue) out[out.length - 1] = prev + part;
+            else out.push(part);
+        });
+        return out.filter(s => s.trim());
+    }
+
+    // 要唸出來的文字：拿掉中文註解（例如「earthquake（地震）」）與括號
+    function speechText(sentence) {
+        return sentence.replace(/（[^）]*）/g, ' ').replace(/[()]/g, ' ').replace(/[　-鿿＀-￯]+/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    // sentences：[{ span, text }]。逐句唸，才能標示正在唸的句子，暫停後也能從同一句接著唸。
+    function buildReader(sentences) {
+        let index = 0;
+        let state = 'idle'; // idle → playing ⇄ paused
+        let token = 0;      // 每次重新開始或中斷就加一，讓舊的語音回呼失效
+        let watchdog = null;
+        let utterance = null; // 留著參照，避免 Chrome 在唸完前把它回收
+        let rateId = bridge.readStorage(READ_RATE_KEY) === 'slow' ? 'slow' : 'normal';
+
+        const bar = h('div', 'trainer-reader', null, { role: 'group', 'aria-label': '朗讀文章' });
+        const playBtn = h('button', 'dialog-button secondary trainer-reader-btn', '', { type: 'button' });
+        const stopBtn = h('button', 'dialog-button secondary trainer-reader-btn', '⏹ 停止', { type: 'button' });
+        const speed = h('div', 'trainer-reader-speed', null, { role: 'group', 'aria-label': '語速' });
+        speed.appendChild(h('span', 'trainer-reader-label', '語速'));
+        const rateBtns = READ_RATES.map(r => {
+            const b = h('button', 'trainer-reader-rate', r.label, { type: 'button' });
+            b.addEventListener('click', () => setRate(r.id));
+            speed.appendChild(b);
+            return { id: r.id, b };
+        });
+        bar.appendChild(playBtn);
+        bar.appendChild(stopBtn);
+        bar.appendChild(speed);
+
+        function render() {
+            playBtn.textContent = state === 'playing' ? '⏸ 暫停' : state === 'paused' ? '▶ 繼續' : '🔊 唸出文章';
+            stopBtn.hidden = state === 'idle';
+            rateBtns.forEach(({ id, b }) => b.setAttribute('aria-pressed', String(id === rateId)));
+        }
+        function mark(at) { sentences.forEach((s, i) => s.span.classList.toggle('is-speaking', i === at)); }
+        function halt() { token++; clearTimeout(watchdog); synth.cancel(); }
+
+        function speak() {
+            if (!bar.isConnected || index >= sentences.length) { reader.stop(); return; }
+            const mine = ++token;
+            const sentence = sentences[index];
+            if (!sentence.text) { index++; speak(); return; }
+            utterance = new SpeechSynthesisUtterance(sentence.text);
+            const voice = bridge.getPreferredVoice();
+            if (voice) utterance.voice = voice;
+            utterance.lang = 'en-US';
+            utterance.rate = READ_RATES.find(r => r.id === rateId).rate;
+            const next = () => { if (mine !== token) return; clearTimeout(watchdog); index++; speak(); };
+            utterance.onend = next;
+            utterance.onerror = next;
+            // 部分瀏覽器偶爾不會觸發 onend，設保險計時避免卡在「播放中」
+            clearTimeout(watchdog);
+            watchdog = setTimeout(() => { if (mine === token) reader.stop(); }, 8000 + sentence.text.length * 250);
+            mark(index);
+            synth.speak(utterance);
+        }
+        // cancel() 之後立刻 speak() 有時會被瀏覽器吃掉，稍等一下再開始
+        function speakSoon() {
+            halt();
+            const mine = token;
+            setTimeout(() => { if (mine === token && state === 'playing') speak(); }, 80);
+        }
+        function setRate(id) {
+            rateId = id;
+            bridge.writeStorage(READ_RATE_KEY, id);
+            render();
+            if (state === 'playing') speakSoon(); // 用新語速重唸目前這一句
+        }
+
+        const reader = {
+            el: bar,
+            stop() {
+                halt();
+                state = 'idle';
+                index = 0;
+                mark(-1);
+                if (activeReader === reader) activeReader = null;
+                render();
+            },
+        };
+        playBtn.addEventListener('click', () => {
+            if (state === 'playing') { halt(); state = 'paused'; render(); return; }
+            if (activeReader && activeReader !== reader) activeReader.stop();
+            activeReader = reader;
+            state = 'playing';
+            render();
+            speakSoon();
+        });
+        stopBtn.addEventListener('click', () => { reader.stop(); playBtn.focus({ preventScroll: true }); });
+        render();
+        return reader;
+    }
+
+    // slotWidgets：Map(格號 → 選擇題元件)。有對應元件的空格會變成按鈕，點了在空格下方跳出選項。
+    function renderPassage(passage, askedSlots, slotWidgets) {
         const box = h('div', `trainer-passage kind-${passage.kind}`);
         box.appendChild(h('h3', 'trainer-passage-title', passage.title));
+        const slots = [];   // 文章裡可作答的空格，依出現順序
+        const hint = h('p', 'trainer-passage-hint', '👆 點文章裡的空格選答案');
+        let pop = null;     // 目前開著的選項視窗（一次只開一個）
+        let popBtn = null;
+
+        function closePop() {
+            if (!pop) return;
+            pop.remove();
+            popBtn.setAttribute('aria-expanded', 'false');
+            pop = null;
+            popBtn = null;
+            document.removeEventListener('mousedown', onOutsideDown, true);
+        }
+        function onOutsideDown(event) {
+            if (!pop || !pop.isConnected) { closePop(); return; }
+            if (!pop.contains(event.target) && !popBtn.contains(event.target)) closePop();
+        }
+        function openPop(entry) {
+            const { btn, slot, widget } = entry;
+            closePop();
+            pop = h('div', 'trainer-slot-pop', null, { role: 'group', 'aria-label': `第 ${slot} 格的選項` });
+            popBtn = btn;
+            pop.appendChild(h('p', 'trainer-slot-pop-title', `${widget.number ? `第 ${widget.number} 題・` : ''}第 ${slot} 格`));
+            const optionBtns = widget.options.map((option, i) => {
+                const b = h('button', `trainer-option${option === widget.getAnswer() ? ' selected' : ''}`, null, { type: 'button' });
+                b.appendChild(h('span', 'trainer-option-letter', `(${LETTERS[i]})`));
+                b.appendChild(h('span', 'trainer-option-text', option));
+                b.addEventListener('click', () => {
+                    widget.pick(option);
+                    closePop();
+                    // 選完把焦點移到下一個還沒作答的空格，沒有的話留在原地
+                    const rest = slots.slice(slots.indexOf(entry) + 1).concat(slots.slice(0, slots.indexOf(entry)));
+                    (rest.find(s => !s.widget.getAnswer()) || entry).btn.focus({ preventScroll: true });
+                });
+                pop.appendChild(b);
+                return b;
+            });
+            pop.addEventListener('keydown', event => {
+                if (event.ctrlKey || event.metaKey || event.altKey) return;
+                const key = event.key.toLowerCase();
+                const index = key.length === 1 ? ('1234'.includes(key) ? Number(key) - 1 : 'abcd'.indexOf(key)) : -1;
+                const at = optionBtns.indexOf(document.activeElement);
+                if (event.key === 'Escape') { closePop(); btn.focus({ preventScroll: true }); }
+                else if (index >= 0 && optionBtns[index]) optionBtns[index].click();
+                else if (event.key === 'ArrowDown') optionBtns[(at + 1) % optionBtns.length].focus();
+                else if (event.key === 'ArrowUp') optionBtns[(at - 1 + optionBtns.length) % optionBtns.length].focus();
+                else return;
+                event.preventDefault();
+                event.stopPropagation(); // 不讓 Esc、數字鍵再觸發外層的快速鍵
+            });
+            box.appendChild(pop);
+            btn.setAttribute('aria-expanded', 'true');
+            // 放在空格正下方，左右不超出文章框
+            const boxRect = box.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+            pop.style.top = `${btnRect.bottom - boxRect.top + 6}px`;
+            pop.style.left = `${Math.max(8, Math.min(btnRect.left - boxRect.left, box.clientWidth - pop.offsetWidth - 8))}px`;
+            (optionBtns.find(b => b.classList.contains('selected')) || optionBtns[0]).focus({ preventScroll: true });
+            pop.scrollIntoView({ block: 'nearest' });
+            document.addEventListener('mousedown', onOutsideDown, true);
+        }
+        function slotButton(slot, widget) {
+            const btn = h('button', 'trainer-slot trainer-slot-btn', null, { type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false' });
+            btn.appendChild(h('span', 'trainer-slot-num', `( ${slot} )`));
+            const value = h('span', 'trainer-slot-value');
+            btn.appendChild(value);
+            const entry = { btn, slot, widget };
+            slots.push(entry);
+            const sync = () => {
+                const answer = widget.getAnswer();
+                value.textContent = answer;
+                btn.classList.toggle('filled', Boolean(answer));
+                btn.setAttribute('aria-label', answer ? `第 ${slot} 格，已選 ${answer}，點一下可以改` : `第 ${slot} 格，還沒作答，點一下選答案`);
+            };
+            btn.addEventListener('click', () => { if (popBtn === btn) closePop(); else openPop(entry); });
+            widget.slotHooks = {
+                sync,
+                focus: () => btn.focus(),
+                lock: () => { if (popBtn === btn) closePop(); btn.disabled = true; hint.hidden = true; },
+                mark: right => {
+                    btn.classList.add(right ? 'is-correct' : 'is-wrong');
+                    if (!widget.getAnswer()) value.textContent = '未作答';
+                },
+            };
+            sync();
+            return btn;
+        }
+
+        const paragraphs = [];
+        const readable = passage.kind === 'reading' && Boolean(synth);
+        const sentences = []; // 閱讀文章逐句包起來，朗讀時用來標示
         passage.text.split(/\n{2,}/).forEach(par => {
             const p = h('p', 'trainer-passage-text');
             par.split(/(\{\{\d+\}\})/g).forEach(part => {
                 const m = part.match(/^\{\{(\d+)\}\}$/);
-                if (m) p.appendChild(h('span', `trainer-slot${askedSlots && !askedSlots.has(Number(m[1])) ? ' dim' : ''}`, `( ${m[1]} )`));
-                else part.split('\n').forEach((seg, i) => { if (i) p.appendChild(h('br')); p.appendChild(document.createTextNode(seg)); });
+                const widget = m && slotWidgets && slotWidgets.get(Number(m[1]));
+                if (widget) p.appendChild(slotButton(Number(m[1]), widget));
+                else if (m) p.appendChild(h('span', `trainer-slot${askedSlots && !askedSlots.has(Number(m[1])) ? ' dim' : ''}`, `( ${m[1]} )`));
+                else part.split('\n').forEach((seg, i) => {
+                    if (i) p.appendChild(h('br'));
+                    if (!readable) { p.appendChild(document.createTextNode(seg)); return; }
+                    splitSentences(seg).forEach(sentence => {
+                        const span = h('span', 'trainer-sen', sentence);
+                        p.appendChild(span);
+                        sentences.push({ span, text: speechText(sentence) });
+                    });
+                });
             });
-            box.appendChild(p);
+            paragraphs.push(p);
         });
+        // 題庫裡若有對不到文章空格的題目，照舊顯示下方的選項，不能讓它變成無法作答
+        if (slotWidgets) slotWidgets.forEach(widget => { if (!widget.slotHooks) widget.el.hidden = false; });
+        if (sentences.length) box.appendChild(buildReader(sentences).el);
+        if (slots.length) box.appendChild(hint);
+        paragraphs.forEach(p => box.appendChild(p));
         return box;
+    }
+
+    // 克漏字的題目元件依格號對應到文章空格
+    function clozeSlotMap(passage, widgets) {
+        if (!passage || passage.kind !== 'cloze') return null;
+        return new Map(widgets.filter(w => w.item.format === 'cloze').map(w => [w.item.slot, w]));
     }
 
     // ---------- 大廳 ----------
@@ -348,7 +589,6 @@
         titles.appendChild(h('p', 'trainer-subtitle', unit.subtitle));
         header.appendChild(titles);
         const headBtns = h('div', 'trainer-header-actions');
-        headBtns.appendChild(h('span', 'trainer-points', `🪙 ${bridge.getTotalPoints()}`));
         headBtns.appendChild(button('家長報告', 'secondary', () => renderReport()));
         headBtns.appendChild(button('返回主選單', 'secondary', () => bridge.exit()));
         header.appendChild(headBtns);
@@ -617,13 +857,14 @@
 
         const form = h('form', 'trainer-work', null, { novalidate: '' });
         const showFormat = session.kind !== 'format';
-        if (work.passage) form.appendChild(renderPassage(work.passage, work.passage.kind === 'cloze' ? new Set(work.items.map(it => it.slot)) : null));
         const submit = h('button', 'dialog-button trainer-submit', '檢查答案', { type: 'submit' });
         const widgets = work.items.map((item, i) => buildWidget(item, {
             number: work.items.length > 1 ? i + 1 : 0,
             showFormat: showFormat && !work.passage,
+            inline: item.format === 'cloze' && Boolean(work.passage),
             onPick: work.items.length === 1 ? () => submit.focus({ preventScroll: true }) : null,
         }));
+        if (work.passage) form.appendChild(renderPassage(work.passage, work.passage.kind === 'cloze' ? new Set(work.items.map(it => it.slot)) : null, clozeSlotMap(work.passage, widgets)));
         widgets.forEach(w => form.appendChild(w.el));
         const actions = h('div', 'trainer-actions');
         actions.appendChild(submit);
@@ -708,7 +949,6 @@
     function finishSession() {
         const done = session;
         const summary = core.finishSession(done);
-        toastRewards(summary.rewards);
         setView('summary');
         clearRoot();
         const box = h('div', 'trainer-summary');
@@ -834,13 +1074,17 @@
             sec.appendChild(h('p', 'trainer-section-desc', C.FORMAT_BY_ID[section.format].desc));
             section.units.forEach(u => {
                 const items = u.ids.map(id => core.data.items.get(id)).filter(Boolean);
-                if (u.passage) sec.appendChild(renderPassage(core.data.passages.get(u.passage), null));
-                items.forEach(item => {
+                const passage = u.passage ? core.data.passages.get(u.passage) : null;
+                const unitWidgets = items.map(item => {
                     number++;
-                    const w = buildWidget(item, { number, mock: true, seed: exam.startedAt });
-                    if (exam.answers[item.id] !== undefined) w.setAnswer(exam.answers[item.id]);
+                    const w = buildWidget(item, { number, mock: true, seed: exam.startedAt, inline: item.format === 'cloze' && Boolean(passage) });
                     w.onChange(() => { exam.answers[item.id] = w.getAnswer(); updateCount(); schedulePersist(); });
                     widgets.push(w);
+                    return w;
+                });
+                if (passage) sec.appendChild(renderPassage(passage, null, clozeSlotMap(passage, unitWidgets)));
+                unitWidgets.forEach(w => {
+                    if (exam.answers[w.item.id] !== undefined) w.setAnswer(exam.answers[w.item.id]);
                     sec.appendChild(w.el);
                 });
             });
@@ -880,7 +1124,6 @@
         const report = core.submitExam();
         session = null;
         if (!report) { renderHub(); return; }
-        toastRewards(report.rewards);
         setView('examReport');
         clearRoot();
 
@@ -1120,6 +1363,7 @@
         if (session && session.persist) session.persist();
         else if (core && core.getState()) core.save();
         if (keyHandler) { document.removeEventListener('keydown', keyHandler); keyHandler = null; }
+        stopReading();
         session = null;
         view = '';
         if (root) root.innerHTML = '';

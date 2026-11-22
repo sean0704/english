@@ -74,7 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const redemptionBalanceEl = document.getElementById('redemption-balance');
     const redemptionErrorEl = document.getElementById('redemption-error');
 
+    buildPointsUi();
     const totalPointsDisplayEl = document.getElementById('total-points-display');
+    const pointsHudEl = document.getElementById('points-hud');
+    const pointsCelebrationEl = document.getElementById('points-celebration');
+    const pointsAnnouncerEl = document.getElementById('points-announcer');
+    const pointsHistoryContainer = document.getElementById('points-history-container');
+    const closePointsHistoryBtn = document.getElementById('close-points-history-btn');
+    const pointsHistoryBalanceEl = document.getElementById('points-history-balance');
+    const pointsHistoryBodyEl = document.getElementById('points-history-body');
     const unitRewardsBadgeContainer = document.getElementById('unit-rewards-badge-container');
     const unitRewardsHintEl = document.getElementById('unit-rewards-hint');
     const pointsInfoTitleEl = document.getElementById('points-info-title');
@@ -192,10 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const MEDAL_IDS = ['BRONZE', 'SILVER', 'GOLD'];
     const STREAK_IDS = ['THREE_DAY_STREAK', 'THREE_WEEK_STREAK', 'THREE_MONTH_STREAK'];
 
-    function formatAchievementLabel(ach) {
-        return `${ach.icon} ${ach.name}（+${ach.points}）`;
-    }
-
     // --- 遊戲 & 玩家狀態 ---
     let playerStats;
     let wordList = [];
@@ -291,6 +295,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .filter(isPlainObject)
             .map(record => ({ ...record, points: toNumber(record.points), description: String(record.description ?? '') }))
             .filter(record => Number.isFinite(record.points));
+        if (!Array.isArray(stats.pointsHistory)) stats.pointsHistory = [];
+        stats.pointsHistory = stats.pointsHistory
+            .filter(isPlainObject)
+            .map(record => ({ ...record, points: toNumber(record.points), reason: String(record.reason ?? '') }))
+            .filter(record => Number.isFinite(record.points));
 
         const trainerPaths = new Set(wordLists.filter(list => list.type === 'trainer').map(list => list.path));
         Object.keys(stats.unitData).forEach(unitPath => {
@@ -319,6 +328,170 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         playerStats = normalizeStats(parsed);
+    }
+
+    // 常駐總點數、點數紀錄視窗與得點慶祝的元素由程式建立，不寫在 index.html：
+    // index.html 沒有防快取，瀏覽器可能拿舊的 index.html 配新的 script.js，元素寫在那裡會找不到。
+    function buildPointsUi() {
+        // 舊版 index.html 把總點數放在首頁標題下方
+        document.getElementById('total-points-display')?.remove();
+        document.body.insertAdjacentHTML('afterbegin', `
+            <button id="points-hud" class="points-hud" type="button" title="查看點數紀錄">
+                <span class="points-hud-coin" aria-hidden="true">🪙</span><span id="total-points-display">0</span><span class="visually-hidden"> 點，查看點數紀錄</span>
+            </button>`);
+        document.body.insertAdjacentHTML('beforeend', `
+            <div id="points-history-container" style="display: none;">
+                <div id="points-history-modal" role="dialog" aria-modal="true" aria-labelledby="points-history-title">
+                    <button id="close-points-history-btn" type="button" aria-label="關閉">&times;</button>
+                    <h2 id="points-history-title">點數紀錄</h2>
+                    <p id="points-history-balance" class="points-history-balance"></p>
+                    <p class="points-history-note">每次拿到或使用點數，都會記在這裡。</p>
+                    <div id="points-history-body"></div>
+                </div>
+            </div>
+            <div id="points-celebration" class="points-celebration" aria-hidden="true"></div>
+            <div id="points-announcer" class="visually-hidden" role="status" aria-live="polite"></div>`);
+    }
+
+    // --- 加點：所有得點都走這裡，負責加總、記錄與慶祝 ---
+    const MAX_POINTS_HISTORY = 300;
+
+    // log 為 false 時不寫進得點紀錄（管理員加點已記在兌換紀錄裡）；呼叫端負責 saveProgress()
+    // label 是慶祝畫面上的簡短說明，沒給就沿用 reason
+    function grantPoints(points, reason, { title = '獲得點數！', label = reason, log = true } = {}) {
+        if (!(points > 0)) return;
+        playerStats.totalPoints += points;
+        if (log) {
+            playerStats.pointsHistory.unshift({ points, reason, timestamp: Date.now() });
+            playerStats.pointsHistory.length = Math.min(playerStats.pointsHistory.length, MAX_POINTS_HISTORY);
+        }
+        queueCelebration({ points, reason, label, title });
+    }
+
+    // --- 得點慶祝：中央彈出「+N 點」，金幣飛向常駐總點數 ---
+    const celebrationQueue = [];
+    let celebrationBatch = null;      // 同一時間點發出的得點先收在這裡，合併成一次彈出
+    let celebrationPlaying = false;
+    let uncelebratedPoints = 0;       // 已入帳但動畫還沒播到的點數；常駐總點數先不顯示這部分
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    function queueCelebration(item) {
+        uncelebratedPoints += item.points;
+        if (!celebrationBatch) {
+            celebrationBatch = [];
+            setTimeout(() => {
+                celebrationQueue.push(celebrationBatch);
+                celebrationBatch = null;
+                if (!celebrationPlaying) runCelebrations();
+            }, 0);
+        }
+        celebrationBatch.push(item);
+    }
+
+    async function runCelebrations() {
+        celebrationPlaying = true;
+        while (celebrationQueue.length > 0) {
+            const items = celebrationQueue.shift();
+            try {
+                await playCelebration(items);
+            } catch (error) {
+                console.warn('得點動畫播放失敗：', error);
+                pointsCelebrationEl.innerHTML = '';
+            }
+            // 不論動畫是否順利，這批點數都要算進顯示的總點數
+            uncelebratedPoints = Math.max(0, uncelebratedPoints - items.reduce((sum, item) => sum + item.points, 0));
+            updateTotalPointsDisplay();
+        }
+        celebrationPlaying = false;
+    }
+
+    async function playCelebration(items) {
+        const sum = items.reduce((total, item) => total + item.points, 0);
+        const title = items[items.length - 1].title;
+        const isSingle = items.length === 1;
+
+        const card = createEl('div', 'celebration-card');
+        card.appendChild(createEl('div', 'celebration-coin', '🪙'));
+        card.appendChild(createEl('div', 'celebration-title', title));
+        card.appendChild(createEl('div', 'celebration-amount', `+${sum} 點`));
+        const list = createEl('ul', `celebration-reasons${isSingle ? ' single' : ''}`);
+        items.forEach(item => {
+            const li = createEl('li');
+            li.appendChild(createEl('span', '', item.label));
+            if (!isSingle) li.appendChild(createEl('span', '', `+${item.points}`));
+            list.appendChild(li);
+        });
+        card.appendChild(list);
+        pointsCelebrationEl.appendChild(card);
+        card.classList.add('show');
+        pointsAnnouncerEl.textContent = `獲得 ${sum} 點：${items.map(item => item.reason).join('、')}`;
+
+        // 項目越多停留越久，讓孩子來得及看完
+        await wait(1500 + Math.min(items.length, 5) * 300);
+
+        const cardRect = card.getBoundingClientRect();
+        card.classList.replace('show', 'hide');
+        const shownBefore = (playerStats.totalPoints || 0) - uncelebratedPoints;
+        if (reducedMotionQuery.matches) {
+            totalPointsDisplayEl.textContent = shownBefore + sum;
+        } else {
+            await flyCoinsToHud(cardRect, Math.min(8, 3 + Math.floor(sum / 15)));
+            await countUpHud(shownBefore, shownBefore + sum);
+        }
+        await wait(350);
+        card.remove();
+    }
+
+    function bumpHud() {
+        pointsHudEl.classList.remove('bump');
+        void pointsHudEl.offsetWidth; // 強制重排，讓同一個動畫可以連續重播
+        pointsHudEl.classList.add('bump');
+    }
+
+    function flyCoinsToHud(fromRect, count) {
+        const target = pointsHudEl.getBoundingClientRect();
+        const startX = fromRect.left + fromRect.width / 2 - 12;
+        const startY = fromRect.top + 40;
+        const endX = target.left + 14 - 12;
+        const endY = target.top + target.height / 2 - 12;
+        const flights = [];
+        for (let i = 0; i < count; i++) {
+            const coin = createEl('div', 'fly-coin', '🪙');
+            document.body.appendChild(coin);
+            const driftX = (Math.random() - 0.5) * 120;
+            const driftY = (Math.random() - 0.5) * 80;
+            const animation = coin.animate([
+                { transform: `translate(${startX}px, ${startY}px) scale(1)`, opacity: 1 },
+                { transform: `translate(${startX + driftX}px, ${startY + driftY}px) scale(1.25)`, opacity: 1, offset: 0.3 },
+                { transform: `translate(${endX}px, ${endY}px) scale(0.6)`, opacity: 0.9 },
+            ], { duration: 750, delay: i * 70, easing: 'cubic-bezier(0.5, 0, 0.3, 1)', fill: 'both' });
+            const land = () => { coin.remove(); bumpHud(); };
+            flights.push(animation.finished.then(land, land));
+        }
+        return Promise.all(flights);
+    }
+
+    function countUpHud(from, to) {
+        bumpHud();
+        return new Promise(resolve => {
+            const duration = 500;
+            const startTime = performance.now();
+            // 分頁在背景時 requestAnimationFrame 會暫停，用計時器保底，避免佇列卡住
+            const fallback = setTimeout(finish, duration + 300);
+            function finish() {
+                clearTimeout(fallback);
+                totalPointsDisplayEl.textContent = to;
+                resolve();
+            }
+            function tick(now) {
+                const progress = Math.min(1, (now - startTime) / duration);
+                if (progress >= 1) { finish(); return; }
+                totalPointsDisplayEl.textContent = Math.round(from + (to - from) * progress);
+                requestAnimationFrame(tick);
+            }
+            requestAnimationFrame(tick);
+        });
     }
 
     // --- 通知訊息（Toast）：每則獨立顯示，可同時堆疊 ---
@@ -410,7 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        [achievementContainer, redemptionContainer, adminModalContainer, dialogContainer].forEach(container => {
+        [achievementContainer, redemptionContainer, pointsHistoryContainer, adminModalContainer, dialogContainer].forEach(container => {
             container.addEventListener('mousedown', event => {
                 if (event.target !== container) return;
                 const entry = modalStack.find(item => item.container === container);
@@ -461,9 +634,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const ach = GLOBAL_ACHIEVEMENTS[id];
             const progress = ach.progress(stats);
             if (progress.current >= progress.target) {
-                stats.totalPoints += ach.points;
                 stats.unlockedGlobalAchievements[id] = true;
-                showToast(formatAchievementLabel(ach));
+                grantPoints(ach.points, `${ach.icon} ${ach.name}`, { title: '成就解鎖！' });
             }
         }
     }
@@ -650,6 +822,55 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             li.appendChild(item);
             redemptionHistoryList.appendChild(li);
+        });
+    }
+
+    // --- 點數紀錄：得點紀錄與兌換紀錄合併成一份收支明細，依日期分組 ---
+    function formatHistoryDay(timestamp) {
+        const d = new Date(timestamp);
+        if (Number.isNaN(d.getTime())) return '日期不明';
+        const dayKey = getLocalDateString(d);
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (dayKey === getLocalDateString()) return '今天';
+        if (dayKey === getLocalDateString(yesterday)) return '昨天';
+        return dayKey.replace(/-/g, '/');
+    }
+
+    function renderPointsHistory() {
+        pointsHistoryBalanceEl.textContent = `🪙 ${playerStats.totalPoints || 0} 點`;
+        pointsHistoryBodyEl.innerHTML = '';
+        const records = [
+            ...playerStats.pointsHistory.map(record => ({ change: record.points, text: record.reason, timestamp: record.timestamp })),
+            // 兌換紀錄的 points 為正代表扣點、為負代表管理員加點
+            ...playerStats.redemptionHistory.map(record => ({
+                change: -record.points,
+                text: record.points > 0 ? `兌換：${record.description}` : record.description,
+                timestamp: record.timestamp,
+            })),
+        ].sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0));
+
+        if (records.length === 0) {
+            pointsHistoryBodyEl.appendChild(createEl('p', 'history-empty', '還沒有點數紀錄，完成練習就會出現在這裡。'));
+            return;
+        }
+        let currentDay = null;
+        let list = null;
+        records.forEach(record => {
+            const day = formatHistoryDay(record.timestamp);
+            if (day !== currentDay) {
+                currentDay = day;
+                pointsHistoryBodyEl.appendChild(createEl('h3', 'points-history-day', day));
+                list = createEl('ul', 'points-history-list');
+                pointsHistoryBodyEl.appendChild(list);
+            }
+            const d = new Date(record.timestamp);
+            const time = Number.isNaN(d.getTime()) ? '' : `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            const item = createEl('li', 'history-item');
+            item.appendChild(createEl('span', 'history-date', time));
+            item.appendChild(createEl('span', 'history-desc', record.text));
+            item.appendChild(createEl('span', `history-points${record.change > 0 ? ' reward' : ''}`, `${record.change > 0 ? '+' : '−'} ${Math.abs(record.change)} 點`));
+            list.appendChild(item);
         });
     }
 
@@ -1355,14 +1576,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const todayKey = getLocalDateString();
         const toastOptions = { title: '回合完成！', icon: '🪙' };
         if (unitData[rewardKey][round] !== todayKey) {
-            playerStats.totalPoints += pointsAwarded;
             unitData[rewardKey][round] = todayKey;
-            showToast(`完成${roundLabel}，獲得 ${pointsAwarded} 點！`, toastOptions);
+            grantPoints(pointsAwarded, `「${currentWordListName}」完成${roundLabel}`, { title: '回合完成！', label: `完成${roundLabel}` });
         } else {
             showToast(`完成${roundLabel}！（今日點數已領取）`, toastOptions);
         }
         saveProgress();
         updateTotalPointsDisplay();
+    }
+
+    function grantUnitAchievement(unitName, ach) {
+        grantPoints(ach.points, `「${unitName}」${ach.icon} ${ach.name}`, { title: '恭喜通關！', label: `${ach.icon} ${ach.name}` });
     }
 
     // 單元通關結算：記錄完成時間並發放首次通關、獎牌、累計成就點數
@@ -1376,17 +1600,12 @@ document.addEventListener('DOMContentLoaded', () => {
             ['SILVER', remainingHealth >= MAX_HEALTH - 1],
             ['BRONZE', remainingHealth >= MAX_HEALTH - 2],
         ];
-        const unlockedInSession = [];
         medalRules.forEach(([id, qualified]) => {
             if (!qualified || unitData.achievements[id]) return;
-            playerStats.totalPoints += UNIT_ACHIEVEMENTS[id].points;
             unitData.achievements[id] = true;
-            unlockedInSession.push(formatAchievementLabel(UNIT_ACHIEVEMENTS[id]));
+            grantUnitAchievement(unitName, UNIT_ACHIEVEMENTS[id]);
         });
-        checkStreakAchievements(unitPath, unlockedInSession);
-        if (unlockedInSession.length > 0) {
-            showToast(`在「${unitName}」解鎖：${unlockedInSession.join('、')}`);
-        }
+        checkStreakAchievements(unitPath, unitName);
         checkGlobalAchievements();
     }
 
@@ -1477,7 +1696,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return [d.getUTCFullYear(), weekNo];
     }
 
-    function checkStreakAchievements(unitPath, unlockedInSession) {
+    function checkStreakAchievements(unitPath, unitName) {
         const unitData = playerStats.unitData[unitPath];
         if (!unitData) return;
         for (const id in UNIT_ACHIEVEMENTS) {
@@ -1486,9 +1705,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const ach = UNIT_ACHIEVEMENTS[id];
                     const progress = ach.progress(playerStats, unitPath);
                     if (progress.current >= progress.target) {
-                        playerStats.totalPoints += ach.points;
                         unitData.achievements[id] = true;
-                        unlockedInSession.push(formatAchievementLabel(ach));
+                        grantUnitAchievement(unitName, ach);
                     }
                 }
             }
@@ -1518,7 +1736,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateTotalPointsDisplay() {
-        totalPointsDisplayEl.textContent = playerStats.totalPoints || 0;
+        // 得點動畫播放中由動畫負責更新數字，播完會再呼叫一次
+        if (celebrationPlaying) return;
+        totalPointsDisplayEl.textContent = Math.max(0, (playerStats.totalPoints || 0) - uncelebratedPoints);
     }
 
     function renderHearts(displayEl, health) {
@@ -1900,13 +2120,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        playerStats.totalPoints += points;
-        // 兌換紀錄中以負數代表加點
+        // 兌換紀錄中以負數代表加點；這筆已記在兌換紀錄，不再重複寫進得點紀錄
         playerStats.redemptionHistory.unshift({ points: -points, description: `[獎勵] ${reason}`, timestamp: Date.now() });
+        grantPoints(points, reason, { title: '獲得獎勵！', log: false });
         saveProgress();
         updateTotalPointsDisplay();
         closeModal(adminModalContainer);
-        showToast(`已增加 ${points} 點（${reason}）`, { title: '加點成功', icon: '🪙' });
     }
 
     // 其他分頁更新了存檔時同步過來，避免兩個分頁互相覆蓋進度
@@ -1916,13 +2135,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTotalPointsDisplay();
         if (startContainer.style.display !== 'none') updateUnitRewardsBadge();
         if (redemptionContainer.style.display !== 'none') renderRedemptionHistory();
+        if (pointsHistoryContainer.style.display !== 'none') renderPointsHistory();
     }
 
     // --- 段考特訓的接點：trainer.js 透過這組函式使用共用工具與點數（一律傳函式，playerStats 會被重新指派）---
     const trainerBridge = {
         createEl, showToast, showDialog, isAnyModalOpen, shuffle, getLocalDateString, readStorage, writeStorage, moveFocusTo,
         fetchJson: url => fetchJsonWithTimeout(url, { cache: 'no-cache' }, LOAD_TIMEOUT_MS),
-        getTotalPoints: () => playerStats.totalPoints,
+        // 朗讀文章用和單字發音同一個語音
+        getPreferredVoice: () => (synth ? getPreferredVoice() : null),
         // 點數帳本與總點數放在同一份存檔，沿用跨分頁同步
         getRewardLedger() {
             if (!isPlainObject(playerStats.trainerRewards)) playerStats.trainerRewards = {};
@@ -1932,9 +2153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isPlainObject(ledger.once)) ledger.once = {};
             return ledger;
         },
-        grantPoints(points) {
+        grantPoints(points, label) {
             if (!(points > 0)) return;
-            playerStats.totalPoints += points;
+            grantPoints(points, `段考特訓：${label || '練習獎勵'}`, { title: '段考特訓', label: label || '練習獎勵' });
             saveProgress();
             updateTotalPointsDisplay();
         },
@@ -2003,6 +2224,18 @@ document.addEventListener('DOMContentLoaded', () => {
             openModal(redemptionContainer, { focusEl: redeemPointsInput });
         });
         closeRedemptionsBtn.addEventListener('click', () => closeModal(redemptionContainer));
+
+        // 點數紀錄
+        // 練習途中看完紀錄，把游標放回拼寫輸入框，不必再點一次
+        const closePointsHistory = () => {
+            closeModal(pointsHistoryContainer);
+            if (gameContainer.style.display !== 'none' && !isSpellingLocked && !isAnyModalOpen()) spellingInputEl.focus();
+        };
+        pointsHudEl.addEventListener('click', () => {
+            renderPointsHistory();
+            openModal(pointsHistoryContainer, { focusEl: closePointsHistoryBtn, onDismiss: closePointsHistory });
+        });
+        closePointsHistoryBtn.addEventListener('click', closePointsHistory);
         redemptionForm.addEventListener('submit', handleManualRedeem);
 
         // 管理員加點

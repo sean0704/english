@@ -51,7 +51,6 @@
     flex-wrap: wrap;
 }
 
-.trainer-points,
 .trainer-progress-text {
     color: var(--notice-color);
     font-weight: bold;
@@ -920,6 +919,7 @@
 
 /* ---------- 文章 ---------- */
 .trainer-passage {
+    position: relative; /* 空格的選項視窗以文章框為基準定位 */
     background: #1a202c;
     border: 1px solid var(--border-color);
     border-radius: 0.7rem;
@@ -952,6 +952,140 @@
     padding: 0 0.45rem;
     margin: 0 0.15rem;
     line-height: 1.4;
+}
+
+/* 朗讀文章的控制列 */
+.trainer-reader {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0 0 0.8rem;
+}
+
+.trainer-container .trainer-reader-btn {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.92rem;
+}
+
+.trainer-reader-speed {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.trainer-reader-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-right: 0.15rem;
+}
+
+.trainer-reader-rate {
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    cursor: pointer;
+}
+
+.trainer-reader-rate[aria-pressed="true"] {
+    color: #1a202c;
+    background: var(--notice-color);
+    border-color: var(--notice-color);
+    font-weight: bold;
+}
+
+/* 正在唸的句子 */
+.trainer-sen.is-speaking {
+    background: rgba(246, 173, 85, 0.28);
+    border-radius: 0.25rem;
+    box-shadow: 0 0 0 2px rgba(246, 173, 85, 0.28);
+}
+
+/* 可作答的空格：點一下在下方跳出選項 */
+.trainer-slot-btn {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    font: inherit;
+    font-weight: bold;
+    line-height: 1.4;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.trainer-slot-btn:hover:not(:disabled),
+.trainer-slot-btn[aria-expanded="true"] {
+    box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.45);
+}
+
+/* 還沒作答：留一段底線當空格 */
+.trainer-slot-value:empty {
+    display: inline-block;
+    min-width: 3.5em;
+    border-bottom: 2px solid currentColor;
+    transform: translateY(-0.2em);
+}
+
+.trainer-slot-btn:not(:disabled)::after {
+    content: '▾';
+    font-size: 0.8em;
+}
+
+.trainer-slot-btn.filled {
+    color: var(--text-color);
+    background: rgba(66, 153, 225, 0.3);
+    border-color: #63b3ed;
+}
+
+.trainer-slot-btn:disabled {
+    cursor: default;
+}
+
+.trainer-slot-btn.is-correct {
+    color: var(--text-color);
+    background: rgba(72, 187, 120, 0.22);
+    border-color: var(--correct-color);
+}
+
+.trainer-slot-btn.is-wrong {
+    color: var(--text-color);
+    background: rgba(229, 62, 62, 0.22);
+    border-color: var(--incorrect-color);
+}
+
+.trainer-passage-hint {
+    margin: 0 0 0.6rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.trainer-slot-pop {
+    position: absolute;
+    z-index: 4; /* 在文章之上、固定的計時列之下 */
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 13rem;
+    max-width: calc(100% - 16px);
+    padding: 0.6rem;
+    background: var(--container-bg-color);
+    border: 2px solid var(--notice-color);
+    border-radius: 0.7rem;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+}
+
+.trainer-slot-pop-title {
+    margin: 0 0 0.1rem;
+    color: var(--notice-color);
+    font-size: 0.85rem;
+    font-weight: bold;
 }
 
 .trainer-slot.dim {
@@ -1198,6 +1332,13 @@
     padding: 0.6rem 1rem;
     margin-bottom: 1rem;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+/* 畫面不夠寬時，右上角的常駐總點數會蓋到固定的計時列，讓計時列停在它下方 */
+@media (max-width: 1200px) {
+    .trainer-exam-bar {
+        top: var(--hud-space);
+    }
 }
 
 .trainer-exam-name {

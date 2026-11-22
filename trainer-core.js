@@ -394,7 +394,7 @@
             const l = ledger();
             if (l.once[key]) return { points: 0, label };
             l.once[key] = env.today();
-            env.bridge.grantPoints(points);
+            env.bridge.grantPoints(points, label);
             return { points, label };
         }
         // 每日類點數：每個單元每天合計上限 DAILY_CAP；flag 用來限制「每天一次」
@@ -403,7 +403,7 @@
             if (flag && d.flags[flag]) return { points: 0, label };
             const allowed = Math.max(0, Math.min(points, DAILY_CAP - d.points));
             if (flag) d.flags[flag] = true;
-            if (allowed > 0) { d.points += allowed; env.bridge.grantPoints(allowed); }
+            if (allowed > 0) { d.points += allowed; env.bridge.grantPoints(allowed, label); }
             else env.bridge.saveLedger();
             return { points: allowed, label, capped: allowed < points };
         }

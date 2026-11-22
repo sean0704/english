@@ -16,6 +16,7 @@
     --notice-color: #f6ad55;
     --incorrect-text: #fc8181; /* 深色背景上的紅色文字，對比高於 --incorrect-color */
     --text-secondary: #a0aec0;
+    --hud-space: 4rem; /* 畫面上方留給常駐總點數的高度 */
     --font-family: 'Inter', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
 }
 
@@ -39,7 +40,7 @@ body {
     min-height: 100vh;
     min-height: 100dvh;
     margin: 0;
-    padding: 1.5rem 0;
+    padding: var(--hud-space) 0 1.5rem;
     -webkit-font-smoothing: antialiased;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -66,6 +67,19 @@ select:focus-visible,
 summary:focus-visible {
     outline: 3px solid var(--notice-color);
     outline-offset: 2px;
+}
+
+/* 只給螢幕閱讀器讀的文字 */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .noscript-message {
@@ -117,6 +131,27 @@ summary:focus-visible {
     to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes hudBump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.18); box-shadow: 0 0 22px rgba(246, 173, 85, 0.9); }
+    100% { transform: scale(1); }
+}
+
+@keyframes celebrationIn {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes celebrationOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.85) translateY(-12px); }
+}
+
+@keyframes celebrationCoinSpin {
+    0%, 100% { transform: translateY(0) rotateY(0); }
+    50% { transform: translateY(-6px) rotateY(180deg); }
+}
+
 @keyframes coinPulse {
     0%, 100% { transform: scale(1.1) translateY(-2px); box-shadow: 0 0 12px rgba(255, 215, 0, 0.5), 0 4px 8px rgba(255, 152, 0, 0.3); }
     50% { transform: scale(1.15) translateY(-4px); box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 6px 12px rgba(255, 152, 0, 0.5); }
@@ -164,18 +199,40 @@ summary:focus-visible {
     color: var(--header-color);
 }
 
-.points-display {
-    font-size: 1.4rem;
-    font-weight: bold;
+/* 常駐總點數：固定在畫面右上角，也是得點時金幣飛入的目的地 */
+.points-hud {
+    position: fixed;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 90; /* 在內容與答題閃光之上、視窗之下 */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.95rem 0.4rem 0.7rem;
+    background-color: var(--container-bg-color);
     color: var(--notice-color);
+    border: 2px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 1.15rem;
+    font-weight: bold;
     font-variant-numeric: tabular-nums;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
 }
 
-.points-display::before {
-    content: '🪙 ';
-    font-size: 1.5rem;
-    vertical-align: middle;
-    margin-right: 0.5rem;
+.points-hud:hover {
+    border-color: var(--notice-color);
+}
+
+.points-hud-coin {
+    font-size: 1.25rem;
+    line-height: 1;
+}
+
+.points-hud.bump {
+    border-color: var(--notice-color);
+    animation: hudBump 0.6s ease;
 }
 
 .dashboard-nav {
@@ -945,7 +1002,7 @@ summary:focus-visible {
    9. 視窗：成就、兌換、管理員、對話框
    ========================================================================== */
 
-#achievement-container, #redemption-container {
+#achievement-container, #redemption-container, #points-history-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -958,7 +1015,7 @@ summary:focus-visible {
     z-index: 100;
 }
 
-#achievement-modal, #redemption-modal {
+#achievement-modal, #redemption-modal, #points-history-modal {
     background-color: var(--container-bg-color);
     padding: 2rem;
     border-radius: 1rem;
@@ -972,7 +1029,8 @@ summary:focus-visible {
 }
 
 #achievement-modal > h2,
-#redemption-modal > h2 {
+#redemption-modal > h2,
+#points-history-modal > h2 {
     margin-top: 0;
     padding-right: 2.5rem;
 }
@@ -1231,7 +1289,7 @@ summary:focus-visible {
 }
 
 /* 關閉鈕固定在視窗上緣，清單捲動後仍按得到（手機全螢幕視窗沒有背景可點，尤其需要） */
-#close-achievements-btn, #close-redemptions-btn {
+#close-achievements-btn, #close-redemptions-btn, #close-points-history-btn {
     position: sticky;
     top: 0;
     float: right;
@@ -1248,7 +1306,7 @@ summary:focus-visible {
     transition: color 0.2s ease;
 }
 
-#close-achievements-btn:hover, #close-redemptions-btn:hover {
+#close-achievements-btn:hover, #close-redemptions-btn:hover, #close-points-history-btn:hover {
     color: var(--text-color);
 }
 
@@ -1462,9 +1520,151 @@ summary:focus-visible {
     color: var(--header-color);
 }
 
+/* ---------- 點數紀錄視窗 ---------- */
+.points-history-balance {
+    margin: 0 0 0.25rem;
+    color: var(--notice-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.points-history-note {
+    margin: 0 0 0.75rem;
+    color: var(--header-color);
+    font-size: 0.85rem;
+}
+
+.points-history-day {
+    margin: 1rem 0 0.25rem;
+    color: var(--header-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.points-history-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.points-history-list .history-item {
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.points-history-list .history-date {
+    flex: none;
+    width: 3.2em;
+}
+
+.points-history-list .history-desc {
+    flex: 1;
+    min-width: 0;
+}
+
+.points-history-list .history-points {
+    flex: none;
+    white-space: nowrap;
+}
+
 /* ==========================================================================
-   10. 通知訊息
+   10. 得點慶祝與通知訊息
    ========================================================================== */
+
+/* 得點慶祝：畫面中央彈出，不擋操作；在視窗之上、通知訊息之下 */
+.points-celebration {
+    position: fixed;
+    inset: 0;
+    z-index: 450;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.celebration-card {
+    min-width: 230px;
+    max-width: min(86vw, 380px);
+    padding: 1.25rem 1.75rem 1.1rem;
+    text-align: center;
+    background: linear-gradient(160deg, #3a3222 0%, var(--container-bg-color) 60%);
+    border: 3px solid var(--notice-color);
+    border-radius: 1.25rem;
+    /* 第一層陰影把背景稍微壓暗，讓卡片更醒目 */
+    box-shadow: 0 0 0 100vmax rgba(10, 14, 20, 0.35), 0 0 40px rgba(246, 173, 85, 0.55), 0 16px 30px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+}
+
+.celebration-card.show {
+    animation: celebrationIn 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+
+.celebration-card.hide {
+    animation: celebrationOut 0.35s ease forwards;
+}
+
+.celebration-coin {
+    display: inline-block;
+    font-size: 3rem;
+    line-height: 1;
+    animation: celebrationCoinSpin 1.2s ease-in-out infinite;
+}
+
+.celebration-title {
+    margin-bottom: 0.15rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    font-weight: bold;
+}
+
+.celebration-amount {
+    color: var(--notice-color);
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 12px rgba(246, 173, 85, 0.45);
+}
+
+.celebration-reasons {
+    list-style: none;
+    margin: 0.6rem 0 0;
+    padding: 0.6rem 0 0;
+    border-top: 1px solid rgba(246, 173, 85, 0.35);
+    color: var(--text-color);
+    font-size: 0.92rem;
+    text-align: left;
+}
+
+.celebration-reasons li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.12rem 0;
+}
+
+.celebration-reasons li span:last-child:not(:first-child) {
+    color: var(--notice-color);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.celebration-reasons.single li {
+    justify-content: center;
+    text-align: center;
+}
+
+.fly-coin {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 460;
+    font-size: 1.5rem;
+    line-height: 1;
+    pointer-events: none;
+    will-change: transform;
+}
 
 .toast-container {
     position: fixed;
@@ -1524,7 +1724,7 @@ summary:focus-visible {
     body {
         /* 手機上內容從頂端開始排，不做垂直置中 */
         align-items: flex-start;
-        padding: 0;
+        padding: var(--hud-space) 0 0;
     }
 
     /* 主要畫面在手機上滿版顯示，像 App 一樣。
@@ -1533,8 +1733,8 @@ summary:focus-visible {
     .game-container,
     .completion-container {
         width: 100%;
-        min-height: 100vh;
-        min-height: 100dvh;
+        min-height: calc(100vh - var(--hud-space));
+        min-height: calc(100dvh - var(--hud-space));
         max-width: 100%;
         border-radius: 0;
         border: none;
@@ -1549,10 +1749,6 @@ summary:focus-visible {
     .dashboard-header {
         padding-bottom: 1rem;
         margin-bottom: 2rem;
-    }
-
-    .points-display {
-        font-size: 1.2rem;
     }
 
     .icon-button {
@@ -1623,7 +1819,8 @@ summary:focus-visible {
     }
 
     #achievement-modal,
-    #redemption-modal {
+    #redemption-modal,
+    #points-history-modal {
         width: 100%;
         height: 100%;
         max-width: 100%;
