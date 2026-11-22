@@ -75,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const redemptionErrorEl = document.getElementById('redemption-error');
 
     buildPointsUi();
+    buildTypingUi();
+    const modeBtnTyping = document.getElementById('mode-btn-typing');
+    const typingContainer = document.getElementById('typing-container');
     const totalPointsDisplayEl = document.getElementById('total-points-display');
     const pointsHudEl = document.getElementById('points-hud');
     const pointsCelebrationEl = document.getElementById('points-celebration');
@@ -128,6 +131,12 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '六年級 上 Unit 1', path: 'g6_1_unit1.json', type: 'spelling' },
         { name: '六年級 上 Unit 2', path: 'g6_1_unit2.json', type: 'spelling' },
         { name: '六年級 上 Phonics 3~5', path: 'g6_1_phonics3_5.json', type: 'spelling' },
+        // 英打練習的關卡（題目在 typing.js，path 只是關卡代號）
+        { name: '第 1 關　基本鍵位（ASDF JKL;）', path: 'typing:home', type: 'typing' },
+        { name: '第 2 關　上排鍵（QWERTY）', path: 'typing:top', type: 'typing' },
+        { name: '第 3 關　下排鍵（ZXCVBNM）', path: 'typing:bottom', type: 'typing' },
+        { name: '第 4 關　常用單字', path: 'typing:words', type: 'typing' },
+        { name: '第 5 關　課本單字', path: 'typing:vocab', type: 'typing' },
     ];
 
     // --- 愛心（生命值）設定 ---
@@ -351,6 +360,39 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div id="points-celebration" class="points-celebration" aria-hidden="true"></div>
             <div id="points-announcer" class="visually-hidden" role="status" aria-live="polite"></div>`);
+    }
+
+    // 英打練習的模式按鈕與畫面容器同樣由程式建立（理由同上：舊的 index.html 裡沒有這些元素）
+    function buildTypingUi() {
+        if (!document.getElementById('mode-btn-typing')) {
+            modeBtnTrainer.insertAdjacentHTML('afterend', '<button id="mode-btn-typing" class="start-button secondary" type="button" data-mode="typing" aria-pressed="false">英打練習</button>');
+        }
+        if (!document.getElementById('typing-container')) {
+            trainerContainer.insertAdjacentHTML('afterend', '<div id="typing-container" class="typing-container" style="display: none;"></div>');
+        }
+    }
+
+    // 舊的 index.html 不會載入 typing.css／typing.js，要用時再補載
+    let typingAssetsPromise = null;
+    function loadTypingAssets() {
+        if (window.TypingMode) return Promise.resolve(true);
+        if (!typingAssetsPromise) {
+            const version = Date.now();
+            typingAssetsPromise = new Promise(resolve => {
+                if (!document.querySelector('link[href*="typing.css"]')) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    link.href = `typing.css?v=${version}`;
+                    document.head.appendChild(link);
+                }
+                const script = document.createElement('script');
+                script.src = `typing.js?v=${version}`;
+                script.onload = () => resolve(Boolean(window.TypingMode));
+                script.onerror = () => { typingAssetsPromise = null; resolve(false); };
+                document.head.appendChild(script);
+            });
+        }
+        return typingAssetsPromise;
     }
 
     // --- 加點：所有得點都走這裡，負責加總、記錄與慶祝 ---
@@ -1718,10 +1760,12 @@ document.addEventListener('DOMContentLoaded', () => {
         clearNextWordTimeout();
         stopWordAudio();
         if (window.TrainerMode) window.TrainerMode.stop();
+        if (window.TypingMode) window.TypingMode.stop();
         currentWord = null;
 
         gameContainer.style.display = 'none';
         trainerContainer.style.display = 'none';
+        typingContainer.style.display = 'none';
         completionContainer.style.display = 'none';
         spellingFormEl.style.display = 'none';
         startContainer.style.display = 'flex';
@@ -1761,7 +1805,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 首頁：模式與單元選擇 ---
-    const modeButtons = { spelling: modeBtnSpelling, trainer: modeBtnTrainer };
+    const modeButtons = { spelling: modeBtnSpelling, trainer: modeBtnTrainer, typing: modeBtnTyping };
 
     // 記住上次選的模式，以及每個模式上次選的單元（存在瀏覽器，重新整理後仍保留）
     let lastSelection = { mode: '', paths: {} };
@@ -1800,7 +1844,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 首頁「如何獲得點數？」區塊：依目前選擇的模式列出對應的得點方式
-    const MODE_LABELS = { spelling: '單字拼寫', trainer: '段考特訓' };
+    const MODE_LABELS = { spelling: '單字拼寫', trainer: '段考特訓', typing: '英打練習' };
 
     function getUnitPointsInfoTexts() {
         const roundText = Object.entries(ROUND_REWARDS)
@@ -1838,12 +1882,25 @@ document.addEventListener('DOMContentLoaded', () => {
         '錯題本：當天到期的錯題全部答對 +5。',
     ];
 
+    // 英打練習的點數規則在 typing.js；這裡只負責顯示（數值與 TypingMode.REWARDS 一致）
+    const TYPING_REWARDS = { FIRST_CLEAR: 10, DAILY_CLEAR: 3, DAILY_ACCURACY: 2, ACCURACY_PERCENT: 95, DAILY_CAP: 15 };
+    const TYPING_POINTS_INFO = [
+        { heading: '🎁 只給一次' },
+        `每一關第一次過關 +${TYPING_REWARDS.FIRST_CLEAR}。`,
+        { heading: '🔁 每天都有' },
+        `每一關每天過關一次 +${TYPING_REWARDS.DAILY_CLEAR}。`,
+        `過關時準確率 ${TYPING_REWARDS.ACCURACY_PERCENT}% 以上，再 +${TYPING_REWARDS.DAILY_ACCURACY}。`,
+        `每天的點數合計最多 ${TYPING_REWARDS.DAILY_CAP} 點（第一次過關的獎勵另外算）。`,
+    ];
+
     function getPointsInfoTexts(mode) {
         if (mode === 'spelling') return getUnitPointsInfoTexts();
         if (mode === 'trainer') return TRAINER_POINTS_INFO;
+        if (mode === 'typing') return TYPING_POINTS_INFO;
         return [
             '單字拼寫：每天過關就有點數，還能拿獎牌和成就。',
             '段考特訓：模擬段考及格、訂正錯題、練完文法點，都有點數。',
+            '英打練習：打字打怪闖關，過關和打得準都有點數。',
             '👆 點一下上面的練習模式，看看怎麼拿點數！',
         ];
     }
@@ -1937,11 +1994,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 英打練習的每日點數：這一關今天的「過關」「準確率」兩枚金幣。只讀存檔，不寫入
+    function updateTypingRewardsBadge(levelPath) {
+        const levelId = levelPath.replace(/^typing:/, '');
+        const ledger = isPlainObject(playerStats.typingRewards) ? playerStats.typingRewards : {};
+        const daily = isPlainObject(ledger.daily) && ledger.daily.date === getLocalDateString() ? ledger.daily : null;
+        const flags = daily && isPlainObject(daily.flags) ? daily.flags : {};
+        const earned = daily ? Math.max(0, Number(daily.points) || 0) : 0;
+        const firstClearDone = Boolean(isPlainObject(ledger.once) && ledger.once[levelId]);
+
+        unitRewardsBadgeContainer.innerHTML = '';
+        unitRewardsBadgeContainer.style.display = 'flex';
+        if (!firstClearDone) unitRewardsBadgeContainer.appendChild(createRewardBadge(TYPING_REWARDS.FIRST_CLEAR, '第一次過關', false));
+        unitRewardsBadgeContainer.appendChild(createRewardBadge(TYPING_REWARDS.DAILY_CLEAR, '今日過關', Boolean(flags[`clear:${levelId}`])));
+        unitRewardsBadgeContainer.appendChild(createRewardBadge(TYPING_REWARDS.DAILY_ACCURACY, `準確 ${TYPING_REWARDS.ACCURACY_PERCENT}%`, Boolean(flags[`acc:${levelId}`])));
+
+        if (earned >= TYPING_REWARDS.DAILY_CAP) {
+            setUnitRewardsHint(`🎉 太棒了！英打練習今天的每日點數 ${TYPING_REWARDS.DAILY_CAP} 點都拿到了！`, 'done');
+        } else if (earned > 0) {
+            setUnitRewardsHint(`🔥 英打練習的每日點數今天已拿 ${earned} / ${TYPING_REWARDS.DAILY_CAP} 點，繼續加油！`, 'gold');
+        } else {
+            setUnitRewardsHint('⌨️ 需要實體鍵盤。照著畫面上的指法圖打，準確比快重要！');
+        }
+    }
+
     function updateUnitRewardsBadge() {
         const badgeContainer = unitRewardsBadgeContainer;
 
         if (activeGameMode === 'trainer' && wordListSelectEl.value) {
             updateTrainerRewardsBadge(wordListSelectEl.value);
+            return;
+        }
+        if (activeGameMode === 'typing' && wordListSelectEl.value) {
+            updateTypingRewardsBadge(wordListSelectEl.value);
             return;
         }
 
@@ -2006,6 +2091,27 @@ document.addEventListener('DOMContentLoaded', () => {
             trainerContainer.style.display = 'block';
             window.scrollTo(0, 0);
             window.TrainerMode.start(trainerBridge, listInfo);
+            return;
+        }
+
+        // 英打練習：題目與畫面都在 typing.js
+        if (mode === 'typing') {
+            isStartingGame = true;
+            const ready = await loadTypingAssets();
+            isStartingGame = false;
+            if (!ready) {
+                showDialog({ title: '載入失敗', message: '英打練習的程式沒有載入成功，請重新整理頁面再試一次。' });
+                return;
+            }
+            saveSelection();
+            startContainer.style.display = 'none';
+            gameContainer.style.display = 'none';
+            spellingFormEl.style.display = 'none';
+            completionContainer.style.display = 'none';
+            trainerContainer.style.display = 'none';
+            typingContainer.style.display = 'block';
+            window.scrollTo(0, 0);
+            window.TypingMode.start(typingBridge, listInfo);
             return;
         }
 
@@ -2173,6 +2279,36 @@ document.addEventListener('DOMContentLoaded', () => {
         exit: () => showStartScreen(),
     };
 
+    // --- 英打練習的接點：typing.js 透過這組函式使用共用工具與點數 ---
+    const typingBridge = {
+        showDialog, isAnyModalOpen, getLocalDateString, readStorage, writeStorage,
+        fetchJson: url => fetchJsonWithTimeout(url, { cache: 'no-cache' }, LOAD_TIMEOUT_MS),
+        // 「課本單字」關卡用開放中的單字拼寫單元出題
+        getVocabPaths: () => getActiveWordLists().filter(list => list.type === 'spelling').map(list => list.path),
+        // 點數帳本與總點數放在同一份存檔：{ once: { 關卡: 日期 }, daily: { date, points, flags } }
+        getLedger() {
+            if (!isPlainObject(playerStats.typingRewards)) playerStats.typingRewards = {};
+            const ledger = playerStats.typingRewards;
+            if (!isPlainObject(ledger.once)) ledger.once = {};
+            return ledger;
+        },
+        grantPoints(points, label) {
+            if (!(points > 0)) return;
+            grantPoints(points, `英打練習：${label}`, { title: '英打練習', label });
+            saveProgress();
+            updateTotalPointsDisplay();
+        },
+        saveLedger: () => saveProgress(),
+        // 過關後「挑戰下一關」：關卡清單，以及把首頁的選單同步到新的關卡
+        getLevels: () => wordLists.filter(list => list.type === 'typing' && !list.disabled).map(list => ({ path: list.path, name: list.name })),
+        selectLevel(path) {
+            lastSelection.mode = 'typing';
+            lastSelection.paths.typing = path;
+            writeStorage(SELECTION_KEY, JSON.stringify(lastSelection));
+        },
+        exit: () => showStartScreen(),
+    };
+
     // --- 程式進入點 ---
     function main() {
         loadProgress();
@@ -2251,7 +2387,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('storage', handleStorageChange);
         // 練習途中重新整理、關閉分頁或按上一頁離站前，請瀏覽器先跳出確認（這次練習的進度不會保留）
         window.addEventListener('beforeunload', event => {
-            const isPracticing = gameContainer.style.display !== 'none' || Boolean(window.TrainerMode && window.TrainerMode.isBusy());
+            const isPracticing = gameContainer.style.display !== 'none' || Boolean(window.TrainerMode && window.TrainerMode.isBusy())
+                || Boolean(window.TypingMode && window.TypingMode.isBusy());
             if (!isPracticing) return;
             event.preventDefault();
             event.returnValue = '';

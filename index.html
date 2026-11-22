@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="英語練習：單字拼寫與段考特訓，搭配點數與成就系統，讓每天的英語練習更有動力。">
+    <meta name="description" content="英語練習：單字拼寫、段考特訓與英打練習，搭配點數與成就系統，讓每天的英語練習更有動力。">
     <meta name="theme-color" content="#1a202c">
     <meta name="color-scheme" content="dark">
     <title>英語練習</title>
@@ -16,10 +16,10 @@
     <script>
         (function () {
             var v = Date.now();
-            ['style.css', 'trainer.css'].forEach(function (file) {
+            ['style.css', 'trainer.css', 'typing.css'].forEach(function (file) {
                 document.write('<link rel="stylesheet" href="' + file + '?v=' + v + '">');
             });
-            ['trainer-grading.js', 'trainer-core.js', 'trainer.js', 'script.js'].forEach(function (file) {
+            ['trainer-grading.js', 'trainer-core.js', 'trainer.js', 'typing.js', 'script.js'].forEach(function (file) {
                 document.write('<script src="' + file + '?v=' + v + '" defer><\/script>');
             });
         })();
