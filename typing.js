@@ -11,12 +11,33 @@
     // 連擊越高，每一下打得越痛
     const COMBO_TIERS = [{ at: 50, mult: 4 }, { at: 25, mult: 3 }, { at: 10, mult: 2 }, { at: 0, mult: 1 }];
 
-    // 每一關三隻怪獸；fill 是「攻擊倒數」從空到滿的秒數，越小越緊張
-    const MONSTERS = [
-        { emoji: '👾', name: '鍵盤小怪', hp: 60, fill: 16 },
-        { emoji: '🦖', name: '亂碼暴龍', hp: 100, fill: 14 },
-        { emoji: '🐲', name: '錯字魔龍', hp: 150, fill: 12, boss: true },
+    // 每一關打三隻：兩隻小怪加一隻魔王。fill 是「攻擊倒數」從空到滿的秒數，越小越緊張
+    const WAVES = [{ hp: 60, fill: 16 }, { hp: 100, fill: 14 }, { hp: 150, fill: 12, boss: true }];
+    // 小怪每一場隨機抽兩隻，每次玩都不太一樣
+    const MINIONS = [
+        { emoji: '👾', name: '鍵盤小怪' }, { emoji: '🦖', name: '亂碼暴龍' }, { emoji: '👻', name: '漏字幽靈' },
+        { emoji: '🦇', name: '錯鍵蝙蝠' }, { emoji: '🕷️', name: '亂敲蜘蛛' }, { emoji: '🦂', name: '標點毒蠍' },
+        { emoji: '🐙', name: '八爪亂打怪' }, { emoji: '🧟', name: '拼錯殭屍' }, { emoji: '🦀', name: '橫行螃蟹' },
+        { emoji: '🐍', name: '繞路大蛇' }, { emoji: '🤖', name: '當機機器人' }, { emoji: '🦑', name: '墨水烏賊' },
+        { emoji: '🐊', name: '咬字鱷魚' }, { emoji: '🦍', name: '重拳猩猩' }, { emoji: '🐺', name: '搶拍野狼' },
+        { emoji: '🦏', name: '橫衝犀牛' },
     ];
+    // 每一關有自己的魔王
+    const BOSSES = {
+        home: { emoji: '👹', name: '鍵位大王' },
+        top: { emoji: '🦅', name: '高空魔鷹' },
+        bottom: { emoji: '🦈', name: '深海巨鯊' },
+        words: { emoji: '🧙', name: '咒語巫師' },
+        vocab: { emoji: '🐲', name: '錯字魔龍' },
+    };
+    let lastMinions = []; // 上一場出過的小怪，下一場盡量不重複
+
+    function pickMonsters(levelId) {
+        const fresh = shuffle(MINIONS.filter(m => !lastMinions.includes(m.name)));
+        const minions = fresh.slice(0, WAVES.length - 1);
+        lastMinions = minions.map(m => m.name);
+        return WAVES.map((wave, i) => ({ ...wave, ...(wave.boss ? BOSSES[levelId] || BOSSES.vocab : minions[i]) }));
+    }
 
     const LEVELS = {
         home: {
@@ -292,7 +313,7 @@
         endLoop();
         const pool = LEVELS[level.id].words;
         game = {
-            phase: 'play', queue: shuffle(pool), word: '', pos: 0,
+            phase: 'play', queue: shuffle(pool), word: '', pos: 0, monsters: pickMonsters(level.id),
             monsterIndex: -1, hp: 0, maxHp: 0, gauge: 0, fill: 16, graceUntil: 0,
             hearts: MAX_HEARTS, combo: 0, maxCombo: 0, correct: 0, wrong: 0, score: 0, words: 0,
             activeMs: 0, lastFrame: 0, armed: false, // armed：按下第一個鍵之後才開始計時與倒數
@@ -363,7 +384,7 @@
 
     function renderHud() {
         els.hearts.textContent = '❤️'.repeat(game.hearts) + '🖤'.repeat(MAX_HEARTS - game.hearts);
-        els.wave.textContent = `第 ${game.monsterIndex + 1} / ${MONSTERS.length} 隻`;
+        els.wave.textContent = `第 ${game.monsterIndex + 1} / ${game.monsters.length} 隻`;
         els.score.textContent = `⭐ ${game.score}`;
         els.hpFill.style.width = `${Math.max(0, game.hp / game.maxHp) * 100}%`;
         const mult = multiplierOf(game.combo);
@@ -396,7 +417,7 @@
     }
     function nextMonster() {
         game.monsterIndex++;
-        const m = MONSTERS[game.monsterIndex];
+        const m = game.monsters[game.monsterIndex];
         game.hp = game.maxHp = m.hp;
         game.fill = m.fill;
         game.gauge = 0;
@@ -507,7 +528,7 @@
         sfx.kill();
         sparks(22, true);
         restartClass(els.arena, 'is-shake-big');
-        if (game.monsterIndex + 1 >= MONSTERS.length) { renderHud(); finish(true); return; }
+        if (game.monsterIndex + 1 >= game.monsters.length) { renderHud(); finish(true); return; }
         showBanner('擊倒！', 'good');
         nextMonster();
     }
