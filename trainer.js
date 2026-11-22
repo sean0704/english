@@ -237,6 +237,13 @@
                 api.retryInput = retry;
                 api.retryTarget = target;
             };
+            // 孩子申訴後改判為答對：不用重打訂正，輸入框改成答對的樣子
+            api.acceptAsCorrect = () => {
+                api.needsCorrection = false;
+                if (api.retryInput) { api.retryInput.closest('.trainer-retry').remove(); api.retryInput = null; }
+                input.classList.remove('is-wrong');
+                input.classList.add('is-correct');
+            };
             api.checkCorrection = () => {
                 const ok = G.gradeSentence(api.retryInput.value, item.answers).verdict !== 'wrong';
                 if (ok) { api.retryInput.disabled = true; api.retryInput.classList.remove('is-retry'); api.retryInput.classList.add('is-correct'); api.needsCorrection = false; }
@@ -306,6 +313,60 @@
         explain.appendChild(h('span', 'trainer-explain-label', '詳解'));
         explain.appendChild(h('p', '', item.explain));
         fb.appendChild(explain);
+    }
+
+    // ---------- 提示（文法點第 2、3 階） ----------
+    // 回傳這一題可以給的提示，最多兩段：先給文法規則讓孩子自己想，再給答案的開頭
+    function hintStepsFor(item) {
+        const steps = [];
+        const unit = core.data.units[unitKey];
+        const concept = unit && unit.concepts.find(c => c.point === item.point);
+        const rules = concept ? concept.blocks.filter(b => b.type === 'rule').map(b => b.text) : [];
+        if (rules.length) steps.push({ title: `💡 文法提醒｜${core.pointLabel(item.point)}`, lines: rules });
+
+        const mask = word => word[0] + '_'.repeat(Math.max(0, word.length - 1));
+        if (Array.isArray(item.blanks)) {
+            // 填空題：每一格給第一個字母，底線數代表還有幾個字母
+            const lines = item.blanks.map((blank, i) => {
+                const sample = G.expandTemplate(blank.answer)[0];
+                return `${item.blanks.length > 1 ? `第 ${i + 1} 格：` : ''}${sample.split(/\s+/).map(mask).join('　')}`;
+            });
+            steps.push({ title: '✏️ 每一格的開頭（一個底線是一個字母）', lines, mono: true });
+        } else if (Array.isArray(item.answers)) {
+            // 整句題：給開頭的字與總字數
+            const words = G.expandTemplate(item.answers[0])[0].split(/\s+/);
+            const lead = words.slice(0, words.length > 3 ? 2 : 1).join(' ');
+            steps.push({ title: '✏️ 句子的開頭', lines: [`${lead} …（整句共 ${words.length} 個字）`], mono: true });
+        }
+        return steps;
+    }
+
+    // 提示按鈕與提示框。回傳 { button, box, used(), lock() }
+    function buildHint(item) {
+        const steps = hintStepsFor(item);
+        let shown = 0;
+        const box = h('div', 'trainer-hint', null, { role: 'status', 'aria-live': 'polite' });
+        box.hidden = true;
+        const btn = h('button', 'dialog-button secondary trainer-hint-btn', '', { type: 'button' });
+        const render = () => {
+            btn.textContent = shown === 0 ? '💡 提示' : shown < steps.length ? '💡 再給我一點提示' : '💡 提示都給你了';
+            btn.disabled = shown >= steps.length;
+        };
+        btn.addEventListener('click', () => {
+            if (shown >= steps.length) return;
+            const step = steps[shown++];
+            const part = h('div', 'trainer-hint-step');
+            part.appendChild(h('p', 'trainer-hint-title', step.title));
+            step.lines.forEach(line => part.appendChild(h('p', `trainer-hint-line${step.mono ? ' mono' : ''}`, line)));
+            box.appendChild(part);
+            box.hidden = false;
+            render();
+            // 看完提示回到作答的地方
+            const w = session && session.current && session.current.single;
+            if (w) w.focus();
+        });
+        render();
+        return { button: btn, box, used: () => shown, lock: () => { btn.hidden = true; }, available: steps.length > 0 };
     }
 
     // ---------- 朗讀文章（閱讀測驗練聽力） ----------
@@ -867,6 +928,13 @@
         if (work.passage) form.appendChild(renderPassage(work.passage, work.passage.kind === 'cloze' ? new Set(work.items.map(it => it.slot)) : null, clozeSlotMap(work.passage, widgets)));
         widgets.forEach(w => form.appendChild(w.el));
         const actions = h('div', 'trainer-actions');
+        // 文法點第 2、3 階要自己寫出答案，難度較高，提供提示（用了照常算答對，只是會記下來）
+        let hint = null;
+        if (session.kind === 'ladder' && session.stage >= 2 && widgets.length === 1) {
+            hint = buildHint(widgets[0].item);
+            if (hint.available) { form.appendChild(hint.box); actions.appendChild(hint.button); }
+            else hint = null;
+        }
         actions.appendChild(submit);
         form.appendChild(actions);
         root.appendChild(form);
@@ -885,8 +953,10 @@
                 widgets.forEach(w => {
                     const answer = w.getAnswer();
                     const result = core.gradeItem(w.item, answer);
-                    const rec = core.recordAttempt({ item: w.item, ctx: session.kind, answer, result, ms, due: session.kind === 'review' });
-                    session.results.push({ item: w.item, answer, result, right: rec.right, promoted: rec.promoted });
+                    const hints = hint ? hint.used() : 0;
+                    const rec = core.recordAttempt({ item: w.item, ctx: session.kind, answer, result, ms, due: session.kind === 'review', hints });
+                    const entry = { item: w.item, answer, result, right: rec.right, promoted: rec.promoted, hints };
+                    session.results.push(entry);
                     w.lock();
                     w.mark(result);
                     fillFeedback(w, result);
@@ -894,12 +964,28 @@
                     if (!rec.right && kind !== 'choice') {
                         w.startCorrection(result);
                         if (kind === 'sentence' && result.verdict === 'wrong') {
-                            const dispute = h('button', 'trainer-link', '我覺得我是對的（記下來給爸媽看）', { type: 'button' });
-                            dispute.addEventListener('click', () => { core.addDispute(w.item, answer); dispute.disabled = true; dispute.textContent = '已記下，爸媽會在報告裡看到'; });
+                            const dispute = h('button', 'trainer-link', '我覺得我是對的（算我答對，並記下來給爸媽看）', { type: 'button' });
+                            dispute.addEventListener('click', () => {
+                                // 這一題直接改判為答對：這一關的成績、統計、錯題本都跟著改，也不用重打訂正
+                                const outcome = core.acceptDispute(w.item, answer, rec);
+                                entry.right = true;
+                                entry.promoted = outcome.promoted;
+                                entry.result = { ...result, verdict: 'ok', score: 1, notes: [] };
+                                w.acceptAsCorrect();
+                                const fb = w.feedbackEl;
+                                fb.className = 'trainer-feedback verdict-ok';
+                                fb.querySelector('.trainer-verdict').textContent = '✅ 好，這一題算你答對！';
+                                fb.querySelectorAll('.trainer-diff').forEach(el => el.remove());
+                                const label = fb.querySelector('.trainer-answer-label');
+                                if (label) label.textContent = '系統的參考答案：';
+                                dispute.replaceWith(h('p', 'trainer-dispute-note', '📝 已記下你的寫法，爸媽會在報告裡看到。'));
+                                advancePhase();
+                            });
                             w.feedbackEl.appendChild(dispute);
                         }
                     }
                 });
+                if (hint) hint.lock();
                 core.save();
                 nextReadyAt = Date.now() + 400;
                 advancePhase();
@@ -968,6 +1054,8 @@
             if (after.daily.flags.reviewMiss && !after.daily.flags.clear) box.appendChild(h('p', 'trainer-summary-msg', '這次有題目第一次答錯，所以今天沒有「全部答對」的 +5。下次有錯題到期時再挑戰！'));
             else if (!after.daily.flags.clear && after.wrongDue) box.appendChild(h('p', 'trainer-summary-msg', `還有 ${after.wrongDue} 題到期的錯題，全部答對就有 +5。`));
         }
+        const hinted = done.results.filter(r => r.hints > 0).length;
+        if (hinted) box.appendChild(h('p', 'trainer-summary-msg', `💡 這一關有 ${hinted} 題用了提示。下次試試看不看提示！`));
         const careless = done.results.filter(r => r.result.verdict === 'careless').length;
         if (careless) box.appendChild(h('p', 'trainer-summary-warn', `⚠️ 有 ${careless} 題文法對但大小寫或標點寫錯，考試會被扣分。`));
         root.appendChild(box);
@@ -1266,14 +1354,14 @@
         });
 
         // 申訴
-        const disp = sectionBlock('孩子認為自己答對的題目', '打字題的正確寫法很多，系統可能漏列。請看看孩子的寫法是否其實正確（也可以把上面的做題歷程貼給 AI 幫忙判斷）。');
+        const disp = sectionBlock('孩子認為自己答對的題目', '打字題的正確寫法很多，系統可能漏列。孩子按下「我覺得我是對的」之後，那一題當下就先算答對（避免挫折），並記在這裡。請看看孩子的寫法是否其實正確（也可以把上面的做題歷程貼給 AI 幫忙判斷）。');
         if (!state.disputes.length) disp.appendChild(h('p', 'trainer-note', '目前沒有。'));
         state.disputes.slice().reverse().slice(0, 30).forEach(d => {
             const item = core.data.items.get(d.id);
             if (!item) return;
             const row = h('div', 'trainer-dispute');
             row.appendChild(h('p', 'trainer-review-q', core.itemPlain(item)));
-            row.appendChild(h('p', 'trainer-part', `孩子寫：${d.a}`));
+            row.appendChild(h('p', 'trainer-part', `孩子寫：${d.a}${d.ok ? '　（已先算答對）' : ''}`));
             row.appendChild(h('p', 'trainer-answer', `系統正解：${core.correctText(item)}`));
             disp.appendChild(row);
         });

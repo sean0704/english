@@ -1224,6 +1224,45 @@
     font-weight: bold;
 }
 
+/* 提示（文法點第 2、3 階） */
+.trainer-hint {
+    margin: 0.9rem 0 0;
+    padding: 0.7rem 0.9rem;
+    background: rgba(246, 173, 85, 0.1);
+    border: 1px dashed var(--notice-color);
+    border-radius: 0.7rem;
+}
+
+.trainer-hint-step + .trainer-hint-step {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(246, 173, 85, 0.3);
+}
+
+.trainer-hint-title {
+    margin: 0 0 0.25rem;
+    color: var(--notice-color);
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.trainer-hint-line {
+    margin: 0.15rem 0 0;
+}
+
+.trainer-hint-line.mono {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    color: #fff;
+}
+
+.trainer-dispute-note {
+    margin: 0.5rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+}
+
 .trainer-link {
     display: inline-block;
     margin-top: 0.6rem;

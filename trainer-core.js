@@ -168,11 +168,13 @@
             if (verdict === 'careless') table[key].careless++;
         }
         // 每一題在一場練習裡只記第一次作答
-        function recordAttempt({ item, ctx, answer, result, ms, due }) {
+        function recordAttempt({ item, ctx, answer, result, ms, due, hints }) {
             const key = unitOf(item.id);
             const u = unitState(key);
             const right = result.verdict === 'ok' || result.verdict === 'careless';
-            state.log.push({ t: env.now(), id: item.id, c: ctx, a: answerText(answer), r: result.verdict, s: Math.round(result.score * 100) / 100, ms: Math.max(0, Math.round(ms || 0)) });
+            const logEntry = { t: env.now(), id: item.id, c: ctx, a: answerText(answer), r: result.verdict, s: Math.round(result.score * 100) / 100, ms: Math.max(0, Math.round(ms || 0)) };
+            if (hints > 0) logEntry.h = hints; // h：這一題用了幾段提示
+            state.log.push(logEntry);
             bump(u.stat.point, item.point, result.verdict);
             bump(u.stat.format, item.format, result.verdict);
             if (!isObj(u.items[item.id])) u.items[item.id] = { n: 0, ok: 0 };
@@ -182,22 +184,53 @@
 
             const today = env.today();
             const entry = u.wrong[item.id];
+            const prevWrong = entry ? { ...entry } : null; // 改判時用來還原錯題本
             let promoted = false, graduated = false;
-            // 訂正到期錯題時只要答錯一題，當天就拿不到「到期錯題全對」（中途離開也算）
-            if (!right && ctx === 'review' && due) { dailyOf(key).flags.reviewMiss = true; env.bridge.saveLedger(); }
+            // 訂正到期錯題時只要答錯一題，當天就拿不到「到期錯題全對」（中途離開也算）。
+            // reviewMiss 記的是答錯的題數（舊存檔是 true，當成 1）：孩子申訴改判時要能扣回去
+            const reviewMiss = !right && ctx === 'review' && Boolean(due);
+            if (reviewMiss) { const flags = dailyOf(key).flags; flags.reviewMiss = (Number(flags.reviewMiss) || 0) + 1; env.bridge.saveLedger(); }
             if (!right) {
                 u.wrong[item.id] = { box: 1, due: addDays(today, 1), lapses: (entry ? entry.lapses : 0) + 1, last: answerText(answer), added: entry ? entry.added : today };
             } else if (entry && ctx === 'review' && due) {
-                promoted = true;
-                if (entry.box >= 3) { delete u.wrong[item.id]; u.mastered++; graduated = true; }
-                else { entry.box++; entry.due = addDays(today, entry.box === 2 ? 3 : 7); }
+                ({ promoted, graduated } = promoteWrong(u, item.id, today));
             }
-            return { right, promoted, graduated };
+            return { right, promoted, graduated, undo: { logEntry, prevWrong, reviewMiss, ctx, due: Boolean(due) } };
         }
-        function addDispute(item, answer) {
-            state.disputes.push({ t: env.now(), id: item.id, a: answerText(answer) });
+        // 到期的錯題答對了：往下一個間隔移，第三次答對就畢業
+        function promoteWrong(u, id, today) {
+            const entry = u.wrong[id];
+            if (entry.box >= 3) { delete u.wrong[id]; u.mastered++; return { promoted: true, graduated: true }; }
+            entry.box++;
+            entry.due = addDays(today, entry.box === 2 ? 3 : 7);
+            return { promoted: true, graduated: false };
+        }
+        // 孩子按了「我覺得我是對的」：記下來給家長看，並把這一題改判為答對。
+        // rec 是 recordAttempt 的回傳值；統計、錯題本、作答紀錄都改回「答對」的樣子
+        function acceptDispute(item, answer, rec) {
+            const undo = rec && rec.undo;
+            state.disputes.push({ t: env.now(), id: item.id, a: answerText(answer), ok: Boolean(undo) });
             if (state.disputes.length > 200) state.disputes = state.disputes.slice(-200);
+            if (!undo || undo.done) { save(); return { right: Boolean(undo), promoted: false, graduated: false }; }
+            undo.done = true;
+            const key = unitOf(item.id);
+            const u = unitState(key);
+            undo.logEntry.r = 'ok';
+            undo.logEntry.s = 1;
+            undo.logEntry.ov = 1; // ov：孩子申訴後改判的
+            [[u.stat.point, item.point], [u.stat.format, item.format]].forEach(([table, k]) => { if (isObj(table[k])) table[k].ok++; });
+            if (isObj(u.items[item.id])) u.items[item.id].ok++;
+            // 錯題本先還原成作答前的樣子，再照「答對」處理
+            if (undo.prevWrong) u.wrong[item.id] = undo.prevWrong; else delete u.wrong[item.id];
+            let outcome = { promoted: false, graduated: false };
+            if (undo.prevWrong && undo.ctx === 'review' && undo.due) outcome = promoteWrong(u, item.id, env.today());
+            if (undo.reviewMiss) {
+                const flags = dailyOf(key).flags;
+                flags.reviewMiss = Math.max(0, (Number(flags.reviewMiss) || 0) - 1);
+                env.bridge.saveLedger();
+            }
             save();
+            return { right: true, ...outcome };
         }
 
         // ---------- 選題 ----------
@@ -572,20 +605,20 @@
             lines.push('');
 
             if (state.disputes.length) {
-                lines.push('## 五、孩子認為自己答對、但被系統判錯的題目（請你判斷孩子的寫法是否其實正確）');
+                lines.push('## 五、孩子認為自己答對、但被系統判錯的題目（請你判斷孩子的寫法是否其實正確；標「已先算答對」的題目，系統當下已依孩子的申訴改判為答對）');
                 for (const d of state.disputes.filter(x => x.t >= since)) {
                     const item = data.items.get(d.id);
-                    if (item) lines.push(`- ${itemPlain(item)}　系統正解：${correctText(item)}　孩子寫：${d.a}`);
+                    if (item) lines.push(`- ${itemPlain(item)}　系統正解：${correctText(item)}　孩子寫：${d.a}${d.ok ? '　（已先算答對）' : ''}`);
                 }
                 lines.push('');
             }
 
             lines.push('## 六、逐題作答紀錄（依時間先後）');
-            lines.push('格式：時間｜活動｜文法點｜題型｜題目｜正解｜孩子的作答｜結果｜用時');
+            lines.push('格式：時間｜活動｜文法點｜題型｜題目｜正解｜孩子的作答｜結果｜用時（結果後面標「用提示 1」代表看了文法規則提示，「用提示 2」代表還看了答案開頭）');
             for (const e of entries) {
                 const item = data.items.get(e.id);
                 if (!item) continue;
-                lines.push([fmtTime(e.t), CTX_LABELS[e.c] || e.c, `${unitOf(item.id).toUpperCase()} ${pointLabel(item.point)}`, FORMAT_BY_ID[item.format].label, itemPlain(item), correctText(item), e.a || '（空）', VERDICT_LABELS[e.r] || e.r, `${Math.round(e.ms / 1000)} 秒`].join('｜'));
+                lines.push([fmtTime(e.t), CTX_LABELS[e.c] || e.c, `${unitOf(item.id).toUpperCase()} ${pointLabel(item.point)}`, FORMAT_BY_ID[item.format].label, itemPlain(item), correctText(item), e.a || '（空）', (VERDICT_LABELS[e.r] || e.r) + (e.h ? `（用提示 ${e.h}）` : ''), `${Math.round(e.ms / 1000)} 秒`].join('｜'));
             }
             return lines.join('\n');
         }
@@ -602,7 +635,7 @@
 
         return {
             load, save, addUnit, hasUnit, data, getState: () => state, unitState, pointLabel,
-            gradeItem, correctText, altAnswers, answerText, isBlankAnswer, recordAttempt, addDispute,
+            gradeItem, correctText, altAnswers, answerText, isBlankAnswer, recordAttempt, acceptDispute,
             pickLadder, pickFormat, pickConceptCheck, pickReview, ladderPool, wrongIds,
             buildExam, gradeExam, submitExam, abandonExam, examItems, bestExam,
             finishSession, hubInfo, dailyLeft, itemPlain, exportLogText, exportProgress, importProgress,
