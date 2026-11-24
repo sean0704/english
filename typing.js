@@ -1,10 +1,12 @@
 // 英打練習：打字打怪闖關。畫面與規則都在這個檔案，透過 script.js 傳進來的 bridge 使用共用工具與點數。
-// 對外：window.TypingMode = { start, stop, isBusy, REWARDS }
+// 對外：window.TypingMode = { start, stop, isBusy, lockInfo, REWARDS, BEST_KEY }
 (function () {
     'use strict';
 
     // ---------- 規則 ----------
-    const REWARDS = { FIRST_CLEAR: 10, DAILY_CLEAR: 3, DAILY_ACCURACY: 2, ACCURACY_TARGET: 0.95, DAILY_CAP: 15 };
+    // 只給一次：每關第一次過關、第一次打敗最終魔王。每天都有：每關打倒魔王過關一次、打敗最終魔王一次
+    const REWARDS = { FIRST_CLEAR: 10, BOSS_FIRST_CLEAR: 30, DAILY_CLEAR: 5, BOSS_DAILY_CLEAR: 10 };
+    const STAR_ACCURACY = 0.95; // 三顆星需要的準確率（和點數無關）
     const BEST_KEY = 'englishTyping_best_v1';
     const SOUND_KEY = 'englishTyping_sound';
     const MAX_HEARTS = 3;
@@ -24,15 +26,18 @@
     ];
     // 每一關有自己的魔王
     const BOSSES = {
-        home: { emoji: '👹', name: '鍵位大王' },
-        top: { emoji: '🦅', name: '高空魔鷹' },
-        bottom: { emoji: '🦈', name: '深海巨鯊' },
-        words: { emoji: '🧙', name: '咒語巫師' },
-        vocab: { emoji: '🐲', name: '錯字魔龍' },
+        // theme：登場時戰鬥區換成這隻魔王的場景（背景與登場動作在 typing.css）；particle／motion：背景飄的東西和飄法；cry：登場喊話
+        home: { emoji: '👹', name: '鍵位大王', theme: 'home', particle: '⚡', motion: 'twinkle', cry: '鍵位大王駕到！' },
+        top: { emoji: '🦅', name: '高空魔鷹', theme: 'top', particle: '☁', motion: 'drift', cry: '魔鷹從高空俯衝！' },
+        bottom: { emoji: '🦈', name: '深海巨鯊', theme: 'bottom', particle: '○', motion: 'rise', cry: '巨鯊浮出海面！' },
+        words: { emoji: '🧙', name: '咒語巫師', theme: 'words', particle: '✦', motion: 'twinkle', cry: '巫師開始唸咒！' },
+        vocab: { emoji: '🐲', name: '錯字魔龍', theme: 'vocab', particle: '•', motion: 'rise', cry: '魔龍噴出火焰！' },
     };
     let lastMinions = []; // 上一場出過的小怪，下一場盡量不重複
 
     function pickMonsters(levelId) {
+        // 最終魔王：關卡自己指定三個階段，不抽小怪
+        if (LEVELS[levelId].waves) return LEVELS[levelId].waves.map(wave => ({ ...wave }));
         const fresh = shuffle(MINIONS.filter(m => !lastMinions.includes(m.name)));
         const minions = fresh.slice(0, WAVES.length - 1);
         lastMinions = minions.map(m => m.name);
@@ -66,6 +71,68 @@
             words: [], // 開始時從開放中的單字拼寫單元載入
         },
     };
+
+    // ---------- 最終魔王 ----------
+    // 前五關都過關才能挑戰。同一隻魔王變身三次，每個階段換一批題目：鍵位 → 單字 → 短句
+    const FINAL_SENTENCES = [
+        'see you tomorrow', 'i like to read', 'good morning', 'how are you today', 'thank you very much',
+        'this is my friend', 'we play after school', 'she has a red bike', 'what time is it', 'i am very happy',
+        'open the window', 'he is my brother', 'do your homework', 'my favorite animal', 'come back home',
+        'it is a sunny day', 'i can type fast', 'look at the picture', 'time for dinner', 'let me try again',
+        'where is my book', 'have a nice weekend', 'we are a family', 'never give up',
+    ];
+    const FINAL_PHASES = [
+        // 三個階段各有場景：亂碼虛空（飄著亂碼）→ 暴怒雷雲（閃電）→ 終極煉獄（火星）
+        { emoji: '😈', name: '亂碼魔王', pool: 'keys', theme: 'final1', particle: '#@%&?!', motion: 'twinkle', cry: '最終魔王降臨！' },
+        { emoji: '👿', name: '暴怒魔王', pool: 'words', theme: 'final2', particle: '⚡', motion: 'twinkle', cry: '魔王暴怒了！' },
+        { emoji: '💀', name: '終極型態', pool: 'sentences', theme: 'final3', particle: '•', motion: 'rise', cry: '終極型態覺醒！' },
+    ];
+    const GOLD_EVERY = 5;        // 每幾個字出現一個「弱點字」
+    const SPACE_KNOCKBACK = 0.2; // 魔王關的短句：每打完其中一個單字，攻擊倒數打退一點
+    const finalWaves = (hps, fills) => FINAL_PHASES.map((phase, i) => ({ ...phase, boss: true, hp: hps[i], fill: fills[i] }));
+    const FINAL_TIPS = [
+        '最終魔王會變身三次：先考鍵位，再考單字，最後考短句。',
+        '金色的字是魔王的弱點，整個字都沒打錯，傷害加倍！',
+        '打短句時，每打完一個單字（按下空白鍵）也能把攻擊倒數打退一點。',
+    ];
+    LEVELS.final = {
+        name: '最終魔王',
+        intro: '前五關學到的全部用上！手指放回 A S D F 和 J K L ; ，穩穩地打。',
+        tips: FINAL_TIPS.concat('每次魔王變身會補回一顆愛心；三顆愛心用完就失敗。'),
+        requires: ['home', 'top', 'bottom', 'words', 'vocab'],
+        lockedHint: '先通過前五關，才能挑戰最終魔王。',
+        firstClear: REWARDS.BOSS_FIRST_CLEAR,
+        dailyClear: REWARDS.BOSS_DAILY_CLEAR,
+        healOnPhase: true,
+        waves: finalWaves([150, 200, 240], [12, 11, 10]),
+        winTitle: '你打敗了最終魔王！',
+        challengeText: '挑戰最終魔王',
+        words: [],
+    };
+
+    // 還沒解鎖時回傳 { done, total, missing, text }；可以玩就回傳 null。ledger 是點數帳本（過關紀錄在 once）
+    function lockInfo(levelId, ledger) {
+        const def = LEVELS[levelId];
+        if (!def || !def.requires) return null;
+        const once = ledger && typeof ledger.once === 'object' && ledger.once ? ledger.once : {};
+        const missing = def.requires.filter(id => !once[id]);
+        if (missing.length === 0) return null;
+        const total = def.requires.length;
+        const done = total - missing.length;
+        return { done, total, missing, text: total > 1 ? `已通過 ${done}/${total} 關` : '先打敗最終魔王', hint: def.lockedHint };
+    }
+
+    // 這一階段的題目。一般關卡整場都用同一份；魔王關每個階段不一樣
+    const poolCache = {};
+    function poolWords(key) {
+        if (!key) return LEVELS[level.id].words;
+        if (!poolCache[key]) {
+            poolCache[key] = key === 'keys' ? [...LEVELS.home.words, ...LEVELS.top.words, ...LEVELS.bottom.words]
+                : key === 'words' ? [...new Set([...LEVELS.words.words, ...LEVELS.vocab.words])]
+                    : FINAL_SENTENCES;
+        }
+        return poolCache[key];
+    }
 
     // ---------- 指法 ----------
     const FINGERS = {
@@ -140,6 +207,10 @@
         hurt: () => tone(200, 0.4, { type: 'sawtooth', volume: 0.12, slideTo: 60 }),
         win: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.18, { type: 'triangle', volume: 0.09, delay: i * 0.11 })); },
         lose: () => { [392, 330, 262].forEach((f, i) => tone(f, 0.25, { type: 'triangle', volume: 0.09, delay: i * 0.18 })); },
+        boss: () => { [196, 185, 196, 147].forEach((f, i) => tone(f, 0.22, { type: 'sawtooth', volume: 0.1, delay: 0.15 + i * 0.16 })); tone(98, 0.8, { type: 'square', volume: 0.07, slideTo: 60, delay: 0.15 }); },
+        finalBoss: () => { tone(65, 1.6, { type: 'sawtooth', volume: 0.11, slideTo: 45 }); [147, 139, 147, 110, 98].forEach((f, i) => tone(f, 0.3, { type: 'square', volume: 0.09, delay: 0.3 + i * 0.26 })); tone(220, 0.5, { type: 'sawtooth', volume: 0.1, slideTo: 55, delay: 1.6 }); },
+        phase: () => { tone(160, 0.7, { type: 'sawtooth', volume: 0.12, slideTo: 55, delay: 0.3 }); tone(80, 0.7, { type: 'square', volume: 0.07, slideTo: 40, delay: 0.3 }); },
+        unlock: () => { [659, 784, 988, 1319, 1568].forEach((f, i) => tone(f, 0.16, { type: 'triangle', volume: 0.09, delay: i * 0.09 })); },
     };
 
     // ---------- 題目 ----------
@@ -170,15 +241,46 @@
         document.removeEventListener('keydown', onKeyDown); // 「挑戰下一關」會再呼叫一次 start，避免重複掛上
         document.addEventListener('keydown', onKeyDown);
         const def = LEVELS[level.id];
-        if (level.id === 'vocab' && def.words.length === 0) {
+        // 選單上鎖的關卡選不到；這裡再擋一次（記住的上次選擇、其他分頁改了存檔）
+        const lock = lockInfo(level.id, bridge.getLedger());
+        if (lock) { renderLocked(lock); return; }
+        // 魔王關的第二階段也會用到課本單字
+        if ((level.id === 'vocab' || def.waves) && LEVELS.vocab.words.length === 0) {
             root.innerHTML = '';
             root.appendChild(h('p', 'typing-loading', '單字載入中…'));
             const words = await loadVocabWords();
             if (token !== startToken) return;
             // 載不到課本單字時用常用單字頂替，還是可以練
-            def.words = words.length >= 10 ? words : LEVELS.words.words;
+            LEVELS.vocab.words = words.length >= 10 ? words : LEVELS.words.words;
+            delete poolCache.words;
         }
         renderIntro();
+    }
+
+    // 還沒解鎖：列出還差哪幾關
+    function renderLocked(lock) {
+        endLoop();
+        game = { phase: 'locked' };
+        els = null;
+        root.innerHTML = '';
+        root.guide = null;
+        const def = LEVELS[level.id];
+        const box = h('div', 'typing-intro typing-locked');
+        box.appendChild(h('div', 'typing-result-icon', '🔒', { 'aria-hidden': 'true' }));
+        box.appendChild(h('h1', 'typing-title', `${level.name}還沒解鎖`));
+        box.appendChild(h('p', 'typing-intro-lead', lock.hint));
+        const names = {};
+        bridge.getLevels().forEach(l => { names[l.path.replace(/^typing:/, '')] = l.name; });
+        const list = h('ul', 'typing-tips typing-lock-list');
+        def.requires.forEach(id => list.appendChild(h('li', lock.missing.includes(id) ? 'is-todo' : 'is-done', `${lock.missing.includes(id) ? '⬜' : '✅'} ${names[id] || LEVELS[id].name}`)));
+        box.appendChild(list);
+        const actions = h('div', 'typing-actions');
+        const back = h('button', 'start-button', '返回主選單', { type: 'button' });
+        back.addEventListener('click', () => bridge.exit());
+        actions.appendChild(back);
+        box.appendChild(actions);
+        root.appendChild(box);
+        back.focus({ preventScroll: true });
     }
 
     function stop() {
@@ -205,10 +307,10 @@
         box.appendChild(h('h1', 'typing-title', `英打練習｜${level.name}`));
         box.appendChild(h('p', 'typing-intro-lead', LEVELS[level.id].intro));
         const tips = h('ul', 'typing-tips');
-        ['每按一個正確的鍵，就打怪獸一下；連續打對會累積連擊，傷害加倍。',
+        (LEVELS[level.id].tips || ['每按一個正確的鍵，就打怪獸一下；連續打對會累積連擊，傷害加倍。',
             '怪獸頭上的「攻擊倒數」滿了會扣一顆愛心，打完一個字可以把它打退。',
             '打錯不會前進，連擊會歸零。看畫面下方亮起來的鍵和手指，用正確的手指按。',
-            '打倒三隻怪獸就過關，三顆愛心用完就失敗。'].forEach(t => tips.appendChild(h('li', '', t)));
+            '打倒三隻怪獸就過關，三顆愛心用完就失敗。']).forEach(t => tips.appendChild(h('li', '', t)));
         box.appendChild(tips);
         const best = readBest()[level.id];
         if (best) box.appendChild(h('p', 'typing-best', `🏅 最佳紀錄：每分鐘 ${best.wpm} 字・準確率 ${best.acc}%・${'★'.repeat(best.stars)}${'☆'.repeat(3 - best.stars)}`));
@@ -311,15 +413,16 @@
     // ---------- 遊戲畫面 ----------
     function beginGame() {
         endLoop();
-        const pool = LEVELS[level.id].words;
+        const isFinal = Boolean(LEVELS[level.id].waves);
         game = {
-            phase: 'play', queue: shuffle(pool), word: '', pos: 0, monsters: pickMonsters(level.id),
+            phase: 'play', queue: [], pool: null, word: '', pos: 0, monsters: pickMonsters(level.id),
+            final: isFinal, wordSeq: 0, wordGold: false, wordMiss: false, // 魔王關：第幾個字、是不是弱點字、這個字有沒有打錯
             monsterIndex: -1, hp: 0, maxHp: 0, gauge: 0, fill: 16, graceUntil: 0,
             hearts: MAX_HEARTS, combo: 0, maxCombo: 0, correct: 0, wrong: 0, score: 0, words: 0,
             activeMs: 0, lastFrame: 0, armed: false, // armed：按下第一個鍵之後才開始計時與倒數
         };
         root.innerHTML = '';
-        const stage = h('div', 'typing-stage');
+        const stage = h('div', `typing-stage${isFinal ? ' is-final' : ''}`);
 
         const top = h('div', 'typing-top');
         top.appendChild(h('span', 'typing-level-name', level.name));
@@ -384,7 +487,7 @@
 
     function renderHud() {
         els.hearts.textContent = '❤️'.repeat(game.hearts) + '🖤'.repeat(MAX_HEARTS - game.hearts);
-        els.wave.textContent = `第 ${game.monsterIndex + 1} / ${game.monsters.length} 隻`;
+        els.wave.textContent = `第 ${game.monsterIndex + 1} / ${game.monsters.length} ${game.final ? '階段' : '隻'}`;
         els.score.textContent = `⭐ ${game.score}`;
         els.hpFill.style.width = `${Math.max(0, game.hp / game.maxHp) * 100}%`;
         const mult = multiplierOf(game.combo);
@@ -401,6 +504,8 @@
     }
     function renderWord() {
         els.word.textContent = '';
+        els.word.classList.toggle('is-gold', game.wordGold);
+        els.word.classList.toggle('is-long', game.word.length > 14);
         game.word.split('').forEach((ch, i) => {
             const cls = i < game.pos ? 'done' : i === game.pos ? 'current' : 'todo';
             els.word.appendChild(h('span', `typing-char ${cls}${ch === ' ' ? ' is-space' : ''}`, ch === ' ' ? '␣' : ch));
@@ -410,22 +515,58 @@
     }
 
     function nextWord() {
-        if (game.queue.length < 2) game.queue = game.queue.concat(shuffle(LEVELS[level.id].words).filter(w => w !== game.word));
+        if (game.queue.length < 2) game.queue = game.queue.concat(shuffle(game.pool).filter(w => w !== game.word));
         game.word = game.queue.shift();
         game.pos = 0;
+        game.wordSeq++;
+        game.wordGold = game.final && game.wordSeq % GOLD_EVERY === 0;
+        game.wordMiss = false;
         renderWord();
     }
     function nextMonster() {
         game.monsterIndex++;
         const m = game.monsters[game.monsterIndex];
+        const transformed = game.final && game.monsterIndex > 0; // 魔王變身（不是換一隻新的）
         game.hp = game.maxHp = m.hp;
         game.fill = m.fill;
         game.gauge = 0;
-        game.graceUntil = performance.now() + 900; // 新怪獸登場時先不倒數
+        game.graceUntil = performance.now() + (transformed ? 1400 : 900); // 新怪獸登場時先不倒數
+        // 換階段就換題目；正在打的字照樣打完
+        const pool = poolWords(m.pool);
+        if (pool !== game.pool) { game.pool = pool; game.queue = shuffle(pool).filter(w => w !== game.word); }
         els.monster.textContent = m.emoji;
-        els.monster.className = `typing-monster${m.boss ? ' is-boss' : ''} is-enter`;
-        els.monsterName.textContent = m.boss ? `👑 魔王　${m.name}` : m.name;
+        els.monster.className = `typing-monster${m.boss ? ' is-boss' : ''}${game.final ? ' is-final' : ''} ${transformed ? 'is-transform' : 'is-enter'}`;
+        els.monsterName.textContent = !m.boss ? m.name : game.final ? `👑 最終魔王　${m.name}` : `👑 魔王　${m.name}`;
+        if (game.final) els.stage.dataset.phase = String(game.monsterIndex + 1);
+        if (m.theme) enterBossScene(m, transformed);
         renderGauge();
+    }
+
+    // 魔王登場（每一關的魔王、最終魔王的每個階段）：戰鬥區換成牠的場景，背景飄東西，喊一聲，多給一點準備時間
+    // transformed：最終魔王變身。變身的吼聲在 dealDamage 已經播了，這裡只換場景
+    function enterBossScene(m, transformed) {
+        els.arena.dataset.boss = m.theme;
+        game.graceUntil = performance.now() + (game.final && !transformed ? 2200 : 1500);
+        if (!transformed) (game.final ? sfx.finalBoss : sfx.boss)();
+        showBanner(`⚠️ ${m.cry}${game.phaseNote || ''}`, 'bad');
+        game.phaseNote = '';
+        restartClass(els.arena, 'is-boss-flash');
+        const old = els.arena.querySelector('.typing-ambient');
+        if (old) old.remove();
+        if (reducedMotion.matches) return;
+        const ambient = h('div', `typing-ambient motion-${m.motion}`, null, { 'aria-hidden': 'true' });
+        const glyphs = Array.from(m.particle); // 可以給好幾種，每一顆隨機挑一種
+        const count = game.final ? 16 : 12;
+        for (let i = 0; i < count; i++) {
+            const dot = h('span', 'typing-ambient-dot', glyphs[Math.floor(Math.random() * glyphs.length)]);
+            dot.style.left = `${4 + Math.random() * 92}%`;
+            dot.style.top = `${8 + Math.random() * 78}%`;
+            dot.style.fontSize = `${0.7 + Math.random() * 1.1}rem`;
+            dot.style.animationDuration = `${2.4 + Math.random() * 2.6}s`;
+            dot.style.animationDelay = `${-Math.random() * 4}s`;
+            ambient.appendChild(dot);
+        }
+        els.arena.insertBefore(ambient, els.arena.firstChild);
     }
 
     // ---------- 主迴圈：攻擊倒數 ----------
@@ -466,7 +607,7 @@
             if (event.code === 'Space' && !onButton) { event.preventDefault(); beginGame(); }
             return;
         }
-        if (game.phase === 'result') return;
+        if (game.phase !== 'play') return;
         if (event.key === 'Escape') { event.preventDefault(); confirmQuit(); return; }
         const char = CODE_TO_CHAR[event.code] || (event.key.length === 1 ? event.key.toLowerCase() : '');
         if (!char || !FINGER_OF[char]) return;
@@ -490,9 +631,13 @@
         if (mult > beforeMult) { sfx.tier(); showBanner(`連擊 ×${mult}！`, 'good'); }
         const wordDone = game.pos >= game.word.length;
         let damage = mult;
+        if (game.final && char === ' ' && !wordDone) game.gauge = Math.max(0, game.gauge - SPACE_KNOCKBACK);
         if (wordDone) {
             // 打完一個字：追加一擊，並把怪獸的攻擊倒數打退
-            damage += Math.ceil(game.word.length / 2) * mult;
+            let bonus = Math.ceil(game.word.length / 2) * mult;
+            // 弱點字整個字都沒打錯：追加的這一擊加倍
+            if (game.wordGold && !game.wordMiss) { bonus *= 2; showBanner('弱點命中！', 'good'); }
+            damage += bonus;
             game.words++;
             game.gauge = Math.max(0, game.gauge - 0.45);
             sfx.word();
@@ -507,6 +652,7 @@
 
     function missKey(char) {
         game.wrong++;
+        game.wordMiss = true;
         game.combo = 0;
         game.gauge = Math.min(0.999, game.gauge + 0.06);
         sfx.miss();
@@ -529,12 +675,20 @@
         sparks(22, true);
         restartClass(els.arena, 'is-shake-big');
         if (game.monsterIndex + 1 >= game.monsters.length) { renderHud(); finish(true); return; }
-        showBanner('擊倒！', 'good');
+        if (game.final) {
+            // 魔王關：不是換下一隻，而是變身進入下一個階段
+            const healed = LEVELS[level.id].healOnPhase && game.hearts < MAX_HEARTS;
+            if (healed) game.hearts++;
+            sfx.phase();
+            game.phaseNote = healed ? ' ❤️ +1' : ''; // 接在下一個階段的登場喊話後面
+        } else {
+            showBanner('擊倒！', 'good');
+        }
         nextMonster();
     }
 
     // ---------- 特效 ----------
-    const FX_CLASSES = ['is-hit', 'is-hit-heavy', 'is-attack', 'is-enter', 'is-shake', 'is-shake-big', 'is-hurt', 'is-bump', 'is-miss'];
+    const FX_CLASSES = ['is-hit', 'is-hit-heavy', 'is-attack', 'is-enter', 'is-transform', 'is-shake', 'is-shake-big', 'is-boss-flash', 'is-hurt', 'is-bump', 'is-miss'];
     function restartClass(el, cls) {
         el.classList.remove(...FX_CLASSES); // 同一個元素一次只播一種特效，後來的蓋掉前面的
         void el.offsetWidth; // 強制重排，讓同一個動畫可以連續重播
@@ -584,22 +738,22 @@
     }
 
     // 回傳這次拿到的點數明細 [{ label, points }]
-    function grantRewards(accuracy) {
+    function grantRewards() {
         const ledger = bridge.getLedger();
         const today = bridge.getLocalDateString();
         if (!ledger.daily || ledger.daily.date !== today || typeof ledger.daily.flags !== 'object' || !ledger.daily.flags) ledger.daily = { date: today, points: 0, flags: {} };
         const got = [];
         const give = (points, label) => { if (points > 0) { bridge.grantPoints(points, `「${level.name}」${label}`); got.push({ label, points }); } };
-        if (!ledger.once[level.id]) { ledger.once[level.id] = today; give(REWARDS.FIRST_CLEAR, '第一次過關'); }
-        const daily = (flag, points, label) => {
-            if (ledger.daily.flags[flag]) return;
+        const def = LEVELS[level.id];
+        if (!ledger.once[level.id]) { ledger.once[level.id] = today; give(def.firstClear || REWARDS.FIRST_CLEAR, def.waves ? '第一次打敗魔王' : '第一次過關'); }
+        // 每一關每天只給一次；同一天重打同一關不會再拿
+        const flag = `clear:${level.id}`;
+        if (!ledger.daily.flags[flag]) {
             ledger.daily.flags[flag] = true;
-            const allowed = Math.max(0, Math.min(points, REWARDS.DAILY_CAP - ledger.daily.points));
-            ledger.daily.points += allowed;
-            give(allowed, label);
-        };
-        daily(`clear:${level.id}`, REWARDS.DAILY_CLEAR, '今日過關');
-        if (accuracy >= REWARDS.ACCURACY_TARGET) daily(`acc:${level.id}`, REWARDS.DAILY_ACCURACY, `準確率 ${Math.round(REWARDS.ACCURACY_TARGET * 100)}% 以上`);
+            const points = def.dailyClear || REWARDS.DAILY_CLEAR;
+            ledger.daily.points = (Number(ledger.daily.points) || 0) + points;
+            give(points, def.waves ? '今日打敗最終魔王' : '今日打倒魔王過關');
+        }
         bridge.saveLedger();
         return got;
     }
@@ -610,15 +764,20 @@
         const accuracy = total ? game.correct / total : 0;
         const minutes = Math.max(game.activeMs, 1000) / 60000;
         const wpm = Math.round(game.correct / 5 / minutes);
-        const stars = !won ? 0 : (accuracy >= 0.95 && !game.lostHeart ? 3 : accuracy >= 0.9 ? 2 : 1);
+        const stars = !won ? 0 : (accuracy >= STAR_ACCURACY && !game.lostHeart ? 3 : accuracy >= 0.9 ? 2 : 1);
         const stats = { won, accuracy, wpm, stars, score: game.score, maxCombo: game.maxCombo, words: game.words };
         game.phase = 'result';
         (won ? sfx.win : sfx.lose)();
 
         let rewards = [];
         let isNewBest = false;
+        let unlocked = []; // 這次過關新解鎖的關卡
         if (won) {
-            rewards = grantRewards(accuracy);
+            const lockedLevels = () => bridge.getLevels().filter(l => lockInfo(l.path.replace(/^typing:/, ''), bridge.getLedger()));
+            const before = lockedLevels();
+            rewards = grantRewards();
+            const after = lockedLevels().map(l => l.path);
+            unlocked = before.filter(l => !after.includes(l.path));
             const best = readBest();
             const old = best[level.id];
             const accPct = Math.round(accuracy * 100);
@@ -628,15 +787,16 @@
         }
         // 讓最後一擊的特效播完再換畫面
         const token = startToken;
-        setTimeout(() => { if (token === startToken && game && game.phase === 'result') renderResult(stats, rewards, isNewBest); }, won ? 900 : 700);
+        setTimeout(() => { if (token === startToken && game && game.phase === 'result') renderResult(stats, rewards, isNewBest, unlocked); }, won ? 900 : 700);
     }
 
-    function renderResult(stats, rewards, isNewBest) {
+    function renderResult(stats, rewards, isNewBest, unlocked) {
         root.innerHTML = '';
         root.guide = null;
-        const box = h('div', `typing-result${stats.won ? '' : ' is-fail'}`);
-        box.appendChild(h('div', 'typing-result-icon', stats.won ? '🏆' : '💪', { 'aria-hidden': 'true' }));
-        const title = h('h1', 'typing-title', stats.won ? `過關！${level.name}` : '差一點！再試一次');
+        const def = LEVELS[level.id];
+        const box = h('div', `typing-result${stats.won ? '' : ' is-fail'}${stats.won && def.waves ? ' is-final' : ''}`);
+        box.appendChild(h('div', 'typing-result-icon', !stats.won ? '💪' : def.waves ? '👑' : '🏆', { 'aria-hidden': 'true' }));
+        const title = h('h1', 'typing-title', stats.won ? (def.winTitle || `過關！${level.name}`) : '差一點！再試一次');
         box.appendChild(title);
         if (stats.won) box.appendChild(h('div', 'typing-stars', '★'.repeat(stats.stars) + '☆'.repeat(3 - stats.stars), { 'aria-label': `${stats.stars} 顆星` }));
         else box.appendChild(h('p', 'typing-intro-lead', '愛心用完了。先求打對，速度自然會變快。'));
@@ -649,20 +809,26 @@
         });
         box.appendChild(grid);
         if (isNewBest) box.appendChild(h('p', 'typing-best', '🎉 刷新最佳紀錄！'));
+        if (unlocked.length) {
+            box.appendChild(h('p', 'typing-unlock', `🔓 解鎖新關卡：${unlocked.map(l => l.name).join('、')}！`));
+            sfx.unlock();
+        }
         if (stats.won) {
             box.appendChild(h('p', 'typing-reward-line', rewards.length
                 ? '🪙 ' + rewards.map(r => `${r.label} +${r.points}`).join('、')
                 : '今天這一關的點數已經拿過了，明天再來拿！'));
-            if (stats.stars < 3) box.appendChild(h('p', 'typing-tip-line', stats.accuracy < 0.95 ? `💡 準確率到 ${Math.round(REWARDS.ACCURACY_TARGET * 100)}% 而且不被打到，就能拿三顆星。` : '💡 不被怪獸打到就能拿三顆星。'));
+            if (stats.stars < 3) box.appendChild(h('p', 'typing-tip-line', stats.accuracy < STAR_ACCURACY ? `💡 準確率到 ${Math.round(STAR_ACCURACY * 100)}% 而且不被打到，就能拿三顆星。` : '💡 不被怪獸打到就能拿三顆星。'));
         }
         const actions = h('div', 'typing-actions');
         const again = h('button', `start-button${stats.won ? ' secondary' : ''}`, stats.won ? '再玩一次' : '再試一次', { type: 'button' });
         again.addEventListener('click', renderIntro);
         const levels = bridge.getLevels();
-        const nextLevel = stats.won ? levels[levels.findIndex(l => l.path === `typing:${level.id}`) + 1] : null;
+        let nextLevel = stats.won ? levels[levels.findIndex(l => l.path === `typing:${level.id}`) + 1] : null;
+        const nextId = nextLevel ? nextLevel.path.replace(/^typing:/, '') : '';
+        if (nextLevel && lockInfo(nextId, bridge.getLedger())) nextLevel = null; // 下一關還沒解鎖
         let primary = again;
         if (nextLevel) {
-            primary = h('button', 'start-button', '挑戰下一關', { type: 'button' });
+            primary = h('button', 'start-button', (LEVELS[nextId] && LEVELS[nextId].challengeText) || '挑戰下一關', { type: 'button' });
             primary.addEventListener('click', () => { bridge.selectLevel(nextLevel.path); start(bridge, nextLevel); });
             actions.appendChild(primary);
         }
@@ -675,5 +841,5 @@
         primary.focus({ preventScroll: true });
     }
 
-    window.TypingMode = { start, stop, isBusy, REWARDS };
+    window.TypingMode = { start, stop, isBusy, lockInfo, REWARDS, BEST_KEY };
 })();

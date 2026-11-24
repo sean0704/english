@@ -121,6 +121,22 @@
     font-weight: bold;
 }
 
+.typing-unlock {
+    margin: 0.6rem 0 0;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid #ffd54a;
+    border-radius: 0.6rem;
+    background: rgba(255, 213, 74, 0.12);
+    color: #ffd54a;
+    font-weight: bold;
+    animation: typingUnlock 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.typing-result.is-final .typing-result-icon { filter: drop-shadow(0 0 14px rgba(255, 213, 74, 0.8)); }
+
+.typing-lock-list { list-style: none; padding-left: 0; }
+.typing-lock-list .is-done { color: var(--correct-color); }
+
 .typing-tip-line {
     margin: 0.4rem 0 0;
     color: var(--text-secondary);
@@ -248,6 +264,75 @@
 .typing-monster.is-hit-heavy { animation: typingHitHeavy 0.28s ease-out; }
 .typing-monster.is-attack { animation: typingAttack 0.4s ease-out; }
 
+/* 每一關的魔王登場：戰鬥區換成牠的場景（背景、飄的東西、登場動作、血條顏色各不相同） */
+.typing-arena[data-boss] { isolation: isolate; transition: background 0.4s ease; }
+.typing-arena.is-boss-flash { animation: typingBossFlash 0.9s ease-out; }
+.typing-arena[data-boss] .typing-hp-track { width: min(72%, 400px); height: 14px; }
+
+.typing-ambient { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.typing-ambient-dot { position: absolute; line-height: 1; opacity: 0; animation: typingTwinkle 3s ease-in-out infinite; }
+.typing-ambient.motion-rise .typing-ambient-dot { animation-name: typingRise; animation-timing-function: ease-in; }
+.typing-ambient.motion-drift .typing-ambient-dot { animation-name: typingDrift; animation-timing-function: linear; }
+
+/* 鍵位大王：紫色王座、閃電 */
+.typing-arena[data-boss="home"] { background: radial-gradient(ellipse at 50% 115%, #8e2de2 0%, #3a1466 50%, #150a26 100%); border-color: #b794f4; }
+.typing-arena[data-boss="home"] .typing-ambient-dot { color: #faf089; }
+.typing-arena[data-boss="home"] .typing-hp-fill { background: linear-gradient(90deg, #805ad5, #d6bcfa); }
+.typing-arena[data-boss="home"] .typing-monster.is-enter { animation: typingBossStomp 0.8s cubic-bezier(0.3, 0, 0.4, 1); }
+
+/* 高空魔鷹：天空、飄過去的雲 */
+.typing-arena[data-boss="top"] { background: linear-gradient(180deg, #143b6b 0%, #2f6faf 60%, #5d9fd6 100%); border-color: #90cdf4; }
+.typing-arena[data-boss="top"] .typing-ambient-dot { color: rgba(255, 255, 255, 0.85); font-size: 1.9rem !important; }
+.typing-arena[data-boss="top"] .typing-hp-fill { background: linear-gradient(90deg, #3182ce, #bee3f8); }
+.typing-arena[data-boss="top"] .typing-monster.is-enter { animation: typingBossSwoop 0.85s cubic-bezier(0.2, 0.8, 0.3, 1); }
+
+/* 深海巨鯊：深海、往上冒的泡泡 */
+.typing-arena[data-boss="bottom"] { background: linear-gradient(180deg, #0f6a8b 0%, #0a3a5c 50%, #041826 100%); border-color: #4fd1c5; }
+.typing-arena[data-boss="bottom"] .typing-ambient-dot { color: rgba(190, 240, 255, 0.8); }
+.typing-arena[data-boss="bottom"] .typing-hp-fill { background: linear-gradient(90deg, #319795, #81e6d9); }
+.typing-arena[data-boss="bottom"] .typing-monster.is-enter { animation: typingBossSurface 0.9s cubic-bezier(0.2, 1.3, 0.4, 1); }
+
+/* 咒語巫師：魔法陣、閃爍的星星 */
+.typing-arena[data-boss="words"] { background: radial-gradient(circle at 50% 55%, #5a3fd6 0%, #2b1a6b 45%, #0f0a2b 100%); border-color: #9f7aea; }
+.typing-arena[data-boss="words"] .typing-ambient-dot { color: #fbd38d; }
+.typing-arena[data-boss="words"] .typing-hp-fill { background: linear-gradient(90deg, #d53f8c, #fbb6ce); }
+.typing-arena[data-boss="words"] .typing-monster.is-enter { animation: typingBossConjure 0.9s ease-out; }
+
+/* 錯字魔龍：火山、往上飄的火星 */
+.typing-arena[data-boss="vocab"] { background: radial-gradient(ellipse at 50% 120%, #f6ad55 0%, #c53030 35%, #4a1010 70%, #1a0808 100%); border-color: #fc8181; }
+.typing-arena[data-boss="vocab"] .typing-ambient-dot { color: #fbd38d; text-shadow: 0 0 8px #f56565; }
+.typing-arena[data-boss="vocab"] .typing-hp-fill { background: linear-gradient(90deg, #e53e3e, #f6ad55); }
+.typing-arena[data-boss="vocab"] .typing-monster.is-enter { animation: typingBossRoar 0.9s ease-out; }
+
+/* 最終魔王：更大隻，變身時先縮起來再炸開；血條隨階段變色 */
+.typing-monster.is-final { font-size: 6rem; }
+.typing-monster.is-transform { animation: typingTransform 1.1s ease-out; }
+.typing-stage.is-final { border-color: #9b2c2c; box-shadow: 0 10px 24px rgba(155, 44, 44, 0.45); }
+.typing-stage.is-final .typing-arena { height: 196px; }
+.typing-stage.is-final .typing-hp-fill { background: linear-gradient(90deg, #9f7aea, #e9d8fd); }
+.typing-stage.is-final[data-phase="2"] .typing-hp-fill { background: linear-gradient(90deg, #dd6b20, #f6ad55); }
+.typing-stage.is-final[data-phase="3"] .typing-hp-fill { background: linear-gradient(90deg, #c53030, #fc8181); }
+.typing-monster.is-final { filter: drop-shadow(0 0 16px rgba(255, 80, 80, 0.75)) drop-shadow(0 8px 10px rgba(0, 0, 0, 0.6)); }
+
+/* 最終魔王的場景疊一層光效（::after），在背景之上、怪獸之下 */
+.typing-arena[data-boss^="final"]::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+
+/* 階段一 亂碼虛空：暗紫色，飄著亂碼；魔王從黑暗中緩緩降臨 */
+.typing-arena[data-boss="final1"] { background: radial-gradient(ellipse at 50% 45%, #55206e 0%, #1e0f33 55%, #07040d 100%); border-color: #b794f4; }
+.typing-arena[data-boss="final1"] .typing-ambient-dot { color: #68d391; font-family: ui-monospace, monospace; font-weight: bold; text-shadow: 0 0 6px rgba(104, 211, 145, 0.8); }
+.typing-arena[data-boss="final1"]::after { box-shadow: inset 0 0 50px 10px rgba(0, 0, 0, 0.85); }
+.typing-arena[data-boss="final1"] .typing-monster.is-enter { animation: typingFinalDescend 1.8s ease-out; }
+
+/* 階段二 暴怒雷雲：暗紅色，閃電，整個戰鬥區不時打雷閃一下 */
+.typing-arena[data-boss="final2"] { background: linear-gradient(180deg, #2d0a0a 0%, #7b1e1e 55%, #c2410c 100%); border-color: #f6ad55; }
+.typing-arena[data-boss="final2"] .typing-ambient-dot { color: #faf089; font-size: 1.6rem !important; }
+.typing-arena[data-boss="final2"]::after { background: #fff; opacity: 0; animation: typingThunder 3.2s linear infinite; }
+
+/* 階段三 終極煉獄：黑紅色，火星往上飄，四周紅光一明一暗 */
+.typing-arena[data-boss="final3"] { background: radial-gradient(ellipse at 50% 125%, #ff6b35 0%, #9b1c1c 30%, #2a0606 65%, #050203 100%); border-color: #fc8181; }
+.typing-arena[data-boss="final3"] .typing-ambient-dot { color: #fbd38d; text-shadow: 0 0 8px #f56565; }
+.typing-arena[data-boss="final3"]::after { box-shadow: inset 0 0 46px 6px rgba(255, 40, 40, 0.9); animation: typingInferno 1.3s ease-in-out infinite; }
+
 .typing-monster-name {
     font-size: 0.85rem;
     font-weight: bold;
@@ -366,6 +451,12 @@
 }
 
 .typing-word.is-miss { animation: shake 0.25s linear; }
+.typing-word.is-long { font-size: 2rem; }
+
+/* 弱點字：金色，整個字沒打錯傷害加倍 */
+.typing-word.is-gold .typing-char.todo,
+.typing-word.is-gold .typing-char.current { color: #ffd54a; text-shadow: 0 0 10px rgba(255, 213, 74, 0.7); }
+.typing-word.is-gold::before { content: '⭐'; font-size: 0.6em; align-self: center; margin-right: 0.25em; }
 
 .typing-char {
     min-width: 0.62em;
@@ -539,6 +630,102 @@
     font-weight: bold;
 }
 
+/* 首頁的每日金幣：英打一關一枚，排得緊一點，放不下就換行 */
+.unit-rewards-badge-container.is-typing { flex-wrap: wrap; gap: 0.9rem 1.1rem; }
+.unit-rewards-badge-container.is-typing .coin { width: 48px; height: 48px; font-size: 1.25rem; }
+
+/* ---------- 首頁的關卡集章卡 ---------- */
+.word-list-select.is-replaced-by-cards { display: none; }
+
+.typing-level-cards { width: 100%; margin-bottom: 1.2rem; }
+.typing-level-cards[hidden] { display: none; }
+
+.typing-cards-progress {
+    margin: 0 0 0.6rem;
+    text-align: center;
+    color: var(--notice-color);
+    font-weight: bold;
+}
+
+.typing-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+}
+
+.typing-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    min-height: 8.4rem;
+    padding: 0.6rem 0.3rem 0.5rem;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 0.8rem;
+    font-family: inherit;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.typing-card:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--notice-color); }
+.typing-card:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.typing-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    background: var(--container-bg-color);
+    border: 2px solid var(--border-color);
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.typing-card-title { font-size: 0.95rem; font-weight: bold; }
+.typing-card-status { font-size: 0.8rem; color: var(--text-secondary); }
+.typing-card-status.is-stars { font-size: 1.05rem; letter-spacing: 0.08rem; color: #ffd54a; }
+.typing-card-coin { margin-top: auto; font-size: 0.75rem; font-weight: bold; color: var(--notice-color); }
+.typing-card-coin.is-claimed { color: var(--text-secondary); font-weight: normal; }
+
+/* 通關過：綠框、圖示變成獎章色，右上角蓋章 */
+.typing-card.is-cleared { border-color: var(--correct-color); background: linear-gradient(160deg, rgba(72, 187, 120, 0.2), var(--bg-color) 60%); }
+.typing-card.is-cleared .typing-card-icon { background: var(--correct-color); border-color: #9ae6b4; color: #10291b; }
+.typing-card.is-boss.is-cleared { border-color: #ffd54a; background: linear-gradient(160deg, rgba(255, 213, 74, 0.24), var(--bg-color) 60%); }
+.typing-card.is-boss.is-cleared .typing-card-icon { background: #ffd54a; border-color: #fff3bf; }
+
+.typing-card-stamp {
+    position: absolute;
+    top: 0.45rem;
+    right: -0.2rem;
+    padding: 0.05rem 0.4rem;
+    border: 2px solid #fc8181;
+    border-radius: 0.3rem;
+    color: #fc8181;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1rem;
+    transform: rotate(14deg);
+    background: rgba(26, 32, 44, 0.75);
+}
+
+.typing-card-stamp.is-new { animation: typingStamp 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) 0.25s both; }
+
+.typing-card.is-selected { border-color: var(--notice-color); box-shadow: 0 0 0 3px rgba(246, 173, 85, 0.45); transform: translateY(-2px); }
+.typing-card.is-locked { opacity: 0.55; cursor: not-allowed; border-style: dashed; }
+
+@keyframes typingStamp {
+    0% { transform: rotate(-20deg) scale(3.2); opacity: 0; }
+    60% { transform: rotate(18deg) scale(0.9); opacity: 1; }
+    100% { transform: rotate(14deg) scale(1); opacity: 1; }
+}
+
 /* ---------- 動畫 ---------- */
 @keyframes typingIdle {
     0%, 100% { transform: translateY(0); }
@@ -635,6 +822,99 @@
     50% { box-shadow: 0 0 0 10px rgba(246, 173, 85, 0); }
 }
 
+@keyframes typingBossFlash {
+    0% { box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.75); }
+    25% { box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0); }
+    40% { box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.35); }
+    100% { box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0); }
+}
+
+@keyframes typingTwinkle {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.9; transform: scale(1.15); }
+}
+
+@keyframes typingRise {
+    0% { opacity: 0; transform: translateY(40px); }
+    20% { opacity: 0.85; }
+    100% { opacity: 0; transform: translateY(-110px); }
+}
+
+@keyframes typingDrift {
+    0% { opacity: 0; transform: translateX(-70px); }
+    20%, 80% { opacity: 0.8; }
+    100% { opacity: 0; transform: translateX(90px); }
+}
+
+/* 大王：從上面重重踩下來 */
+@keyframes typingBossStomp {
+    0% { transform: translateY(-160px) scale(1.3); opacity: 0; }
+    55% { transform: translateY(0) scale(1.25, 0.75); opacity: 1; }
+    75% { transform: translateY(-14px) scale(0.95, 1.08); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+/* 魔鷹：從左上角俯衝進來 */
+@keyframes typingBossSwoop {
+    0% { transform: translate(-260px, -120px) rotate(-30deg) scale(0.5); opacity: 0; }
+    60% { transform: translate(30px, 12px) rotate(10deg) scale(1.15); opacity: 1; }
+    100% { transform: translate(0, 0) rotate(0) scale(1); }
+}
+
+/* 巨鯊：從底下浮上來 */
+@keyframes typingBossSurface {
+    0% { transform: translateY(150px) rotate(25deg); opacity: 0; }
+    60% { transform: translateY(-18px) rotate(-8deg); opacity: 1; }
+    100% { transform: translateY(0) rotate(0); }
+}
+
+/* 巫師：轉著圈變出來 */
+@keyframes typingBossConjure {
+    0% { transform: scale(0) rotate(-540deg); opacity: 0; filter: brightness(4); }
+    70% { transform: scale(1.2) rotate(15deg); opacity: 1; filter: brightness(1.8); }
+    100% { transform: scale(1) rotate(0); filter: brightness(1); }
+}
+
+/* 魔龍：由小衝到面前吼一聲 */
+@keyframes typingBossRoar {
+    0% { transform: scale(0.2); opacity: 0; }
+    45% { transform: scale(1.7); opacity: 1; filter: brightness(1.8) saturate(1.6); }
+    60% { transform: scale(1.55) rotate(-6deg); }
+    75% { transform: scale(1.6) rotate(6deg); }
+    100% { transform: scale(1) rotate(0); filter: brightness(1); }
+}
+
+/* 最終魔王：一團黑影從上方緩緩降下來，落地才現出原形 */
+@keyframes typingFinalDescend {
+    0% { transform: translateY(-190px) scale(2.2); opacity: 0; filter: brightness(0); }
+    55% { transform: translateY(-20px) scale(1.5); opacity: 1; filter: brightness(0); }
+    75% { transform: translateY(0) scale(1.35); filter: brightness(3) drop-shadow(0 0 30px #fff); }
+    100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+@keyframes typingThunder {
+    0%, 86%, 90%, 94%, 100% { opacity: 0; }
+    88% { opacity: 0.55; }
+    92% { opacity: 0.3; }
+}
+
+@keyframes typingInferno {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
+}
+
+@keyframes typingTransform {
+    0% { transform: scale(1); filter: brightness(1); }
+    35% { transform: scale(0.35) rotate(-14deg); filter: brightness(4) saturate(0); }
+    60% { transform: scale(1.5) rotate(6deg); filter: brightness(2.2); }
+    100% { transform: scale(1) rotate(0); filter: brightness(1); }
+}
+
+@keyframes typingUnlock {
+    from { transform: scale(0.6); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
 /* ---------- 窄畫面 ---------- */
 @media (max-width: 768px) {
     .typing-container {
@@ -651,11 +931,17 @@
     .typing-key-row.row-2 { padding-left: 1.8rem; }
     .typing-key-space { width: 11rem; }
     .typing-word { font-size: 2rem; }
+    .typing-word.is-long { font-size: 1.45rem; }
+    .typing-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    .typing-monster.is-final { font-size: 5.2rem; }
     .typing-stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .typing-monster,
+    .typing-arena[data-boss^="final"]::after,
+    .typing-unlock,
+    .typing-card-stamp.is-new,
     .typing-go,
     .typing-key.is-next,
     .typing-char.current,

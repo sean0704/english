@@ -137,6 +137,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '第 3 關　下排鍵（ZXCVBNM）', path: 'typing:bottom', type: 'typing' },
         { name: '第 4 關　常用單字', path: 'typing:words', type: 'typing' },
         { name: '第 5 關　課本單字', path: 'typing:vocab', type: 'typing' },
+        // 最終魔王：前五關都過關才解鎖（解鎖規則在 typing.js 的 lockInfo）
+        { name: '👑 最終魔王', path: 'typing:final', type: 'typing' },
     ];
 
     // --- 愛心（生命值）設定 ---
@@ -1883,14 +1885,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // 英打練習的點數規則在 typing.js；這裡只負責顯示（數值與 TypingMode.REWARDS 一致）
-    const TYPING_REWARDS = { FIRST_CLEAR: 10, DAILY_CLEAR: 3, DAILY_ACCURACY: 2, ACCURACY_PERCENT: 95, DAILY_CAP: 15 };
+    const TYPING_REWARDS = { FIRST_CLEAR: 10, BOSS_FIRST_CLEAR: 30, DAILY_CLEAR: 5, BOSS_DAILY_CLEAR: 10 };
     const TYPING_POINTS_INFO = [
         { heading: '🎁 只給一次' },
         `每一關第一次過關 +${TYPING_REWARDS.FIRST_CLEAR}。`,
+        `前五關都過關就能挑戰 👑 最終魔王，第一次打敗 +${TYPING_REWARDS.BOSS_FIRST_CLEAR}。`,
         { heading: '🔁 每天都有' },
-        `每一關每天過關一次 +${TYPING_REWARDS.DAILY_CLEAR}。`,
-        `過關時準確率 ${TYPING_REWARDS.ACCURACY_PERCENT}% 以上，再 +${TYPING_REWARDS.DAILY_ACCURACY}。`,
-        `每天的點數合計最多 ${TYPING_REWARDS.DAILY_CAP} 點（第一次過關的獎勵另外算）。`,
+        `擊殺每關小 Boss +${TYPING_REWARDS.DAILY_CLEAR}（5 關共 +${TYPING_REWARDS.DAILY_CLEAR * 5}）。`,
+        `擊殺最終魔王 +${TYPING_REWARDS.BOSS_DAILY_CLEAR}。`,
+        '同一關每天只算一次，重打不會再拿。',
     ];
 
     function getPointsInfoTexts(mode) {
@@ -1930,15 +1933,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const lockedPaths = new Set();
         filteredLists.forEach(list => {
             const option = document.createElement('option');
             option.value = list.path;
             option.textContent = list.name;
+            // 英打練習的最終魔王：還沒解鎖時看得到但選不到
+            const lock = list.type === 'typing' ? getTypingLock(list.path) : null;
+            if (lock) {
+                option.disabled = true;
+                option.textContent = `🔒 ${list.name}（${lock.text}）`;
+                lockedPaths.add(list.path);
+            }
             wordListSelectEl.appendChild(option);
         });
-        // 還原這個模式上次選的單元（若仍在清單中）
+        // 還原這個模式上次選的單元（若仍在清單中、而且沒有上鎖）
         const rememberedPath = lastSelection.paths[selectedType];
-        if (filteredLists.some(list => list.path === rememberedPath)) wordListSelectEl.value = rememberedPath;
+        if (filteredLists.some(list => list.path === rememberedPath) && !lockedPaths.has(rememberedPath)) wordListSelectEl.value = rememberedPath;
         wordListSelectEl.disabled = false;
         startGameBtn.disabled = false;
         updateUnitRewardsBadge();
@@ -1994,32 +2005,135 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 英打練習的每日點數：這一關今天的「過關」「準確率」兩枚金幣。只讀存檔，不寫入
+    // 英打練習的關卡是否還沒解鎖（規則在 typing.js；舊版頁面還沒載入 typing.js 時當作沒上鎖，進關卡時 typing.js 會再擋一次）
+    function getTypingLock(levelPath) {
+        const lockInfo = window.TypingMode && window.TypingMode.lockInfo;
+        return typeof lockInfo === 'function' ? lockInfo(levelPath.replace(/^typing:/, ''), playerStats.typingRewards) : null;
+    }
+    const TYPING_BOSS_PATHS = new Set(['typing:final']);
+    function typingDailyPoints(path) { return TYPING_BOSS_PATHS.has(path) ? TYPING_REWARDS.BOSS_DAILY_CLEAR : TYPING_REWARDS.DAILY_CLEAR; }
+    function isTypingBossPath(path) { return TYPING_BOSS_PATHS.has(path); }
+
+    // 英打練習的每日點數：這一關今天的過關金幣（每關每天一次）。只讀存檔，不寫入
     function updateTypingRewardsBadge(levelPath) {
         const levelId = levelPath.replace(/^typing:/, '');
+        const isBoss = TYPING_BOSS_PATHS.has(levelPath);
         const ledger = isPlainObject(playerStats.typingRewards) ? playerStats.typingRewards : {};
         const daily = isPlainObject(ledger.daily) && ledger.daily.date === getLocalDateString() ? ledger.daily : null;
         const flags = daily && isPlainObject(daily.flags) ? daily.flags : {};
-        const earned = daily ? Math.max(0, Number(daily.points) || 0) : 0;
+        // 今天已拿／最多可拿：照「今天過關了哪幾關」算，不看存檔裡的累計數字
+        const typingLevels = wordLists.filter(list => list.type === 'typing' && !list.disabled);
+        const dailyMax = typingLevels.reduce((sum, list) => sum + typingDailyPoints(list.path), 0);
+        const earned = typingLevels.reduce((sum, list) => sum + (flags[`clear:${list.path.replace(/^typing:/, '')}`] ? typingDailyPoints(list.path) : 0), 0);
         const firstClearDone = Boolean(isPlainObject(ledger.once) && ledger.once[levelId]);
 
         unitRewardsBadgeContainer.innerHTML = '';
         unitRewardsBadgeContainer.style.display = 'flex';
-        if (!firstClearDone) unitRewardsBadgeContainer.appendChild(createRewardBadge(TYPING_REWARDS.FIRST_CLEAR, '第一次過關', false));
-        unitRewardsBadgeContainer.appendChild(createRewardBadge(TYPING_REWARDS.DAILY_CLEAR, '今日過關', Boolean(flags[`clear:${levelId}`])));
-        unitRewardsBadgeContainer.appendChild(createRewardBadge(TYPING_REWARDS.DAILY_ACCURACY, `準確 ${TYPING_REWARDS.ACCURACY_PERCENT}%`, Boolean(flags[`acc:${levelId}`])));
+        // 每日金幣一關一枚（五關各 +5、最終魔王 +10），今天打過的亮起來；選到的那一關還沒拿過首次獎勵時，最後多一枚
+        typingLevels.forEach(list => {
+            const numbered = list.name.match(/^第\s*(\d+)\s*關/);
+            const label = numbered ? `第 ${numbered[1]} 關` : list.name.split(' ').slice(1).join(' ');
+            unitRewardsBadgeContainer.appendChild(createRewardBadge(typingDailyPoints(list.path), label, Boolean(flags[`clear:${list.path.replace(/^typing:/, '')}`])));
+        });
+        if (!firstClearDone) unitRewardsBadgeContainer.appendChild(createRewardBadge(isBoss ? TYPING_REWARDS.BOSS_FIRST_CLEAR : TYPING_REWARDS.FIRST_CLEAR, isBoss ? '第一次打敗' : '第一次過關', false));
 
-        if (earned >= TYPING_REWARDS.DAILY_CAP) {
-            setUnitRewardsHint(`🎉 太棒了！英打練習今天的每日點數 ${TYPING_REWARDS.DAILY_CAP} 點都拿到了！`, 'done');
+        if (earned >= dailyMax) {
+            setUnitRewardsHint(`🎉 太棒了！英打練習今天的每日點數 ${dailyMax} 點都拿到了！`, 'done');
         } else if (earned > 0) {
-            setUnitRewardsHint(`🔥 英打練習的每日點數今天已拿 ${earned} / ${TYPING_REWARDS.DAILY_CAP} 點，繼續加油！`, 'gold');
+            setUnitRewardsHint(`🔥 英打練習的每日點數今天已拿 ${earned} / ${dailyMax} 點，繼續加油！`, 'gold');
         } else {
             setUnitRewardsHint('⌨️ 需要實體鍵盤。照著畫面上的指法圖打，準確比快重要！');
         }
     }
 
+    // 英打練習的關卡集章卡：取代下拉選單，一格一關。
+    // 通關過的關卡蓋上「通關」章並顯示最佳星數；金幣標出今天的點數領過了沒；還沒解鎖的魔王顯示 🔒。
+    // 只讀存檔，不寫入；點卡片等於在下拉選單選那一關
+    let typingCardsEl = null;
+    let typingCardsCleared = null; // 上一次畫的時候已通關的關卡，用來找出「剛剛才通關」的那一格
+    function renderTypingLevelCards() {
+        const typing = window.TypingMode;
+        const show = activeGameMode === 'typing' && Boolean(typing) && typeof typing.lockInfo === 'function';
+        if (!typingCardsEl) {
+            if (!show) return;
+            typingCardsEl = createEl('div', 'typing-level-cards');
+            typingCardsEl.setAttribute('role', 'radiogroup');
+            typingCardsEl.setAttribute('aria-labelledby', 'unit-step-title');
+            wordListSelectEl.insertAdjacentElement('afterend', typingCardsEl);
+        }
+        typingCardsEl.hidden = !show;
+        wordListSelectEl.classList.toggle('is-replaced-by-cards', show);
+        if (!show) return;
+
+        const ledger = isPlainObject(playerStats.typingRewards) ? playerStats.typingRewards : {};
+        const once = isPlainObject(ledger.once) ? ledger.once : {};
+        const daily = isPlainObject(ledger.daily) && ledger.daily.date === getLocalDateString() ? ledger.daily : null;
+        const flags = daily && isPlainObject(daily.flags) ? daily.flags : {};
+        let best = {};
+        try { const parsed = JSON.parse(readStorage(typing.BEST_KEY) || '{}'); if (isPlainObject(parsed)) best = parsed; } catch (error) { /* 沒有最佳紀錄就不顯示星數 */ }
+
+        const levels = wordLists.filter(list => list.type === 'typing' && !list.disabled);
+        const clearedNow = new Set(levels.map(list => list.path.replace(/^typing:/, '')).filter(id => once[id]));
+        const hadFocus = typingCardsEl.contains(document.activeElement);
+        typingCardsEl.innerHTML = '';
+        typingCardsEl.appendChild(createEl('p', 'typing-cards-progress', clearedNow.size >= levels.length
+            ? `🏅 全部 ${levels.length} 關都通關了，太厲害了！`
+            : `🏅 已通關 ${clearedNow.size} / ${levels.length} 關`));
+        const grid = createEl('div', 'typing-cards-grid');
+        let selectedCard = null;
+        levels.forEach(list => {
+            const id = list.path.replace(/^typing:/, '');
+            const lock = getTypingLock(list.path);
+            const cleared = clearedNow.has(id);
+            const selected = wordListSelectEl.value === list.path;
+            // 「第 1 關　基本鍵位（ASDF JKL;）」→ 圖示 1、名稱 基本鍵位；「👑 最終魔王」→ 圖示 👑、名稱 最終魔王
+            const numbered = list.name.match(/^第\s*(\d+)\s*關\s*(.*)$/);
+            const icon = numbered ? numbered[1] : list.name.split(' ')[0];
+            const title = (numbered ? numbered[2] : list.name.split(' ').slice(1).join(' ')).replace(/（.*）$/, '');
+            const stars = best[id] ? Math.max(0, Math.min(3, Number(best[id].stars) || 0)) : 0;
+            const avail = flags[`clear:${id}`] ? 0 : typingDailyPoints(list.path);
+
+            const card = createEl('button', `typing-card${cleared ? ' is-cleared' : ''}${lock ? ' is-locked' : ''}${selected ? ' is-selected' : ''}${isTypingBossPath(list.path) ? ' is-boss' : ''}`);
+            card.type = 'button';
+            card.setAttribute('role', 'radio');
+            card.setAttribute('aria-checked', String(selected));
+            card.disabled = Boolean(lock);
+            card.appendChild(createEl('span', 'typing-card-icon', lock ? '🔒' : icon));
+            card.appendChild(createEl('span', 'typing-card-title', title));
+            let status;
+            let coin = '';
+            if (lock) {
+                status = lock.text;
+            } else {
+                status = cleared ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '還沒通關';
+                coin = avail > 0 ? `🪙 今日可拿 +${avail}` : '🪙 今日已領';
+            }
+            card.appendChild(createEl('span', `typing-card-status${cleared && !lock ? ' is-stars' : ''}`, status));
+            if (coin) card.appendChild(createEl('span', `typing-card-coin${avail > 0 ? '' : ' is-claimed'}`, coin));
+            if (cleared && !lock) {
+                const isNew = typingCardsCleared !== null && !typingCardsCleared.has(id);
+                const stamp = createEl('span', `typing-card-stamp${isNew ? ' is-new' : ''}`, '通關');
+                stamp.setAttribute('aria-hidden', 'true');
+                card.appendChild(stamp);
+            }
+            card.setAttribute('aria-label', `${list.name}：${lock ? `還沒解鎖，${lock.text}` : `${cleared ? `已通關，${stars} 顆星` : '還沒通關'}，${coin.replace('🪙 ', '')}`}`);
+            card.addEventListener('click', () => {
+                if (wordListSelectEl.disabled || wordListSelectEl.value === list.path) return;
+                wordListSelectEl.value = list.path;
+                wordListSelectEl.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+            if (selected) selectedCard = card;
+            grid.appendChild(card);
+        });
+        typingCardsEl.appendChild(grid);
+        typingCardsCleared = clearedNow;
+        if (hadFocus && selectedCard) selectedCard.focus({ preventScroll: true });
+    }
+
     function updateUnitRewardsBadge() {
         const badgeContainer = unitRewardsBadgeContainer;
+        renderTypingLevelCards();
+        badgeContainer.classList.toggle('is-typing', activeGameMode === 'typing'); // 英打一次排六、七枚金幣，要排得緊一點
 
         if (activeGameMode === 'trainer' && wordListSelectEl.value) {
             updateTrainerRewardsBadge(wordListSelectEl.value);
