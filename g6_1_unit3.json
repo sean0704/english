@@ -1,0 +1,80 @@
+[
+  {
+    "english": "eggs",
+    "chinese": "蛋（複數）",
+    "phonetics": "[ɛɡz]",
+    "example": "How many eggs do you need?"
+  },
+  {
+    "english": "oranges",
+    "chinese": "柳橙（複數）",
+    "phonetics": "[ˈɔrɪndʒɪz]",
+    "example": "I need ten oranges."
+  },
+  {
+    "english": "strawberries",
+    "chinese": "草莓（複數）",
+    "phonetics": "[ˈstrɔˌbɛrɪz]",
+    "example": "I need two strawberries."
+  },
+  {
+    "english": "watermelons",
+    "chinese": "西瓜（複數）",
+    "phonetics": "[ˈwɔtɚˌmɛlənz]",
+    "example": "Do you know how many watermelons there are?"
+  },
+  {
+    "english": "cookies",
+    "chinese": "餅乾（複數）",
+    "phonetics": "[ˈkʊkɪz]",
+    "example": "How much are the cookies?"
+  },
+  {
+    "english": "hamburgers",
+    "chinese": "漢堡（複數）",
+    "phonetics": "[ˈhæmbɝɡɚz]",
+    "example": "How many hamburgers do you need?"
+  },
+  {
+    "english": "hot dogs",
+    "chinese": "熱狗（複數）",
+    "phonetics": "[hɑt dɔɡz]",
+    "example": "I need two hot dogs."
+  },
+  {
+    "english": "sandwiches",
+    "chinese": "三明治（複數）",
+    "phonetics": "[ˈsændwɪtʃɪz]",
+    "example": "We need two sandwiches."
+  },
+  {
+    "english": "how many",
+    "chinese": "幾個",
+    "phonetics": "[haʊ ˈmɛnɪ]",
+    "example": "How many eggs do you need?"
+  },
+  {
+    "english": "need",
+    "chinese": "需要",
+    "phonetics": "[nid]",
+    "example": "I need ten eggs."
+  },
+  {
+    "english": "how much",
+    "chinese": "多少錢",
+    "phonetics": "[haʊ mʌtʃ]",
+    "example": "How much is the hot dog?"
+  },
+  {
+    "english": "dollar",
+    "chinese": "元（貨幣單位）",
+    "phonetics": "[ˈdɑlɚ]",
+    "example": "It's one dollar."
+  },
+  {
+    "english": "hundred",
+    "chinese": "百（數字）",
+    "phonetics": "[ˈhʌndrəd]",
+    "example": "They're one hundred dollars."
+  }
+]

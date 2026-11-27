@@ -333,6 +333,35 @@
 .typing-arena[data-boss="final3"] .typing-ambient-dot { color: #fbd38d; text-shadow: 0 0 8px #f56565; }
 .typing-arena[data-boss="final3"]::after { box-shadow: inset 0 0 46px 6px rgba(255, 40, 40, 0.9); animation: typingInferno 1.3s ease-in-out infinite; }
 
+/* 隱藏牛關：五個階段各有場景，血條跟著換色（階段一到三沿用最終魔王的血條顏色） */
+.typing-stage.is-final[data-phase="4"] .typing-hp-fill { background: linear-gradient(90deg, #2b6cb0, #90cdf4); }
+.typing-stage.is-final[data-phase="5"] .typing-hp-fill { background: linear-gradient(90deg, #f6e05e, #ffffff); }
+.typing-arena[data-boss^="cow"]::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.typing-arena[data-boss^="cow"] .typing-monster { filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.55)) drop-shadow(0 8px 10px rgba(0, 0, 0, 0.6)); }
+/* 階段一 牧場白天：藍天綠地，小花飄過 */
+.typing-arena[data-boss="cow1"] { background: linear-gradient(180deg, #2b6cb0 0%, #63b3ed 52%, #48bb78 53%, #276749 100%); border-color: #9ae6b4; }
+.typing-arena[data-boss="cow1"] .typing-monster.is-enter { animation: typingBossStomp 0.8s cubic-bezier(0.3, 0, 0.4, 1); }
+/* 階段二 黃昏衝鋒：橘紅天空，塵土飛揚 */
+.typing-arena[data-boss="cow2"] { background: linear-gradient(180deg, #742a2a 0%, #dd6b20 50%, #975a16 51%, #5f370e 100%); border-color: #f6ad55; }
+.typing-arena[data-boss="cow2"] .typing-ambient-dot { font-size: 1.5rem !important; opacity: 0.8; }
+/* 階段三 泥沼：暗褐綠色，泡泡往上冒 */
+.typing-arena[data-boss="cow3"] { background: linear-gradient(180deg, #1c2b1e 0%, #3d4f2a 45%, #4a3b22 100%); border-color: #a0875a; }
+.typing-arena[data-boss="cow3"] .typing-ambient-dot { color: rgba(214, 196, 150, 0.75); }
+/* 階段四 暴風草原：深藍夜色，閃電打雷 */
+.typing-arena[data-boss="cow4"] { background: linear-gradient(180deg, #0b1026 0%, #1e3a6b 60%, #14321f 100%); border-color: #90cdf4; }
+.typing-arena[data-boss="cow4"] .typing-ambient-dot { color: #faf089; font-size: 1.6rem !important; }
+.typing-arena[data-boss="cow4"]::after { background: #fff; opacity: 0; animation: typingThunder 2.6s linear infinite; }
+/* 階段五 牛魔王的火焰牛棚：黑紅色，四周紅光一明一暗 */
+.typing-arena[data-boss="cow5"] { background: radial-gradient(ellipse at 50% 125%, #ffd54a 0%, #c53030 28%, #2a0606 65%, #050203 100%); border-color: #ffd54a; }
+.typing-arena[data-boss="cow5"] .typing-ambient-dot { color: #fbd38d; text-shadow: 0 0 8px #f56565; }
+.typing-arena[data-boss="cow5"]::after { box-shadow: inset 0 0 46px 6px rgba(255, 60, 20, 0.9); animation: typingInferno 1s ease-in-out infinite; }
+.typing-arena[data-boss="cow5"] .typing-monster { font-size: 7rem; filter: drop-shadow(0 0 18px rgba(255, 80, 40, 0.9)) drop-shadow(0 8px 10px rgba(0, 0, 0, 0.6)); }
+
+/* 首頁的隱藏牛關卡片：黑白乳牛斑紋的邊框 */
+.typing-card.is-secret { border-color: #f7fafc; border-style: dashed; background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), var(--bg-color) 60%); }
+.typing-card.is-secret .typing-card-icon { background: #f7fafc; border-color: #1a202c; }
+.typing-card.is-secret.is-cleared { border-style: solid; border-color: #ffd54a; }
+
 .typing-monster-name {
     font-size: 0.85rem;
     font-weight: bold;
@@ -940,6 +969,7 @@
 @media (prefers-reduced-motion: reduce) {
     .typing-monster,
     .typing-arena[data-boss^="final"]::after,
+    .typing-arena[data-boss^="cow"]::after,
     .typing-unlock,
     .typing-card-stamp.is-new,
     .typing-go,

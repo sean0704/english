@@ -142,6 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '第 5 關　課本單字', path: 'typing:vocab', type: 'typing' },
         // 最終魔王：前五關都過關才解鎖（解鎖規則在 typing.js 的 lockInfo）
         { name: '👑 最終魔王', path: 'typing:final', type: 'typing' },
+        // 隱藏牛關：前五關都三顆星、而且打敗最終魔王才會出現（規則在 typing.js）。secret：不算在通關進度裡，也沒有每日點數
+        { name: '🐄 隱藏牛關', path: 'typing:cow', type: 'typing', secret: true },
     ];
 
     // --- 愛心（生命值）設定 ---
@@ -1923,7 +1925,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateWordListDropdown(selectedMode) {
         wordListSelectEl.innerHTML = '';
         const selectedType = typeof selectedMode === 'string' ? selectedMode : activeGameMode;
-        const filteredLists = wordLists.filter(list => list.type === selectedType && !list.disabled);
+        const filteredLists = selectedType === 'typing' ? getVisibleTypingLevels() : wordLists.filter(list => list.type === selectedType && !list.disabled);
 
         if (filteredLists.length === 0) {
             const option = document.createElement('option');
@@ -2009,36 +2011,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 英打練習的關卡是否還沒解鎖（規則在 typing.js；舊版頁面還沒載入 typing.js 時當作沒上鎖，進關卡時 typing.js 會再擋一次）
+    function readTypingBest() {
+        const key = window.TypingMode && window.TypingMode.BEST_KEY;
+        if (!key) return {};
+        try { const parsed = JSON.parse(readStorage(key) || '{}'); return isPlainObject(parsed) ? parsed : {}; } catch (error) { return {}; }
+    }
     function getTypingLock(levelPath) {
         const lockInfo = window.TypingMode && window.TypingMode.lockInfo;
-        return typeof lockInfo === 'function' ? lockInfo(levelPath.replace(/^typing:/, ''), playerStats.typingRewards) : null;
+        return typeof lockInfo === 'function' ? lockInfo(levelPath.replace(/^typing:/, ''), playerStats.typingRewards, readTypingBest()) : null;
     }
-    const TYPING_BOSS_PATHS = new Set(['typing:final']);
-    function typingDailyPoints(path) { return TYPING_BOSS_PATHS.has(path) ? TYPING_REWARDS.BOSS_DAILY_CLEAR : TYPING_REWARDS.DAILY_CLEAR; }
+    // 選單上看得到的英打關卡：隱藏關還沒解鎖時整個不出現
+    function getVisibleTypingLevels() {
+        return wordLists.filter(list => {
+            if (list.type !== 'typing' || list.disabled) return false;
+            const lock = getTypingLock(list.path);
+            return !(lock && lock.hidden);
+        });
+    }
+    const TYPING_BOSS_PATHS = new Set(['typing:final', 'typing:cow']);
+    const TYPING_FINAL_PATH = 'typing:final';
+    const isSecretTypingPath = path => wordLists.some(list => list.path === path && list.secret);
+    // 隱藏關沒有每日點數
+    function typingDailyPoints(path) { return isSecretTypingPath(path) ? 0 : path === TYPING_FINAL_PATH ? TYPING_REWARDS.BOSS_DAILY_CLEAR : TYPING_REWARDS.DAILY_CLEAR; }
     function isTypingBossPath(path) { return TYPING_BOSS_PATHS.has(path); }
 
     // 英打練習的每日點數：這一關今天的過關金幣（每關每天一次）。只讀存檔，不寫入
     function updateTypingRewardsBadge(levelPath) {
-        const levelId = levelPath.replace(/^typing:/, '');
-        const isBoss = TYPING_BOSS_PATHS.has(levelPath);
         const ledger = isPlainObject(playerStats.typingRewards) ? playerStats.typingRewards : {};
         const daily = isPlainObject(ledger.daily) && ledger.daily.date === getLocalDateString() ? ledger.daily : null;
         const flags = daily && isPlainObject(daily.flags) ? daily.flags : {};
         // 今天已拿／最多可拿：照「今天過關了哪幾關」算，不看存檔裡的累計數字
-        const typingLevels = wordLists.filter(list => list.type === 'typing' && !list.disabled);
+        const typingLevels = wordLists.filter(list => list.type === 'typing' && !list.disabled && typingDailyPoints(list.path) > 0);
         const dailyMax = typingLevels.reduce((sum, list) => sum + typingDailyPoints(list.path), 0);
         const earned = typingLevels.reduce((sum, list) => sum + (flags[`clear:${list.path.replace(/^typing:/, '')}`] ? typingDailyPoints(list.path) : 0), 0);
-        const firstClearDone = Boolean(isPlainObject(ledger.once) && ledger.once[levelId]);
 
         unitRewardsBadgeContainer.innerHTML = '';
         unitRewardsBadgeContainer.style.display = 'flex';
-        // 每日金幣一關一枚（五關各 +5、最終魔王 +10），今天打過的亮起來；選到的那一關還沒拿過首次獎勵時，最後多一枚
+        // 每日金幣一關一枚（五關各 +5、最終魔王 +10），今天打過的亮起來；首次過關獎勵照給，但不在這排顯示
         typingLevels.forEach(list => {
             const numbered = list.name.match(/^第\s*(\d+)\s*關/);
             const label = numbered ? `第 ${numbered[1]} 關` : list.name.split(' ').slice(1).join(' ');
             unitRewardsBadgeContainer.appendChild(createRewardBadge(typingDailyPoints(list.path), label, Boolean(flags[`clear:${list.path.replace(/^typing:/, '')}`])));
         });
-        if (!firstClearDone) unitRewardsBadgeContainer.appendChild(createRewardBadge(isBoss ? TYPING_REWARDS.BOSS_FIRST_CLEAR : TYPING_REWARDS.FIRST_CLEAR, isBoss ? '第一次打敗' : '第一次過關', false));
 
         if (earned >= dailyMax) {
             setUnitRewardsHint(`🎉 太棒了！英打練習今天的每日點數 ${dailyMax} 點都拿到了！`, 'done');
@@ -2072,16 +2086,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const once = isPlainObject(ledger.once) ? ledger.once : {};
         const daily = isPlainObject(ledger.daily) && ledger.daily.date === getLocalDateString() ? ledger.daily : null;
         const flags = daily && isPlainObject(daily.flags) ? daily.flags : {};
-        let best = {};
-        try { const parsed = JSON.parse(readStorage(typing.BEST_KEY) || '{}'); if (isPlainObject(parsed)) best = parsed; } catch (error) { /* 沒有最佳紀錄就不顯示星數 */ }
+        const best = readTypingBest(); // 沒有最佳紀錄就不顯示星數
 
-        const levels = wordLists.filter(list => list.type === 'typing' && !list.disabled);
+        const levels = getVisibleTypingLevels();
         const clearedNow = new Set(levels.map(list => list.path.replace(/^typing:/, '')).filter(id => once[id]));
+        // 通關進度只算一般關卡；隱藏關是額外的
+        const countable = levels.filter(list => !list.secret);
+        const clearedCount = countable.filter(list => clearedNow.has(list.path.replace(/^typing:/, ''))).length;
         const hadFocus = typingCardsEl.contains(document.activeElement);
         typingCardsEl.innerHTML = '';
-        typingCardsEl.appendChild(createEl('p', 'typing-cards-progress', clearedNow.size >= levels.length
-            ? `🏅 全部 ${levels.length} 關都通關了，太厲害了！`
-            : `🏅 已通關 ${clearedNow.size} / ${levels.length} 關`));
+        typingCardsEl.appendChild(createEl('p', 'typing-cards-progress', clearedCount >= countable.length
+            ? `🏅 全部 ${countable.length} 關都通關了，太厲害了！`
+            : `🏅 已通關 ${clearedCount} / ${countable.length} 關`));
         const grid = createEl('div', 'typing-cards-grid');
         let selectedCard = null;
         levels.forEach(list => {
@@ -2096,7 +2112,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const stars = best[id] ? Math.max(0, Math.min(3, Number(best[id].stars) || 0)) : 0;
             const avail = flags[`clear:${id}`] ? 0 : typingDailyPoints(list.path);
 
-            const card = createEl('button', `typing-card${cleared ? ' is-cleared' : ''}${lock ? ' is-locked' : ''}${selected ? ' is-selected' : ''}${isTypingBossPath(list.path) ? ' is-boss' : ''}`);
+            const card = createEl('button', `typing-card${cleared ? ' is-cleared' : ''}${lock ? ' is-locked' : ''}${selected ? ' is-selected' : ''}${isTypingBossPath(list.path) ? ' is-boss' : ''}${list.secret ? ' is-secret' : ''}`);
             card.type = 'button';
             card.setAttribute('role', 'radio');
             card.setAttribute('aria-checked', String(selected));
@@ -2109,17 +2125,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 status = lock.text;
             } else {
                 status = cleared ? '★'.repeat(stars) + '☆'.repeat(3 - stars) : '還沒通關';
-                coin = avail > 0 ? `🪙 今日可拿 +${avail}` : '🪙 今日已領';
+                coin = list.secret ? (cleared ? '' : '🎁 首次通關有獎') : avail > 0 ? `🪙 今日可拿 +${avail}` : '🪙 今日已領';
             }
             card.appendChild(createEl('span', `typing-card-status${cleared && !lock ? ' is-stars' : ''}`, status));
-            if (coin) card.appendChild(createEl('span', `typing-card-coin${avail > 0 ? '' : ' is-claimed'}`, coin));
+            if (coin) card.appendChild(createEl('span', `typing-card-coin${avail > 0 || list.secret ? '' : ' is-claimed'}`, coin));
             if (cleared && !lock) {
                 const isNew = typingCardsCleared !== null && !typingCardsCleared.has(id);
                 const stamp = createEl('span', `typing-card-stamp${isNew ? ' is-new' : ''}`, '通關');
                 stamp.setAttribute('aria-hidden', 'true');
                 card.appendChild(stamp);
             }
-            card.setAttribute('aria-label', `${list.name}：${lock ? `還沒解鎖，${lock.text}` : `${cleared ? `已通關，${stars} 顆星` : '還沒通關'}，${coin.replace('🪙 ', '')}`}`);
+            card.setAttribute('aria-label', `${list.name}：${lock ? `還沒解鎖，${lock.text}` : `${cleared ? `已通關，${stars} 顆星` : '還沒通關'}${coin ? `，${coin.replace(/^\S+ /, '')}` : ''}`}`);
             card.addEventListener('click', () => {
                 if (wordListSelectEl.disabled || wordListSelectEl.value === list.path) return;
                 wordListSelectEl.value = list.path;

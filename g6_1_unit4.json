@@ -1,0 +1,56 @@
+[
+  {
+    "english": "breakfast",
+    "chinese": "早餐",
+    "phonetics": "[ˈbrɛkfəst]",
+    "example": "What would you like for breakfast?"
+  },
+  {
+    "english": "lunch",
+    "chinese": "午餐",
+    "phonetics": "[lʌntʃ]",
+    "example": "Would you like some rice for lunch?"
+  },
+  {
+    "english": "dinner",
+    "chinese": "晚餐",
+    "phonetics": "[ˈdɪnɚ]",
+    "example": "I would like some noodles for dinner."
+  },
+  {
+    "english": "rice",
+    "chinese": "米飯",
+    "phonetics": "[raɪs]",
+    "example": "Would you like some rice for lunch?"
+  },
+  {
+    "english": "soup",
+    "chinese": "湯",
+    "phonetics": "[sup]",
+    "example": "Would you like some soup?"
+  },
+  {
+    "english": "noodles",
+    "chinese": "麵",
+    "phonetics": "[ˈnudəlz]",
+    "example": "I would like some chicken and noodles."
+  },
+  {
+    "english": "bread",
+    "chinese": "麵包",
+    "phonetics": "[brɛd]",
+    "example": "I would like some bread."
+  },
+  {
+    "english": "chicken",
+    "chinese": "雞肉",
+    "phonetics": "[ˈtʃɪkɪn]",
+    "example": "Would you like some chicken for lunch?"
+  },
+  {
+    "english": "would like",
+    "chinese": "想要",
+    "phonetics": "[wʊd laɪk]",
+    "example": "I would like some bread."
+  }
+]
